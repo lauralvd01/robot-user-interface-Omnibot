@@ -1,14 +1,75 @@
 <script>
-    import arrow from '$lib/images/icone-fleche-droite-noir.png'
+    import { onMount } from "svelte";
+    import arrow from '$lib/images/icone-fleche-droite-noir.png';
+
+    let rotation = 0;
+    let arrowElement;
+    let keysPressed = {};
+    let isAnyKeyPressed = false;
+
+    function handleKeydown(event) {
+        keysPressed[event.key] = true;
+        updateRotation();
+    }
+
+    function handleKeyup(event) {
+        keysPressed[event.key] = false;
+        updateRotation();
+    }
+
+    function updateRotation() {
+        if (keysPressed['d'] && keysPressed['z']) {
+            rotation = 315; 
+        } else if (keysPressed['q'] && keysPressed['z']) {
+            rotation = 225; 
+        } else if (keysPressed['q'] && keysPressed['s']) {
+            rotation = 135; 
+        } else if (keysPressed['d'] && keysPressed['s']) {
+            rotation = 45; 
+        } else if (keysPressed['d']) {
+            rotation = 0; 
+        } else if (keysPressed['q']) {
+            rotation = 180; 
+        } else if (keysPressed['z']) {
+            rotation = -90; 
+        } else if (keysPressed['s']) {
+            rotation = 90; 
+        }
+        if (arrowElement){
+            arrowElement.style.transform = `rotate(${rotation}deg)`;
+        }
+       
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        isAnyKeyPressed = keysPressed['z'] || keysPressed['q'] || keysPressed['s'] || keysPressed['d'];
+    }
+
+    onMount(() => {
+        window.addEventListener('keydown', handleKeydown);
+        window.addEventListener('keyup', handleKeyup);
+        return () => {
+            window.removeEventListener('keydown', handleKeydown);
+            window.removeEventListener('keyup', handleKeyup);
+        };
+    });
 </script>
 
 <div class="deplacements">
     <div class="direction">
         <h1 class="titles">DIRECTION</h1>
-        <img class="arrow" alt="fleche directionnelle" src={arrow}/>
+        <div class="center">
+            {#if isAnyKeyPressed}
+            <img bind:this={arrowElement} class="arrow" alt="fleche directionnelle" src={arrow} style="transform: rotate(0deg);"/>
+        {:else}
+            <div class="point"></div>
+        {/if}
+        </div>
     </div>
+    
     <div class="vitesse">
-        <p>x m/s</p>
+        <p>x m/s</p>   
     </div>
 </div>
 
@@ -17,7 +78,8 @@
     .deplacements{
         display:flex;
         flex-direction: column;
-        align-items: left;
+        align-items: center;
+        justify-content: center;
     }
 
     .direction{
@@ -26,12 +88,22 @@
         display: flex;
         flex-direction: column;
         margin: 5px 15px;
-        align-items: left;
+        align-items: center;
     }
+
+    .center{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 150px;
+    }
+
     .arrow{
         height:100px;
         width: 100px;
+        transition: transform 0.2s;
     }
+
     .titles {
         grid-column: 1 / span 3;
         font-weight: bold;
@@ -41,7 +113,7 @@
     }
 
     .vitesse{
-        border: 3px solid #A1CEE1; 
+        border: 3px solid black; 
         padding: 5px; 
         display: flex;
         justify-content: center;
@@ -54,11 +126,18 @@
 
     .vitesse p{
         margin:0;
-        color:black;
+        color:#FF662E;
         font-family: 'Roboto',sans-serif;
-
+        font-weight: 600;
+        width: 50px;
+        padding:10px;
     }
-    
 
+    .point{
+        width:20px;
+        height:20px;
+        background-color: black;
+        border-radius: 50%;
+    }
 
 </style>

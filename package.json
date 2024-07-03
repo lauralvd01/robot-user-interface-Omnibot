@@ -5,7 +5,8 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"generate": "grpc_tools_node_protoc --js_out=import_style=commonjs,binary:./generated --grpc_out=grpc_js:./generated --plugin=protoc-gen-grpc=./node_modules/.bin/grpc_tools_node_protoc_plugin ./protos/*.proto"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
@@ -18,6 +19,11 @@
 	"dependencies": {
 		"@emotion/react": "^11.11.4",
 		"@emotion/styled": "^11.11.5",
-		"@mui/material": "^5.15.17"
+		"@grpc/grpc-js": "^1.10.8",
+		"@grpc/proto-loader": "^0.7.13",
+		"@mui/material": "^5.15.17",
+		"grpc_tools_node_protoc_ts": "^5.3.3",
+		"grpc-tools": "^1.12.4"
 	}
+			  
 }

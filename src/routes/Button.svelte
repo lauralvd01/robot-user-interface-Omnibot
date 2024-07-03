@@ -1,4 +1,5 @@
 <script>
+    export let type = 'default';
 
     let buttonProps = {
         class:[$$restProps.class]
@@ -23,10 +24,31 @@
         transition: all 250ms;
         transform-origin: center;
     }
+
     button:hover {
         cursor: pointer;
         transform: scale(0.975);
+    }
+
+    .default {
+        background-color: rgba(0,0,0,0);
+    }
+    .default:hover{
         color:white;
+    }
+
+    .primary{
+        border:solid 2px black;
+        border-radius: 12px;
+        background-color: #ff3700;
+        font-family: "Roboto";
+        font-weight: 500;
+        color:white;
+    }
+
+    .primary:hover{
+        background-color: #FF662E;
+        color:black;
     }
 
 </style>

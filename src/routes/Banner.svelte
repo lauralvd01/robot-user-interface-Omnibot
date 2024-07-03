@@ -9,9 +9,9 @@
     <div class="banner">
         <img class="logo" alt="Logo omnibot" src={logo_omnibot}/>
         <nav class="buttons-container">
-            <Button class="button">PANNEAU DE CONTROLE</Button>
-            <Button class="button">MANUEL D'UTILISATION</Button>
-            <Button class="button">LE PROJET</Button>
+            <Button class="default">PANNEAU DE CONTROLE</Button>
+            <Button class="default">MANUEL D'UTILISATION</Button>
+            <Button class="default">LE PROJET</Button>
         </nav>
         <img class="logo" alt="logo mines" src={logo_mines}>
     </div>
@@ -28,7 +28,7 @@
     height: 80px;
     justify-content: space-between;
     align-items: center;
-    background-color: #A1CEE1;
+    background-color: #FF662E;
     padding: 0 45px;
     box-sizing: border-box;
     z-index: 999; /* Assurez-vous que la banner est au-dessus de tout */

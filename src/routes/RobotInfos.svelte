@@ -2,17 +2,20 @@
     import Direction from './Direction.svelte'
     import OperatingMode from "./OperatingMode.svelte";
     import { onMount } from 'svelte';
-    
+      
     let isActiveKeyA = false;
     let isActiveKeyZ = false;
     let isActiveKeyE = false;
     let isActiveKeyQ = false;
     let isActiveKeyS = false;
     let isActiveKeyD = false;
+    let batteryLevel = 0;
 
     onMount(() => {
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
+        
+        fetchBatteryLevel();
 
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
@@ -39,6 +42,7 @@
         if (event.key.toLowerCase() === 'd'){
             isActiveKeyD = true;
         }
+       
     }
 
     function handleKeyUp(event) {
@@ -59,6 +63,22 @@
         }
         if (event.key.toLowerCase() === 'd') {
             isActiveKeyD = false;
+        }
+       
+    }
+
+
+    async function fetchBatteryLevel(){
+        try{
+            const response = await fetch('http://localhost:8000/battery');
+            const data = await response.json();
+            if(response.ok){
+                batteryLevel = data.battery_level;
+            } else {
+                console.error('Error:',data.error);
+            }
+        }catch (error){
+            console.error('Error:',error);
         }
     }
 </script>
@@ -99,8 +119,8 @@
         <h1 class="titles">BATTERIE</h1>
         <div class="battery">
             <div class="battery-bar">
-                <div class="battery-level"></div> 
-                <div class="battery-text">0%</div>
+                <div class="battery-level" style="width: {batteryLevel}%"></div> 
+                <div class="battery-text">{batteryLevel}%</div>
             </div>
             <div class="battery-shape"></div>
         </div>
@@ -115,7 +135,7 @@
     .control-container {
         width: 300px;
         height: 215px;
-        background-color: #A1CEE1;
+        background-color: #A8A8A8;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         grid-template-rows: auto auto auto;
@@ -136,7 +156,7 @@
     }
 
     .key {
-        background-color: slategrey;
+        background-color: #FF662E;
         color: white;
         display: flex;
         flex-direction: column;
@@ -162,8 +182,8 @@
     }
 
     .key.active {
-        background-color: white;
-        color: black;
+        background-color: #239E99;
+        color: white;
     }
 
     .battery-lvl-container{

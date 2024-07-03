@@ -16,45 +16,65 @@
 </script>
 <div class="blocs">
     <h1 class="titles">EQUIPEMENTS ROBOT</h1>
-    <div class="intelligence-category category">
-        <div class="image-container">
-            <img class="picto-intelligence picto" alt="picto intelligence" src={picto_intelligence}>
+    <div class="scrolable">
+        <div class="intelligence-category category">
+            <div class="image-container">
+                <img class="picto" alt="picto intelligence" src={picto_intelligence}>
+            </div>
+            <ul>
+                <li>Unité centrale</li>
+                <li>5G</li>
+            </ul>
         </div>
-        <ul>
-            <li>Unité centrale</li>
-            <li>5G</li>
-        </ul>
-    </div>
-    <div class="production-category category">
-        <div class="image-container">
-            <img class="picto-energie picto" alt="picto production d'énergie" src={picto_energie}>
+        <div class="production-category category">
+            <div class="image-container">
+                <img class="picto" alt="picto production d'énergie" src={picto_energie}>
+            </div>
+            <ul>
+                <li>Pile à hydrogène</li>
+                <li>Panneau solaire</li>
+            
+            </ul>
         </div>
-        <ul>
-            <li>Pile à hydrogène</li>
-            <li>Panneau solaire</li>
-            <li>Chargeur usb-c</li>
-        </ul>
-    </div>
-    <div class="storage-category category">
-        <div class="image-container">
-            <img class="picto-stockage picto" alt="picto stockage d'énergie" src={picto_stockage}>
+        <div class="storage-category category">
+            <div class="image-container">
+                <img class="picto" alt="picto stockage d'énergie" src={picto_stockage}>
+            </div>
+            <ul>
+                <li>Batterie</li>
+                <li>Supercondensateur</li>
+            </ul>
         </div>
-        <ul>
-            <li>Batterie</li>
-            <li>Supercondensateur</li>
-        </ul>
-    </div>
-    <div class="shift-category category">
-        <div class="image-container">
-            <img class="picto-deplacement picto" alt="picto déplacement" src={picto_mobilite}>
+        <div class="shift-category category">
+            <div class="image-container">
+                <img class="picto" alt="picto déplacement" src={picto_mobilite}>
+            </div>
+            <ul>
+                <li>Roue omnidirectionnelle 1</li>
+            </ul>
         </div>
-        <ul>
-            <li>Roue omnidirectionnelle 1</li>
-        </ul>
+        <div class="sensor-category category">
+            <div class="image-container">
+                <img class="picto" alt="picto capteur" src={picto_capteur}>
+            </div>
+            <ul>
+                <li>Camera</li>
+            </ul>
+        </div>
     </div>
+    
 </div>
 
 <style>
+    .scrolable{
+        width: 350px; 
+        height: 250px; 
+        overflow-y: auto; 
+        padding: 10px; 
+        margin: auto;
+        background-color: #f9f9f9; 
+    }
+
     .titles {
         grid-column: 1 / span 3;
         font-weight: bold;
@@ -73,24 +93,33 @@
     box-sizing: border-box;
     }
 
-    .storage-category .production-category .intelligence-category .shift-category{
+    .storage-category .production-category .intelligence-category .shift-category .sensor-category{
         display: grid; 
     }
 
     .storage-category{
-        background-color: #ffa682;
+        background-color: #E42618;
+        color:white;
     }
 
     .production-category{
-        background-color: #828fff;
+        background-color: #A04040;
+        color:white;
     }
 
     .intelligence-category{
-        background-color: #656780; 
+        background-color:  #4B1338;
+        color:white;
     }
 
     .shift-category{      
-        background-color: #99d478;
+        background-color: #656780;
+        color:white;
+    }
+
+    .sensor-category{
+        background-color: #239E99;
+        color:white;
     }
 
     .blocs h2 {
@@ -103,22 +132,21 @@
     }
 
     .picto{
-        height: 60px;
-        width: 60px;
+        height: 40px;
+        width: 40px;
     }
 
     .image-container{
         display: inline-block;
         background-color: white; 
-        border-radius: 30px;
+        border-radius: 50%;
         margin:5px; 
-        padding: 0px;
+        padding: 3px;
        
     }
 
     ul li::before {
-            content: '•';
-            color: black;
+            color: white;
             display: inline-block; 
             width: 1em;
             margin-left: -1em;
