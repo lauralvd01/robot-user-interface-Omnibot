@@ -2,7 +2,8 @@
     import Direction from './Direction.svelte'
     import OperatingMode from "./OperatingMode.svelte";
     import { onMount } from 'svelte';
-      
+    
+    //Creation de booléens pour savoir si une touche du clavier est pressée
     let isActiveKeyA = false;
     let isActiveKeyZ = false;
     let isActiveKeyE = false;
@@ -23,6 +24,7 @@
         };
     });
 
+    //Fonctions permettant de savoir si la touche est pressée ou non
     function handleKeyDown(event) {
         if (event.key.toLowerCase() === 'z') {
             isActiveKeyZ = true;
@@ -67,7 +69,7 @@
        
     }
 
-
+    //Fonction permettant de voir le niveau de batterie sur l'interface. NON TESTEE
     async function fetchBatteryLevel(){
         try{
             const response = await fetch('http://localhost:8000/battery');
@@ -181,6 +183,7 @@
 
     }
 
+    /*Permet de changer le style lorsque qu'une touche du clavier est pressée */
     .key.active {
         background-color: #239E99;
         color: white;

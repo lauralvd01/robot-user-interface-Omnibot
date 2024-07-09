@@ -1,9 +1,8 @@
 <script>
     import Button from "./Button.svelte";
     import {selectedTriangle } from './store';
-    import {writable} from 'svelte/store';
-    import {onMount} from "svelte";
-
+    
+    //Code permettant de pouvoir cliquer sur un bloc et d'avoir les informations correspondantes. EN COURS DE DEVELOPPEMENT 
     const content = {
         1: {
             title: "Moteur",

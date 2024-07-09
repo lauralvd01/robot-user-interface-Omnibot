@@ -1,12 +1,9 @@
 <script>
     import { onMount } from "svelte";
     import {selectedTriangle} from './store';
-    import fond_omnibot from '$lib/images/fond_omnibot.svg';
 
     let canvas;
     const size = 80; 
-
-    
 
     function drawEquilateralTriangle(ctx, x1, y1, x2, y2, x3, y3) {
         ctx.beginPath();
@@ -26,8 +23,6 @@
 
     onMount(() => {
         const ctx = canvas.getContext("2d");
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
 
         ctx.fillStyle = "#494949"; 
         ctx.strokeStyle = "#000000"; 

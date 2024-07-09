@@ -5,15 +5,8 @@
     import picto_stockage from '$lib/images/picto_stockage_energie.svg'
     import picto_capteur from '$lib/images/picto_capteur.svg'
 
-    let defaultInfo = "Cliquez sur un bloc afin d'avoir les informations liées à celui-ci";
-
-    function handleClick(text) {
-        const infoComponent = document.querySelector('info');
-        if (infoComponent) {
-            infoComponent.updateInfo(text);
-        }
-    }
 </script>
+
 <div class="blocs">
     <h1 class="titles">EQUIPEMENTS ROBOT</h1>
     <div class="scrolable">
@@ -61,8 +54,7 @@
                 <li>Camera</li>
             </ul>
         </div>
-    </div>
-    
+    </div>   
 </div>
 
 <style>
@@ -121,12 +113,7 @@
         background-color: #239E99;
         color:white;
     }
-
-    .blocs h2 {
-        font-size: 18px;
-        color: black;
-        font-family: 'Roboto', sans-serif;
-    }
+   
     ul{
         font-family: 'Roboto',sans-serif;
     }

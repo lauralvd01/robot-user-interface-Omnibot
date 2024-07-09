@@ -31,15 +31,8 @@
     background-color: #FF662E;
     padding: 0 45px;
     box-sizing: border-box;
-    z-index: 999; /* Assurez-vous que la banner est au-dessus de tout */
+    z-index: 999; 
 }
-
-.banner-content {
-    width: 100%;
-    max-width: 1200px; 
-    margin: 0 auto; 
-}
-
 
 body, header {
     margin: 0;
@@ -55,10 +48,6 @@ body, header {
     align-items: center;
 }
 
-.button {
-    color: black;
-    margin: 0 10px;
-}
 
 </style>
 

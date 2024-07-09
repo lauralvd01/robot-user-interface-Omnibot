@@ -5,13 +5,14 @@
     import Blocs from "./Blocs.svelte";
     import Omnibot from './Omnibot.svelte';
     import PageInfo from './PageInfo.svelte';
-    //import Debug from './Debug.svelte';
 
     let bannerHeight = 0;
 
+    //onMount est utilisée pour exécuter du code une fois que le composant est créer sur la page
     onMount(() => {
         const banner = document.querySelector('.banner');
         if (banner) {
+            //récupération de la taille de la bannière
             bannerHeight = banner.offsetHeight;
         }
     });
@@ -47,7 +48,7 @@
         width: 100%;
         height: 100%;
     }
-
+    
     .homepage {
         display: flex;
         flex-direction: column;

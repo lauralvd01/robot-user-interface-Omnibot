@@ -7,6 +7,7 @@
     let keysPressed = {};
     let isAnyKeyPressed = false;
 
+    //fonctions permettant de voir si une touche du clavier est pressée ou non
     function handleKeydown(event) {
         keysPressed[event.key] = true;
         updateRotation();
@@ -17,6 +18,7 @@
         updateRotation();
     }
 
+    //Fonction permettant de mettre à jour l'orientation de la flèche selon les touches pressées
     function updateRotation() {
         if (keysPressed['d'] && keysPressed['z']) {
             rotation = 315; 

@@ -1,11 +1,14 @@
 <script>
     export let type = 'default';
 
+    //Creation de la classe contenant les boutons, donne les propriétés
     let buttonProps = {
         class:[$$restProps.class]
     }
 
 </script>
+
+<!--Applications des propriétes de "buttonProps à l'élément button"-->
 <button on:click
         on:mouseover
         on:mouseenter
