@@ -16,6 +16,7 @@
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
         
+        //Permet d'actualiser le niveau de batterie sur l'interface
         fetchBatteryLevel();
 
         return () => {
@@ -87,10 +88,10 @@
 
 
 <div class="robot_infos">
-    <Direction/>
+    <Direction/> <!--Import du composant Direction-->
     <div class="control-container">
         <h1 class="titles">COMMANDES</h1>
-        <div class="key {isActiveKeyA ? 'active' : ''}">
+        <div class="key {isActiveKeyA ? 'active' : ''}"> <!--vérification de si la touche est pressée -->
             <span class="first-line">A</span><br/>
             <span class="second-line">Rotation G</span>
         </div>
@@ -116,11 +117,12 @@
         </div>
         
     </div>
-    <OperatingMode/>
+    <OperatingMode/> <!--Import du composant OperatingMode-->
     <div class="battery-lvl-container">
         <h1 class="titles">BATTERIE</h1>
         <div class="battery">
             <div class="battery-bar">
+                <!--Actualisation de la barre de batterie selon le niveau de batterie restant dans l'Omnibot-->
                 <div class="battery-level" style="width: {batteryLevel}%"></div> 
                 <div class="battery-text">{batteryLevel}%</div>
             </div>

@@ -8,6 +8,7 @@
 <header>
     <div class="banner">
         <img class="logo" alt="Logo omnibot" src={logo_omnibot}/>
+        <!--Creation d'une barre de navigation-->
         <nav class="buttons-container">
             <Button class="default">PANNEAU DE CONTROLE</Button>
             <Button class="default">MANUEL D'UTILISATION</Button>

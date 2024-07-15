@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import Banner from './Banner.svelte'
+    import Banner from './Banner.svelte';
     import RobotInfos from "./RobotInfos.svelte";
     import Blocs from "./Blocs.svelte";
     import Omnibot from './Omnibot.svelte';
@@ -8,7 +8,7 @@
 
     let bannerHeight = 0;
 
-    //onMount est utilisée pour exécuter du code une fois que le composant est créer sur la page
+    //onMount est utilisée pour exécuter du code une fois que le composant est créé sur la page
     onMount(() => {
         const banner = document.querySelector('.banner');
         if (banner) {
@@ -30,7 +30,6 @@
         </div>
         <div class="bottom">
             <RobotInfos/>
-            
         </div>
     </div>
 </div>
@@ -54,10 +53,12 @@
         flex-direction: column;
         height: 100vh;
         overflow: hidden;
+        
     }
 
     .banner {
         flex-shrink: 0;
+        
     }
 
     .content {
@@ -65,6 +66,7 @@
         flex-direction: column;
         flex-grow: 1;
         overflow: hidden;
+        
     }
 
     .top {
@@ -73,15 +75,18 @@
         justify-content: space-between;
         flex-grow: 1;
         overflow: hidden;
+       
     }
 
     .infos {
         flex-shrink: 0;
         overflow-y: auto;
+        
     }
 
     .bottom {
         flex-shrink: 0;
         overflow-y: auto;
+        
     }
 </style>

@@ -62,10 +62,10 @@
     <div class="direction">
         <h1 class="titles">DIRECTION</h1>
         <div class="center">
-            {#if isAnyKeyPressed}
-            <img bind:this={arrowElement} class="arrow" alt="fleche directionnelle" src={arrow} style="transform: rotate(0deg);"/>
-        {:else}
-            <div class="point"></div>
+            {#if isAnyKeyPressed} <!--Permet de voir si une touche a été pressée-->
+            <img bind:this={arrowElement} class="arrow" alt="fleche directionnelle" src={arrow} style="transform: rotate(0deg);"/> <!--Fait tourner l'image en fonction de la touche-->
+            {:else}
+                <div class="point"></div> <!--Affiche un point si aucune touche n'est pressée-->
         {/if}
         </div>
     </div>

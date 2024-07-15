@@ -1,7 +1,8 @@
 <div class="operating-mode">
     <h1 class="titles">MODE DE FONCTIONNEMENT</h1>
+    <!--Creation d'un menu déroulant-->
     <select>
-        <option value="option2" selected>Tri-roues</option>
+        <option value="option2" selected>Tri-roues</option> <!--Option sélectionnée de base-->
         <option value="option3">Pas de roues</option>
         <option value="option4">Roue normales</option>
     </select>

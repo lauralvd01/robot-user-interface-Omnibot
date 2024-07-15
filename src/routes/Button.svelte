@@ -4,6 +4,7 @@
     //Creation de la classe contenant les boutons, donne les propriétés
     let buttonProps = {
         class:[$$restProps.class]
+        
     }
 
 </script>
@@ -14,6 +15,7 @@
         on:mouseenter
         on:mouseleave
         {...buttonProps}>
+        
     <slot/>
 </button>
 

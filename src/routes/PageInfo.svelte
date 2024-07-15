@@ -1,41 +1,24 @@
 <script>
     import Button from "./Button.svelte";
-    import {selectedTriangle } from './store';
+    import { selectedTriangle, triangleData } from './store'; // Importer le store
+
+    let currentContent = "Cliquez sur un bloc afin d'avoir les informations lié a celui-ci";
+
+    // Déclaration réactive pour mettre à jour le contenu lorsque selectedTriangle change
+    $: {
+        const id = $selectedTriangle.id;
+        currentContent = id !== null ? $triangleData[id] : "Cliquez sur un bloc afin d'avoir les informations lié a celui-ci";
     
-    //Code permettant de pouvoir cliquer sur un bloc et d'avoir les informations correspondantes. EN COURS DE DEVELOPPEMENT 
-    const content = {
-        1: {
-            title: "Moteur",
-            text: "bloc moteur",
-
-        },
-        2: {
-            title: "jetson",
-            text: "voici le bloc de la jetson nano"
-        }
-    };
-
-    let currentContent = { title: "", text: "", image: "" };
-
-$: selectedTriangle.subscribe(value => {
-  if (value !== null && content[value]) {
-    currentContent = content[value];
-  } else {
-    currentContent = { title: "", text: "", image: "" };
-  }
-});
+        };
+    
 </script>
 
-<div class = "info-bloc">
+<div class="info-bloc">
     <div class="info-container">
-        {#if currentContent.text}
-            <h1>{currentContent.title}</h1>
-            <p>{currentContent.text}</p>
-        {:else}
-            <p>Cliquez sur un bloc afin d'avoir les informations lié a celui-ci</p>
-    {/if}
+        <p>{currentContent}</p>
+
         <div class="button-container">
-            <Button class="primary">Plus d'informations</Button>
+            <Button class="primary">Plus d'informations</Button> <!-- Insertion d'un bouton du style "primary" -->
         </div> 
     </div> 
 </div>
@@ -55,6 +38,7 @@ $: selectedTriangle.subscribe(value => {
         min-height: 350px;
         max-height: 400px;
         position: relative; 
+        min-width: 450px;
     }
 
     .button-container { 
@@ -66,7 +50,7 @@ $: selectedTriangle.subscribe(value => {
     p {
         font-family: 'Roboto', sans-serif;
         font-size: 16px;
-    }
+        
 
-    
+    }
 </style>
