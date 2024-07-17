@@ -8,22 +8,23 @@
 
     // Définition des listes de triangles et de trapèzes
     const triangles = [
-        { id: 7, x1: 250, y1: 113.4, x2: 200, y2: 200, x3: 150, y3: 113.4, hoverColor: '#696761' },
-        { id: 8, x1: 300, y1: 200, x2: 200, y2: 200, x3: 250, y3: 113.4, hoverColor: '#696761' },
-        { id: 9, x1: 250, y1: 286.61, x2: 200, y2: 200, x3: 300, y3: 200, hoverColor: '#696761' },
-        { id: 10, x1: 150, y1: 286.61, x2: 200, y2: 200, x3: 250, y3: 286.61, hoverColor: '#696761' },
-        { id: 11, x1: 100, y1: 200, x2: 200, y2: 200, x3: 150, y3: 286.61, hoverColor: '#696761' },
-        { id: 12, x1: 150, y1: 113.4, x2: 200, y2: 200, x3: 100, y3: 200, hoverColor: '#696761' }
+        { id: 7, x1: 250, y1: 113.4, x2: 200, y2: 200, x3: 150, y3: 113.4, hoverColor: '#696761',clickColor: '#FF662E' },
+        { id: 8, x1: 300, y1: 200, x2: 200, y2: 200, x3: 250, y3: 113.4, hoverColor: '#696761',clickColor: '#FF662E' },
+        { id: 9, x1: 250, y1: 286.61, x2: 200, y2: 200, x3: 300, y3: 200, hoverColor: '#696761',clickColor: '#FF662E' },
+        { id: 10, x1: 150, y1: 286.61, x2: 200, y2: 200, x3: 250, y3: 286.61, hoverColor: '#696761',clickColor: '#FF662E' },
+        { id: 11, x1: 100, y1: 200, x2: 200, y2: 200, x3: 150, y3: 286.61, hoverColor: '#696761',clickColor: '#FF662E' },
+        { id: 12, x1: 150, y1: 113.4, x2: 200, y2: 200, x3: 100, y3: 200, hoverColor: '#696761',clickColor: '#FF662E' }
     ];
 
     const trapezes = [
-        { id: 1, x1: 275, y1: 70.1, x2: 125, y2: 70.1, x3: 150, y3: 113.4, x4: 250, y4: 113.4, hoverColor: '#696761' },
-        { id: 2, x1: 350, y1: 200, x2: 275, y2: 70.1, x3: 250, y3: 113.4, x4: 300, y4: 200, hoverColor: '#696761' },
-        { id: 3, x1: 275, y1: 329.91, x2: 350, y2: 200, x3: 300, y3: 200, x4: 250, y4: 286.61, hoverColor: '#696761' },
-        { id: 4, x1: 125, y1: 329.91, x2: 275, y2: 329.91, x3: 250, y3: 286.61, x4: 150, y4: 286.61, hoverColor: '#696761' },
-        { id: 5, x1: 50, y1: 200, x2: 125, y2: 329.91, x3: 150, y3: 286.61, x4: 100, y4: 200, hoverColor: '#696761' },
-        { id: 6, x1: 125, y1: 70.1, x2: 50, y2: 200, x3: 100, y3: 200, x4: 150, y4: 113.4, hoverColor: '#696761' }
+        { id: 1, x1: 275, y1: 70.1, x2: 125, y2: 70.1, x3: 150, y3: 113.4, x4: 250, y4: 113.4, hoverColor: '#696761',clickColor: '#FF662E' },
+        { id: 2, x1: 350, y1: 200, x2: 275, y2: 70.1, x3: 250, y3: 113.4, x4: 300, y4: 200, hoverColor: '#696761',clickColor: '#FF662E' },
+        { id: 3, x1: 275, y1: 329.91, x2: 350, y2: 200, x3: 300, y3: 200, x4: 250, y4: 286.61, hoverColor: '#696761' ,clickColor: '#FF662E'},
+        { id: 4, x1: 125, y1: 329.91, x2: 275, y2: 329.91, x3: 250, y3: 286.61, x4: 150, y4: 286.61, hoverColor: '#696761',clickColor: '#FF662E' },
+        { id: 5, x1: 50, y1: 200, x2: 125, y2: 329.91, x3: 150, y3: 286.61, x4: 100, y4: 200, hoverColor: '#696761',clickColor: '#FF662E' },
+        { id: 6, x1: 125, y1: 70.1, x2: 50, y2: 200, x3: 100, y3: 200, x4: 150, y4: 113.4, hoverColor: '#696761',clickColor: '#FF662E' }
     ];
+
 
     // Fonction permettant de dessiner des triangles équilatéraux
     function drawEquilateralTriangle(ctx, x1, y1, x2, y2, x3, y3) {
@@ -35,6 +36,7 @@
         ctx.stroke();
         ctx.fill();
     }
+
 
     // Fonction pour dessiner un trapèze
     function drawTrapeze(ctx, x1, y1, x2, y2, x3, y3, x4, y4) {
@@ -48,6 +50,7 @@
         ctx.fill();
     }
 
+
     // Fonction pour vérifier si un point est dans un triangle
     function isPointInTriangle(px, py, { x1, y1, x2, y2, x3, y3 }) {
         const area = 0.5 * (-y2 * x3 + y1 * (-x2 + x3) + x1 * (y2 - y3) + x2 * y3);
@@ -56,6 +59,7 @@
         const u = 1 - s - t;
         return s >= 0 && t >= 0 && u >= 0;
     }
+
 
     // Fonction pour vérifier si un point est dans un trapèze
     function isPointInTrapeze(px, py, { x1, y1, x2, y2, x3, y3, x4, y4 }) {
@@ -75,34 +79,35 @@
         return !(has_neg && has_pos);
     }
 
+
     // Fonction pour redessiner le canvas avec les formes et les couleurs actuelles
     function redrawCanvas() {
-        const ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Effacer le canvas
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Effacer le canvas
 
-        // Dessiner tous les triangles
-        for (const triangle of triangles) {
-            if (triangle.id === hoveredShape) {
-                ctx.fillStyle = triangle.hoverColor; // Couleur lorsque survolé
-            } else if (triangle.id === $selectedTriangle.id) {
-                ctx.fillStyle = $selectedTriangle.color; // Couleur lorsque sélectionné
-            } else {
-                ctx.fillStyle = '#494949'; // Couleur par défaut
-            }
-            drawEquilateralTriangle(ctx, triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.x3, triangle.y3);
+    // Dessiner tous les triangles
+    for (const triangle of triangles) {
+        if (triangle.id === hoveredShape) {
+            ctx.fillStyle = triangle.hoverColor; // Couleur lorsque survolé
+        } else if (triangle.id === $selectedTriangle.id) {
+            ctx.fillStyle = $selectedTriangle.color; // Couleur lorsque sélectionné
+        } else {
+            ctx.fillStyle = '#494949'; // Couleur par défaut
+        }
+        drawEquilateralTriangle(ctx, triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.x3, triangle.y3);
     }
 
     // Dessiner tous les trapèzes
-        for (const trapeze of trapezes) {
-            if (trapeze.id === hoveredShape) {
-                ctx.fillStyle = trapeze.hoverColor; // Couleur lorsque survolé
-            } else if (trapeze.id === $selectedTriangle.id) {
-                ctx.fillStyle = $selectedTriangle.color; // Couleur lorsque sélectionné
-            } else {
-                ctx.fillStyle = '#494949'; // Couleur par défaut
-            }
-            drawTrapeze(ctx, trapeze.x1, trapeze.y1, trapeze.x2, trapeze.y2, trapeze.x3, trapeze.y3, trapeze.x4, trapeze.y4);
+    for (const trapeze of trapezes) {
+        if (trapeze.id === hoveredShape) {
+            ctx.fillStyle = trapeze.hoverColor; // Couleur lorsque survolé
+        } else if (trapeze.id === $selectedTriangle.id) {
+            ctx.fillStyle = $selectedTriangle.color; // Couleur lorsque sélectionné
+        } else {
+            ctx.fillStyle = '#494949'; // Couleur par défaut
         }
+        drawTrapeze(ctx, trapeze.x1, trapeze.y1, trapeze.x2, trapeze.y2, trapeze.x3, trapeze.y3, trapeze.x4, trapeze.y4);
+    }
 }
 
 
@@ -124,41 +129,40 @@
 
         // Gestion des événements sur le canvas
         canvas.addEventListener('click', (event) => {
-            console.log('Canvas clicked');
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
 
-            let clickedTriangleId = null;
-            for (const triangle of triangles) {
-                if (isPointInTriangle(x, y, triangle)) {
-                    clickedTriangleId = triangle.id;
-                    break;
-                }
+        let clickedTriangleId = null;
+        for (const triangle of triangles) {
+            if (isPointInTriangle(x, y, triangle)) {
+                clickedTriangleId = triangle.id;
+                break;
             }
+        }
 
-            let clickedTrapezeID = null;
-            for (const trapeze of trapezes) {
-                if (isPointInTrapeze(x, y, trapeze)) {
-                    clickedTrapezeID = trapeze.id;
-                    break;
-                }
+        let clickedTrapezeID = null;
+        for (const trapeze of trapezes) {
+            if (isPointInTrapeze(x, y, trapeze)) {
+                clickedTrapezeID = trapeze.id;
+                break;
             }
+        }
 
-            if (clickedTriangleId !== null) {
-                console.log(`Clicked on triangle ID: ${clickedTriangleId}`);
-                selectedTriangle.set({ id: clickedTriangleId });
-            } else if (clickedTrapezeID !== null) {
-                console.log(`Clicked on trapeze ID: ${clickedTrapezeID}`);
-                selectedTriangle.set({ id: clickedTrapezeID });
-            } else {
-                selectedTriangle.set({ id: null, color: '#494949' });
-                console.log("Clicked outside Omnibot");
-            }
-        });
+        if (clickedTriangleId !== null) {
+            selectedTriangle.set({ id: clickedTriangleId, color: triangles.find(t => t.id === clickedTriangleId).clickColor });
+        } else if (clickedTrapezeID !== null) {
+            selectedTriangle.set({ id: clickedTrapezeID, color: trapezes.find(t => t.id === clickedTrapezeID).clickColor });
+        } else {
+            selectedTriangle.set({ id: null, color: '#494949' });
+        }
 
-        // Gestion de l'événement de survol sur le canvas
-            // Gestion de l'événement de survol sur le canvas
+        redrawCanvas(); // Redessiner après la sélection
+    });
+
+
+           
+    // Gestion de l'événement de survol sur le canvas
     canvas.addEventListener('mousemove', (event) => {
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;

@@ -73,10 +73,13 @@
     //Fonction permettant de voir le niveau de batterie sur l'interface. NON TESTEE
     async function fetchBatteryLevel(){
         try{
+            console.log('Fetching battery level ...')
             const response = await fetch('http://localhost:8000/battery');
+            console.log('response received:', response)
             const data = await response.json();
             if(response.ok){
-                batteryLevel = data.battery_level;
+                batteryLevel = Math.round(data.battery_level);
+                console.log('Battery Level:',batteryLevel)
             } else {
                 console.error('Error:',data.error);
             }
@@ -215,7 +218,7 @@
 
     .battery-level {
         height: 100%;
-        background-color: #040B8C;
+        background-color: #FF662E;
         width: 0;
         transition: width 0.5s;
     }
