@@ -87,6 +87,7 @@
     .bottom {
         flex-shrink: 0;
         overflow-y: auto;
+  
         
     }
 </style>

@@ -8,7 +8,7 @@ import asyncio
 from grpclib.client import Channel
 
 #Connexion au serveur 
-channel = Channel(host='192.168.1.122', port=6550)
+channel = Channel(host='192.168.50.153', port=6550)
 stub = api.BasicRobotControlStub(channel)
 
 async def get_battery_status():   

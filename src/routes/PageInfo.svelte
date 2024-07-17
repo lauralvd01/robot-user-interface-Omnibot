@@ -1,20 +1,28 @@
 <script>
     import Button from "./Button.svelte";
-    import { selectedTriangle, triangleData } from './store'; // Importer le store
+    import { selectedTriangle, triangleData, triangleImages, triangleTitle } from './store'; // Importer le store
+    import { get } from 'svelte/store';
 
     let currentContent = "Cliquez sur un bloc afin d'avoir les informations lié a celui-ci";
+    let currentImage = null;
+    let currentTitle = null;
 
     // Déclaration réactive pour mettre à jour le contenu lorsque selectedTriangle change
     $: {
         const id = $selectedTriangle.id;
         currentContent = id !== null ? $triangleData[id] : "Cliquez sur un bloc afin d'avoir les informations lié a celui-ci";
-    
+        currentImage = id !=  null ? $triangleImages[id] : null;
+        currentTitle = id != null ? $triangleTitle[id] : " ";
         };
     
 </script>
 
 <div class="info-bloc">
     <div class="info-container">
+        <h1>{currentTitle}</h1>
+        {#if currentImage}
+            <img src={currentImage} alt="Image du triangle" class="triangle-image" />
+        {/if}
         <p>{currentContent}</p>
 
         <div class="button-container">
@@ -33,12 +41,13 @@
         border-radius: 15px;
         padding: 10px;
         margin: 10px; 
-        width: 100%; 
+        width: 90%; 
+        max-width: 95%;
         box-sizing: border-box;
-        min-height: 350px;
-        max-height: 400px;
+        min-height: 90%;
         position: relative; 
         min-width: 450px;
+        overflow: hidden; /* Empêcher le débordement */
     }
 
     .button-container { 
@@ -50,7 +59,17 @@
     p {
         font-family: 'Roboto', sans-serif;
         font-size: 16px;
-        
+    }
 
+    h1 {
+        font-family: 'Roboto', sans-serif;
+        font-size: 24px;
+    }
+
+    .triangle-image {
+        max-width: 100px; /* Limiter la taille de l'image */
+        max-height: 100px; 
+        height: auto;
+        margin-top: 10px;
     }
 </style>

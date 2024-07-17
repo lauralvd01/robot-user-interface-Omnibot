@@ -138,7 +138,7 @@
 
     .control-container {
         width: 300px;
-        height: 215px;
+        height: 30%;
         background-color: #A8A8A8;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
