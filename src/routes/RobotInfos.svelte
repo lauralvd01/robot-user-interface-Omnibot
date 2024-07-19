@@ -18,6 +18,7 @@
         
         //Permet d'actualiser le niveau de batterie sur l'interface
         fetchBatteryLevel();
+        fetchRobotState();
 
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
@@ -31,7 +32,7 @@
             isActiveKeyZ = true;
         }
         if (event.key.toLowerCase() === 'a'){
-            isActiveKeyA = true;
+            isActiveKeyA = true;         
         }
         if (event.key.toLowerCase() === 'e'){
             isActiveKeyE = true;
@@ -45,12 +46,11 @@
         if (event.key.toLowerCase() === 'd'){
             isActiveKeyD = true;
         }
-       
     }
 
     function handleKeyUp(event) {
         if (event.key.toLowerCase() === 'z') {
-            isActiveKeyZ = false;
+            isActiveKeyZ = false;   
         }
         if (event.key.toLowerCase() === 'a') {
             isActiveKeyA = false;
@@ -67,7 +67,6 @@
         if (event.key.toLowerCase() === 'd') {
             isActiveKeyD = false;
         }
-       
     }
 
     //Fonction permettant de voir le niveau de batterie sur l'interface. NON TESTEE
@@ -85,6 +84,20 @@
             }
         }catch (error){
             console.error('Error:',error);
+        }
+    }
+
+    async function fetchRobotState() {
+        try {
+            const response = await fetch('http://localhost:8000/motor_state');
+            const data = await response.json();
+            if (response.ok) {
+                robotState = data;
+            } else {
+                console.error('Error:', data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
         }
     }
 </script>

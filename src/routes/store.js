@@ -1,11 +1,13 @@
 import { writable } from 'svelte/store';
+//import des images
 import pictoIntelligence from '$lib/images/picto_intelligence.svg';
 import picto_energie from '$lib/images/picto_energie.svg'
 import picto_mobilite from '$lib/images/picto_mobilite.svg'
 import picto_stockage from '$lib/images/picto_stockage_energie.svg'
 import picto_capteur from '$lib/images/picto_capteur.svg'
 
-export const selectedTriangle = writable({ id: null, color: '#494949' });
+export const selectedTriangle = writable({ id: null, color: '#494949' }); //définition d'un emplacement par son id et sa couleur
+
 export const triangleTitle = writable({
     1:"Module Roue",
     2:"Module Camera",
@@ -20,6 +22,7 @@ export const triangleTitle = writable({
     11:"Pile à hydrogène",
     12:"Panneau solaire",
 });
+
 export const triangleData = writable({
     1: "Information sur le module roue (id:1)",
     2: "Information sur le module camera (id:2)",
