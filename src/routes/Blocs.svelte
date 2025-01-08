@@ -59,34 +59,30 @@
 
 <style>
     .scrolable{
-        width: 350px; 
+        width: 95%; 
         height: 95%; 
         overflow-y: auto; 
-        padding: 10px; 
+        padding: 5px; 
         margin: auto;
-        background-color: #f9f9f9; 
     }
 
     .titles {
         grid-column: 1 / span 3;
         font-weight: bold;
+        width: 100%;
         font-size: 24px;
         color:black;
         font-family: 'Roboto', sans-serif;
     }
 
     .category {
-    display: flex;
-    align-items: center;
-    border-radius: 15px;
-    padding-right: 10px;
-    margin-bottom: 10px; 
-    width: 100%; 
-    box-sizing: border-box;
-    }
-
-    .storage-category .production-category .intelligence-category .shift-category .sensor-category{
-        display: grid; 
+        display: flex;
+        align-items: center;
+        border-radius: 15px;
+        padding: 0 10px;
+        margin-bottom: 10px; 
+        width: 100%; 
+        box-sizing: border-box;
     }
 
     .storage-category{
@@ -127,9 +123,8 @@
         display: inline-block;
         background-color: white; 
         border-radius: 50%;
-        margin:5px; 
+        margin: 5px; 
         padding: 3px;
-       
     }
 
     ul li::before {

@@ -89,7 +89,6 @@
         height: 150px;
         display: flex;
         flex-direction: column;
-        margin: 5px 15px;
         align-items: center;
     }
 

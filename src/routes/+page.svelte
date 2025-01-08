@@ -20,16 +20,22 @@
 
 <div class="homepage">
     <Banner class="banner"/>
-    <div class="content">
-        <div class="top" style="margin-top: {bannerHeight}px;">
-            <div class="infos">
-                <Blocs/>   
+    <div class="body">
+        <div class="content">
+            <div class="top" style="margin-top: {bannerHeight}px;">
+                <div class="modules">
+                    <Blocs/>   
+                </div>
+                <div class="omnibot">
+                    <Omnibot/>
+                </div>
+                <div class="infos">
+                    <PageInfo/>
+                </div>
             </div>
-            <Omnibot/>
-            <PageInfo/>
         </div>
         <div class="bottom">
-            <RobotInfos/>
+                <RobotInfos/>
         </div>
     </div>
 </div>
@@ -41,53 +47,60 @@
         box-sizing: border-box;
     }
 
-    html, body {
-        margin: 0px 20px 0px 20px;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-    }
     
     .homepage {
         display: flex;
         flex-direction: column;
-        height: 100vh;
         overflow: hidden;
-        
     }
 
-    .banner {
-        flex-shrink: 0;
-        
+    .body {
+        margin: 0px 20px 0px 20px;
+        padding: 0;
+        width: 100%;
+        height: 100%;
     }
 
     .content {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
-        overflow: hidden;
-        
+        overflow: auto;
+        height: 80%;
     }
 
     .top {
         display: flex;
         flex-direction: row;
+        align-items: center;
         justify-content: space-between;
         flex-grow: 1;
         overflow: hidden;
-       
+        height: fit-content;
+    }
+
+    .modules {
+        width: 33%;
+        flex-shrink: 0;
+        overflow-y: auto;
+    }
+
+    .omnibot {
+        width: 33%;
+        flex-shrink: 0;
     }
 
     .infos {
+        width: 33%;
         flex-shrink: 0;
         overflow-y: auto;
-        
     }
 
     .bottom {
         flex-shrink: 0;
-        overflow-y: auto;
-  
-        
+        overflow-y: hidden;
+        width: 100%;
+        margin-top: 2%;
+        margin-bottom: 1%;
     }
 </style>

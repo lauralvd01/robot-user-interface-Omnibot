@@ -2,7 +2,6 @@
     import logo_omnibot from '$lib/images/logo_omnibot.svg'
     import Button from "./Button.svelte";
     import logo_mines from '$lib/images/logo_mines.svg'
-    export let bannerHeight;
 </script>
 
 <header>
@@ -35,7 +34,7 @@
     z-index: 999; 
 }
 
-body, header {
+header {
     margin: 0;
 }
 

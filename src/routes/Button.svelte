@@ -1,12 +1,9 @@
 <script>
-    export let type = 'default';
-
     //Creation de la classe contenant les boutons, donne les propriétés
     let buttonProps = {
         class:[$$restProps.class]
         
     }
-
 </script>
 
 <!--Applications des propriétes de "buttonProps à l'élément button"-->
@@ -14,6 +11,7 @@
         on:mouseover
         on:mouseenter
         on:mouseleave
+        on:focus
         {...buttonProps}>
         
     <slot/>
@@ -36,14 +34,16 @@
     }
 
     .default {
-        background-color: rgba(0,0,0,0);
+        font-family: "Roboto";
+        font-weight: bold;
+        margin: 1px 2px 1px 2px;
     }
     .default:hover{
         color:white;
     }
 
     .primary{
-        border:solid 2px black;
+        border:solid 2px white;
         border-radius: 12px;
         background-color: #ff3700;
         font-family: "Roboto";

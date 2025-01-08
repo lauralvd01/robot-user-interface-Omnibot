@@ -226,8 +226,6 @@
 
     .canvas-container {
         position: relative;
-        width: 800px;
-        height: 500px;
         z-index: 1;
     }
 </style>

@@ -103,53 +103,84 @@
 </script>
 
 
-<div class="robot_infos">
-    <Direction/> <!--Import du composant Direction-->
-    <div class="control-container">
-        <h1 class="titles">COMMANDES</h1>
-        <div class="key {isActiveKeyA ? 'active' : ''}"> <!--vérification de si la touche est pressée -->
-            <span class="first-line">A</span><br/>
-            <span class="second-line">Rotation G</span>
-        </div>
-        <div class="key {isActiveKeyZ ? 'active' : ''}">
-            <span class="first-line">Z</span><br/>
-            <span class="second-line">Avancer</span>
-        </div>
-        <div class="key {isActiveKeyE ? 'active' : ''}">
-            <span class="first-line">E</span><br/>
-            <span class="second-line">Rotation D</span>
-        </div>
-        <div class="key {isActiveKeyQ ? 'active' : ''}">
-            <span class="first-line">Q</span><br/>
-            <span class="second-line">Gauche</span>
-        </div>
-        <div class="key {isActiveKeyS ? 'active' : ''}">
-            <span class="first-line">S</span><br/>
-            <span class="second-line">Reculer</span>
-        </div>
-        <div class="key {isActiveKeyD ? 'active' : ''}">
-            <span class="first-line">D</span><br/>
-            <span class="second-line">Droite</span>
-        </div>
-        
-    </div>
-    <OperatingMode/> <!--Import du composant OperatingMode-->
-    <div class="battery-lvl-container">
-        <h1 class="titles">BATTERIE</h1>
-        <div class="battery">
-            <div class="battery-bar">
-                <!--Actualisation de la barre de batterie selon le niveau de batterie restant dans l'Omnibot-->
-                <div class="battery-level" style="width: {batteryLevel}%"></div> 
-                <div class="battery-text">{batteryLevel}%</div>
+<div class="content">
+        <div class="command-row">
+            <div class="command-row-element" style="width: 25%">
+                <Direction/> <!--Import du composant Direction-->
             </div>
-            <div class="battery-shape"></div>
+
+            <div class="command-row-element" style="width: 25%">
+                <div class="control-container">
+                    <h1 class="titles">COMMANDES</h1>
+                    <div class="key {isActiveKeyA ? 'active' : ''}"> <!--vérification de si la touche est pressée -->
+                        <span class="first-line">A</span><br/>
+                        <span class="second-line">Rotation G</span>
+                    </div>
+                    <div class="key {isActiveKeyZ ? 'active' : ''}">
+                        <span class="first-line">Z</span><br/>
+                        <span class="second-line">Avancer</span>
+                    </div>
+                    <div class="key {isActiveKeyE ? 'active' : ''}">
+                        <span class="first-line">E</span><br/>
+                        <span class="second-line">Rotation D</span>
+                    </div>
+                    <div class="key {isActiveKeyQ ? 'active' : ''}">
+                        <span class="first-line">Q</span><br/>
+                        <span class="second-line">Gauche</span>
+                    </div>
+                    <div class="key {isActiveKeyS ? 'active' : ''}">
+                        <span class="first-line">S</span><br/>
+                        <span class="second-line">Reculer</span>
+                    </div>
+                    <div class="key {isActiveKeyD ? 'active' : ''}">
+                        <span class="first-line">D</span><br/>
+                        <span class="second-line">Droite</span>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="command-row-element" style="width: 30%">
+                <OperatingMode/> <!--Import du composant OperatingMode-->
+            </div>
+
+            <div class="command-row-element" style="width: 20%">
+                <div class="battery-lvl-container">
+                    <h1 class="titles">BATTERIE</h1>
+                    <div class="battery">
+                        <div class="battery-bar">
+                            <!--Actualisation de la barre de batterie selon le niveau de batterie restant dans l'Omnibot-->
+                            <div class="battery-level" style="width: {batteryLevel}%"></div> 
+                            <div class="battery-text">{batteryLevel}%</div>
+                        </div>
+                        <div class="battery-shape"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 </div>
 
 <style>
-    .robot_infos{
+    .content {
         display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .command-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    .command-row-element {
+        flex-shrink: 0;
+        overflow-y: hidden;
     }
 
     .control-container {
@@ -161,7 +192,6 @@
         grid-template-rows: auto auto auto;
         border-radius: 10px;
         text-align: center;
-        margin:15px 15px 15px 15px;
     }
 
     .titles {
@@ -170,7 +200,9 @@
         font-size: 24px;
         color:black;
         font-family: 'Roboto',sans-serif;
+
     }
+
     span{
         color:black;
     }
@@ -187,7 +219,6 @@
         white-space: pre-line;
         height: auto;
         line-height: 1;
-        padding-bottom: 5px;
         font-family: 'Roboto', sans-serif;
     }
 
@@ -208,9 +239,8 @@
     }
 
     .battery-lvl-container{
-        display:flex;
+        display: flex;
         flex-direction: column;
-        margin:15px;
     }
 
     .battery {

@@ -10,7 +10,7 @@
     // Déclaration réactive pour mettre à jour le contenu lorsque selectedTriangle change
     $: {
         const id = $selectedTriangle.id;
-        currentContent = id !== null ? $triangleData[id] : "Cliquez sur un bloc afin d'avoir les informations lié a celui-ci";
+        currentContent = id !== null ? $triangleData[id] : "Cliquer sur un bloc pour avoir les informations liées à celui-ci";
         currentImage = id !=  null ? $triangleImages[id] : null;
         currentTitle = id != null ? $triangleTitle[id] : " ";
         };
@@ -21,7 +21,7 @@
     <div class="info-container">
         <h1>{currentTitle}</h1>
         {#if currentImage}
-            <img src={currentImage} alt="Image du triangle" class="triangle-image" />
+            <img src={currentImage} alt="Triangle" class="triangle-image"/>
         {/if}
         <p>{currentContent}</p>
 
@@ -45,15 +45,14 @@
         max-width: 95%;
         box-sizing: border-box;
         min-height: 90%;
-        position: relative; 
-        min-width: 450px;
-        overflow: hidden; /* Empêcher le débordement */
+        position: relative;
+        overflow: auto;
     }
 
     .button-container { 
-        align-self: flex-end;
+        align-self: flex-start;
         margin-top: auto;
-        margin-right:20px;
+        margin-left:20px;
     }
 
     p {
