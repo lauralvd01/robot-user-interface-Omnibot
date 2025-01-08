@@ -1,5 +1,6 @@
 <script>
-    import Direction from './Direction.svelte'
+    import Button from './Button.svelte';
+import Direction from './Direction.svelte'
     import OperatingMode from "./OperatingMode.svelte";
     import { onMount } from 'svelte';
     
@@ -11,20 +12,9 @@
     let isActiveKeyS = false;
     let isActiveKeyD = false;
     let batteryLevel = 0;
-
-    onMount(() => {
-        window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
-        
-        //Permet d'actualiser le niveau de batterie sur l'interface
-        fetchBatteryLevel();
-        fetchRobotState();
-
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('keyup', handleKeyUp);
-        };
-    });
+    let robotState = {"status": "stopped", "speed": 0};
+    $: displayBatteryLevel = batteryLevel;
+    $: displayRobotState = robotState;
 
     //Fonctions permettant de savoir si la touche est pressée ou non
     function handleKeyDown(event) {
@@ -73,14 +63,12 @@
     async function fetchBatteryLevel(){
         try{
             console.log('Fetching battery level ...')
-            const response = await fetch('http://localhost:8000/battery');
-            console.log('response received:', response)
-            const data = await response.json();
+            const response = await fetch('http://localhost:8001/battery');
             if(response.ok){
+                const data = await response.json();
                 batteryLevel = Math.round(data.battery_level);
-                console.log('Battery Level:',batteryLevel)
             } else {
-                console.error('Error:',data.error);
+                console.error('Failed to fetch battery level:', response.statusText);
             }
         }catch (error){
             console.error('Error:',error);
@@ -89,16 +77,53 @@
 
     async function fetchRobotState() {
         try {
-            const response = await fetch('http://localhost:8000/motor_state');
-            const data = await response.json();
+            const response = await fetch('http://localhost:8001/motor_state');
             if (response.ok) {
+                const data = await response.json();
                 robotState = data;
             } else {
-                console.error('Error:', data.error);
+                console.error('Failed to fetch robot state:', response.statusText);
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error fetching robot state:', error);
         }
+    }
+    
+    onMount(() => {
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        
+        //Permet d'actualiser le niveau de batterie et le statut du robot sur l'interface
+        fetchBatteryLevel();
+        fetchRobotState();
+
+        // Refrexh battery level and robot status every 5 seconds
+        const interval = setInterval(() => {displayBatteryLevel = batteryLevel; displayRobotState = robotState}, 5000);
+        
+        // Refrexh battery level and robot status every 5 seconds
+        const interval1 = setInterval(fetchRobotState, 5000);
+        const interval2 = setInterval(fetchBatteryLevel, 5000);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+            clearInterval(interval);
+            clearInterval(interval1);
+            clearInterval(interval2);
+        };
+    });
+
+    console.log(robotState);
+    console.log(batteryLevel);
+    console.log('RobotInfos mounted');
+
+    function increment() {
+        displayBatteryLevel += 2;
+        displayRobotState.speed += 2;
+    }
+    function update() {
+        displayBatteryLevel = batteryLevel;
+        displayRobotState = robotState;
     }
 </script>
 
@@ -150,11 +175,15 @@
                     <div class="battery">
                         <div class="battery-bar">
                             <!--Actualisation de la barre de batterie selon le niveau de batterie restant dans l'Omnibot-->
-                            <div class="battery-level" style="width: {batteryLevel}%"></div> 
-                            <div class="battery-text">{batteryLevel}%</div>
+                            <div class="battery-level" style="width: {displayBatteryLevel}%"></div> 
+                            <div class="battery-text">{displayBatteryLevel}%</div>
                         </div>
                         <div class="battery-shape"></div>
                     </div>
+                    <p>{displayRobotState.status}</p>
+                    <p>{displayRobotState.speed}</p>
+                    <Button class="primary" on:click={increment}>Incrémenter</Button>
+                    <Button class="primary" on:click={update}>Actualiser</Button>
                 </div>
             </div>
         </div>
@@ -229,7 +258,6 @@
 
     .key .second-line{
         font-size: 16px;
-
     }
 
     /*Permet de changer le style lorsque qu'une touche du clavier est pressée */
