@@ -36,3 +36,15 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
+### Python backend
+
+In a Python environment install betterproto (comes with grpcio, betterproto[compiler], grpclib, stringcase, black, jinja2, protobuf, mypy-extensions, packaging, pathspec, platformdirs, MarkupSafe), paho-mqtt et fastapi packages with pip.
+
+```bash
+python -m pip install betterproto[compiler] grpcio-tools
+python -m pip install paho-mqtt
+python -m pip install fastapi
+python -m pip install uvicorn
+python -m pip install keyboard
+```
