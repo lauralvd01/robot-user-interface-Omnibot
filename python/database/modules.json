@@ -1,74 +1,79 @@
-{
-    "modules": [
-        {
-            "module_id": 1,
-            "name": "Roue Tangente",
-            "function": "Mobilité",
-            "position": "Latérale",
-            "via_bus_root": true
-        },
-        {
-            "module_id": 2,
-            "name": "Batterie",
-            "function": "Stockage d'énergie",
-            "position": "Latérale",
-            "via_bus_root": true
-        },
-        {
-            "module_id": 3,
-            "name": "Jetson Nano",
-            "function": "Processeur",
-            "position": "Supérieure",
-            "via_bus_root": true
-        },
-        {
-            "module_id": 4,
-            "name": "Chargeur USB-C",
-            "function": "Production d'énergie",
-            "position": "Supérieure",
-            "via_bus_root": true
-        },
-        {
-            "module_id": null,
-            "name": "Antenne 5G",
-            "function": "Réseau",
-            "position": "Supérieure",
-            "via_bus_root": false
-        },
-        {
-            "module_id": null,
-            "name": "Panneau Photovoltaïque",
-            "function": "Production d'énergie",
-            "position": "Supérieure",
-            "via_bus_root": true
-        },
-        {
-            "module_id": null,
-            "name": "GPS",
-            "function": "Capteur",
-            "position": "Supérieure",
-            "via_bus_root": false
-        },
-        {
-            "module_id": null,
-            "name": "Camera",
-            "function": "Capteur",
-            "position": "Supérieure",
-            "via_bus_root": false
-        },
-        {
-            "module_id": null,
-            "name": "Pile à hydrogène",
-            "function": "Production d'énergie",
-            "position": "Supérieure",
-            "via_bus_root": true
-        },
-        {
-            "module_id": null,
-            "name": "Supercondensateur",
-            "function": "Stockage d'énergie",
-            "position": "Latérale",
-            "via_bus_root": true
-        }
-    ]
-}
+[
+    {
+        "module_id": 32,
+        "name": "Vide",
+        "position": ["Latérale", "Supérieure"],
+        "function": "",
+        "caracteristics": []
+    },
+    {
+        "module_id": 1,
+        "name": "Roue Omnidirectionnelle",
+        "position": ["Latérale"],
+        "function": "Mobilité",
+        "caracteristics": ["name","state", "speed", "power_flow", "energy"]
+    },
+    {
+        "module_id": 2,
+        "name": "Batterie",
+        "position": ["Latérale"],
+        "function": "Stockage d'énergie",
+        "caracteristics": ["name","state", "state_of_charge", "current", "temperature", "cell_voltages", "power_flow", "energy"]
+    },
+    {
+        "module_id": 3,
+        "name": "Jetson Nano",
+        "position": ["Supérieure"],
+        "function": "Processeur",
+        "caracteristics": ["name","control_state", "control_mode", "power_flow", "energy"]
+    },
+    {
+        "module_id": 4,
+        "name": "Chargeur USB-C",
+        "position": ["Supérieure"],
+        "function": "Production d'énergie",
+        "caracteristics": ["name","power_flow", "energy"]
+    },
+    {
+        "module_id": 5,
+        "name": "Panneau photovoltaïque",
+        "position": ["Supérieure"],
+        "function": "Production d'énergie",
+        "caracteristics": ["name","power_flow", "energy"]
+    },
+    {
+        "module_id": 6,
+        "name": "Pile à hydrogène",
+        "position": ["Supérieure"],
+        "function": "Production d'énergie",
+        "caracteristics": ["name","power_flow", "energy"]
+    },
+    {
+        "module_id": null,
+        "name": "GPS",
+        "position": ["Supérieure"],
+        "function": "Capteur",
+        "caracteristics": ["name","power_flow", "energy"]
+    },
+    {
+        "module_id": null,
+        "name": "Camera",
+        "position": ["Supérieure"],
+        "function": "Capteur",
+        "caracteristics": ["name","power_flow", "energy"]
+    },
+    {
+        "module_id": null,
+        "name": "Antenne 5G",
+        "position": ["Supérieure"],
+        "function": "Réseau",
+        "caracteristics": ["name","power_flow", "energy"]
+    },
+    {
+        "module_id": null,
+        "name": "Supercondensateur",
+        "position": ["Latérale"],
+        "function": "Stockage d'énergie",
+        "caracteristics": ["name","power_flow", "energy"]
+    }
+]
