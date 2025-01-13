@@ -1,6 +1,7 @@
 <script>
     import picto_intelligence from '$lib/images/picto_intelligence.svg'
     
+    export let modules;
 </script>
 
 <div class="network-category category">
@@ -8,7 +9,9 @@
         <img class="picto" alt="picto network" src={picto_intelligence}>
     </div>
     <ul>
-        <li>Antenne 5G</li>
+        {#each Object.entries(modules) as [name, count]}
+            <li>{name} x{count}</li>
+        {/each}
     </ul>
 </div>
 

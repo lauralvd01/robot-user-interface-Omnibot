@@ -1,16 +1,26 @@
 <script>
-    import picto_stockage from '$lib/images/picto_stockage_energie.svg'
-    
+    import picto_stockage from "$lib/images/picto_stockage_energie.svg";
+
+    export let modules;
 </script>
 
 <div class="storage-category category">
     <div class="image-container">
-        <img class="picto" alt="picto stockage d'énergie" src={picto_stockage}>
+        <img
+            class="picto"
+            alt="picto stockage d'énergie"
+            src={picto_stockage}
+        />
     </div>
-    <ul>
-        <li>Batterie</li>
-        <li>Supercondensateur</li>
-    </ul>
+    {#await modules}
+        <p>Loading...</p>
+    {:then modules}
+        <ul>
+            {#each Object.entries(modules) as [name, count]}
+                <li>{name}  x{count}</li>
+            {/each}
+        </ul>
+    {/await}
 </div>
 
 <style>
@@ -19,37 +29,37 @@
         align-items: center;
         border-radius: 15px;
         padding: 0 10px;
-        margin-bottom: 10px; 
-        width: 100%; 
+        margin-bottom: 10px;
+        width: 100%;
         box-sizing: border-box;
     }
 
-    .storage-category{
-        background-color: #E42618;
-        color:white;
+    .storage-category {
+        background-color: #e42618;
+        color: white;
     }
 
-    ul{
-        font-family: 'Roboto',sans-serif;
+    ul {
+        font-family: "Roboto", sans-serif;
     }
 
-    .picto{
+    .picto {
         height: 40px;
         width: 40px;
     }
 
-    .image-container{
+    .image-container {
         display: inline-block;
-        background-color: white; 
+        background-color: white;
         border-radius: 50%;
-        margin: 5px; 
+        margin: 5px;
         padding: 3px;
     }
 
     ul li::before {
-            color: white;
-            display: inline-block; 
-            width: 1em;
-            margin-left: -1em;
+        color: white;
+        display: inline-block;
+        width: 1em;
+        margin-left: -1em;
     }
 </style>

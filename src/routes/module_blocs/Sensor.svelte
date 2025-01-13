@@ -1,6 +1,7 @@
 <script>
     import picto_sensor from '$lib/images/picto_capteur.svg'
     
+    export let modules;
 </script>
 
 <div class="sensor-category category">
@@ -8,8 +9,9 @@
         <img class="picto" alt="picto sensor d'énergie" src={picto_sensor}>
     </div>
     <ul>
-        <li>GPS</li>
-        <li>Camera</li>
+        {#each Object.entries(modules) as [name, count]}
+                <li>{name}  x{count}</li>
+            {/each}
     </ul>
 </div>
 
