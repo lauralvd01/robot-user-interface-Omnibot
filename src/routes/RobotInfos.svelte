@@ -1,6 +1,6 @@
 <script>
     import Button from './Button.svelte';
-import Direction from './Direction.svelte'
+    import Direction from './Direction.svelte'
     import OperatingMode from "./OperatingMode.svelte";
     import { onMount } from 'svelte';
     
