@@ -276,13 +276,15 @@ async def get_modules():
         robot = api.OmnibotStub(channel)
         try:
             response = await robot.get_modules()
-            print("Robot response", response)
+            # print("Robot response", response)
             if response :
-                for id in response.module_id :
-                    print(id)
-                    print()
+                # for id in response.module_id :
+                #     print(id)
+                #     print()
+                return {"ok": True, "module_ids": response.module_id}
         except Exception as e :
-            print("Error ", e)
+            # print("Error ", e)
+            return {"ok": False, "Error": str(e)}
             
 
 
