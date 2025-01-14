@@ -2,6 +2,11 @@
     import logo_omnibot from '$lib/images/logo_omnibot.svg'
     import Button from "./Button.svelte";
     import logo_mines from '$lib/images/logo_mines.svg'
+    import { goto } from '$app/navigation'
+
+    function hangleNavigationToUserManual() {
+        goto('/user_manual');
+    }
 </script>
 
 <header>
@@ -10,7 +15,7 @@
         <!--Creation d'une barre de navigation-->
         <nav class="buttons-container">
             <Button class="default">PANNEAU DE CONTROLE</Button>
-            <Button class="default">MANUEL D'UTILISATION</Button>
+            <Button class="default" on:click={hangleNavigationToUserManual}>MANUEL D'UTILISATION</Button>
             <Button class="default">LE PROJET</Button>
         </nav>
         <img class="logo" alt="logo mines" src={logo_mines}>

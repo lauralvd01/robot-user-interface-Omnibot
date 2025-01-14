@@ -1,16 +1,21 @@
 <script>
-    import picto_energie from '$lib/images/picto_energie.svg'
-    
+    import picto_energie from "$lib/images/picto_energie.svg";
+
+    export let modules;
 </script>
 
 <div class="production-category category">
     <div class="image-container">
-        <img class="picto" alt="picto production d'énergie" src={picto_energie}>
+        <img
+            class="picto"
+            alt="picto production d'énergie"
+            src={picto_energie}
+        />
     </div>
     <ul>
-        <li>Chargeur USB-C</li>
-        <li>Pile à hydrogène</li>
-        <li>Panneau Photovoltaïque</li>
+        {#each Object.entries(modules) as [name, count]}
+            <li>{name} x{count}</li>
+        {/each}
     </ul>
 </div>
 
@@ -20,37 +25,37 @@
         align-items: center;
         border-radius: 15px;
         padding: 0 10px;
-        margin-bottom: 10px; 
-        width: 100%; 
+        margin-bottom: 10px;
+        width: 100%;
         box-sizing: border-box;
     }
 
-    .production-category{
-        background-color: #A04040;
-        color:white;
+    .production-category {
+        background-color: #a04040;
+        color: white;
     }
 
-    ul{
-        font-family: 'Roboto',sans-serif;
+    ul {
+        font-family: "Roboto", sans-serif;
     }
 
-    .picto{
+    .picto {
         height: 40px;
         width: 40px;
     }
 
-    .image-container{
+    .image-container {
         display: inline-block;
-        background-color: white; 
+        background-color: white;
         border-radius: 50%;
-        margin: 5px; 
+        margin: 5px;
         padding: 3px;
     }
 
     ul li::before {
-            color: white;
-            display: inline-block; 
-            width: 1em;
-            margin-left: -1em;
+        color: white;
+        display: inline-block;
+        width: 1em;
+        margin-left: -1em;
     }
 </style>

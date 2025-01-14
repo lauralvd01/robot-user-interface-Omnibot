@@ -10,6 +10,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173"
     # Ajoutez d'autres origines ici si nécessaire
 ]
 
@@ -86,9 +87,9 @@ async def monitor_keyboard():
         await asyncio.sleep(0.1)
 
 ################################################ TODO Test : for now pressed key is not detected ?
-@app.on_event("startup")
-async def startup_event():
-    asyncio.create_task(monitor_keyboard()) ########### TODO : To understand
+# @app.on_event("startup")
+# async def startup_event():
+#     asyncio.create_task(monitor_keyboard()) ########### TODO : To understand
 
 # OK
 @app.get("/")
@@ -326,6 +327,58 @@ async def reset_camera():
     except Exception as e :
         return {"Error": str(e)}
     
+
+
+
+
+
+
+
+##################################################################### Actual front requests
+
+all_modules = []
+implemented_modules = {}
+def read_modules_db():
+    global all_modules
+    global implemented_modules
     
+    import json
+    
+    with open("user_interface/python/database/modules.json") as file:
+        all_modules = json.load(file)
+    
+    for module in all_modules :
+        if module["module_id"] :
+            implemented_modules[module["module_id"]] = module
+
+
+# Actual robot response fro robot.get_modules (to test backend without having to run the robot)
+response_get_modules = {"ok": True, "module_ids": [0, 2, 1, 32, 1, 32, 1, 3, 32, 4, 32, 32, 32]}
+
+@app.get("/fetch_modules")
+async def fetch_modules():
+    global implemented_modules
+    
+    try :
+        response = await robot.get_modules()
+        # response = response_get_modules
+        if response["ok"] :
+            module_ids = response["module_ids"]
+            
+            # Response data sent to the front : [ module on slot 1, module on slot 2, ..., module on slot 12 ]
+            modules_list = []
+            for i in range(1,len(module_ids)) :
+                modules_list.append(implemented_modules[module_ids[i]])
+            return {"ok": True, "data": modules_list}
+        else :
+            raise Exception(response["Error"])
+    except Exception as e :
+        return {"Error": str(e)}
+
+
+
+
 if __name__ == "__main__":
+    read_modules_db()
+    
     uvicorn.run(app, host="localhost", port=8001)

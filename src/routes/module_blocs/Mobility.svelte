@@ -1,6 +1,7 @@
 <script>
     import picto_mobilite from '$lib/images/picto_mobilite.svg'
     
+    export let modules;
 </script>
 
 <div class="shift-category category">
@@ -8,7 +9,9 @@
         <img class="picto" alt="picto shift" src={picto_mobilite}>
     </div>
     <ul>
-        <li>Roue Tangente</li>
+        {#each Object.entries(modules) as [name, count]}
+            <li>{name} x{count}</li>
+        {/each}
     </ul>
 </div>
 

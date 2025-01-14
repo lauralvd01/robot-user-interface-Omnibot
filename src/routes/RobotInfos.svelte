@@ -13,8 +13,10 @@
     let isActiveKeyD = false;
     let batteryLevel = 0;
     let robotState = {"status": "stopped", "speed": 0};
-    $: displayBatteryLevel = batteryLevel;
-    $: displayRobotState = robotState;
+    let UpdatedBatteryLevel = batteryLevel;
+    let UpdatedRobotState = robotState;
+    // $: displayBatteryLevel = batteryLevel;
+    // $: displayRobotState = robotState;
 
     //Fonctions permettant de savoir si la touche est pressée ou non
     function handleKeyDown(event) {
@@ -64,12 +66,8 @@
         try{
             console.log('Fetching battery level ...')
             const response = await fetch('http://localhost:8001/battery');
-            if(response.ok){
-                const data = await response.json();
-                batteryLevel = Math.round(data.battery_level);
-            } else {
-                console.error('Failed to fetch battery level:', response.statusText);
-            }
+            const data = await response.json();
+            batteryLevel = Math.round(data.battery_level);
         }catch (error){
             console.error('Error:',error);
         }
@@ -89,27 +87,27 @@
         }
     }
     
-    onMount(() => {
+    onMount(async () => {
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
         
         //Permet d'actualiser le niveau de batterie et le statut du robot sur l'interface
-        fetchBatteryLevel();
-        fetchRobotState();
+        // await fetchBatteryLevel();
+        // await fetchRobotState();
 
         // Refrexh battery level and robot status every 5 seconds
-        const interval = setInterval(() => {displayBatteryLevel = batteryLevel; displayRobotState = robotState}, 5000);
+        // const interval = setInterval(() => {UpdatedBatteryLevel = batteryLevel; UpdatedRobotState = robotState}, 5000);
         
         // Refrexh battery level and robot status every 5 seconds
-        const interval1 = setInterval(fetchRobotState, 5000);
-        const interval2 = setInterval(fetchBatteryLevel, 5000);
+        // const interval1 = setInterval(fetchRobotState, 5000);
+        // const interval2 = setInterval(fetchBatteryLevel, 5000);
 
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
-            clearInterval(interval);
-            clearInterval(interval1);
-            clearInterval(interval2);
+            // clearInterval(interval);
+            // clearInterval(interval1);
+            // clearInterval(interval2);
         };
     });
 
@@ -118,13 +116,25 @@
     console.log('RobotInfos mounted');
 
     function increment() {
-        displayBatteryLevel += 2;
-        displayRobotState.speed += 2;
+        batteryLevel += 2;
+        robotState.speed += 2;
     }
-    function update() {
-        displayBatteryLevel = batteryLevel;
-        displayRobotState = robotState;
-    }
+    // function update() {
+    //     displayBatteryLevel = batteryLevel;
+    //     displayRobotState = robotState;
+    // }
+
+    let state = UpdatedRobotState.status;
+    let speed = UpdatedRobotState.speed;
+    let count = 0;
+    $: ( () => {
+        count += 1
+        console.log(`Count updated ${count} times : ${batteryLevel}`);
+        state = `State updated ${count} times : ${UpdatedRobotState.status}`;
+        speed = `Speed updated ${count} times : ${UpdatedRobotState.speed}`;
+        console.log(`Battery level updated : ${UpdatedBatteryLevel}`);
+        console.log(`Robot state updated : status: ${UpdatedRobotState.status}, speed: ${UpdatedRobotState.speed}`);
+    }) ()
 </script>
 
 
@@ -175,15 +185,15 @@
                     <div class="battery">
                         <div class="battery-bar">
                             <!--Actualisation de la barre de batterie selon le niveau de batterie restant dans l'Omnibot-->
-                            <div class="battery-level" style="width: {displayBatteryLevel}%"></div> 
-                            <div class="battery-text">{displayBatteryLevel}%</div>
+                            <div class="battery-level" style="width: {UpdatedBatteryLevel}%"></div> 
+                            <div class="battery-text">{UpdatedBatteryLevel}%</div>
                         </div>
                         <div class="battery-shape"></div>
                     </div>
-                    <p>{displayRobotState.status}</p>
-                    <p>{displayRobotState.speed}</p>
+                    <p>{state}</p>
+                    <p>{speed}</p>
                     <Button class="primary" on:click={increment}>Incrémenter</Button>
-                    <Button class="primary" on:click={update}>Actualiser</Button>
+                    <!-- <Button class="primary" on:click={update}>Actualiser</Button> -->
                 </div>
             </div>
         </div>
