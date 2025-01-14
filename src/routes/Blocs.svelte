@@ -1,5 +1,4 @@
 <script>
-    import { onMount } from 'svelte';
     import Storage from './module_blocs/Storage.svelte';
     import Mobility from './module_blocs/Mobility.svelte';
     import Processor from './module_blocs/Processor.svelte';
@@ -7,46 +6,49 @@
     import Production from './module_blocs/Production.svelte';
     import Sensor from './module_blocs/Sensor.svelte';
 
-    let categories = [Storage, Mobility, Processor, Network, Production, Sensor];
-    let connected_modules = [];
-    $: display_connected_modules = connected_modules;
+    import { writable } from 'svelte/store';
 
-    onMount( () => {
-        // fetchConnectedModules();
-        // return () => {
-        //     console.log('cleanup');
-        // }
-    });
+    // Get connected_modules from parent component
+    export let connected_modules;
 
-    async function fetchConnectedModules(){
-        try{
-            const response = await fetch('http://localhost:8001/fetch_modules');
-            if(response.ok){
-                const data = await response.json();
-                connected_modules = data.data;
-            } else {
-                console.error('Failed to fetch connected modules :', response.statusText);
-            }
-        }catch (error){
-            console.error('Error :',error);
-        }
+    // Create a store to store modules grouped by categories
+    const modules_by_categories = writable({"Stockage d'énergie": {}, "Mobilité": {}, "Processeur": {}, "Réseau": {}, "Production d'énergie": {}, "Capteur": {}});
+
+    // Group modules by categories and set modules_by_categories accordingly
+    function group_connected_modules_by_categories(connected_modules) {
+        // Group modules by functionality
+        let modules_group_by_categories = Object.groupBy(connected_modules, ({functionality}) => functionality);
+        
+        Object.entries(modules_group_by_categories).forEach(element => {
+            let [functionality, modules] = element;
+            // For each functionality, count and store occurences of each module name : { name_module1: count_module1, name_module2: count_module2, ... }
+            $modules_by_categories[functionality] = modules.map(({name}) => name).reduce(((acc, val) => { acc[val] = ( acc[val] || 0) + 1; return acc}), {});
+        });
     }
 
-    $: ( () => {
-        display_connected_modules = connected_modules
-    }) ()
+    // Wait for connected_modules to be fetched from parent component and then run group_connected_modules_by_categories
+    $: connected_modules && group_connected_modules_by_categories(connected_modules);
 </script>
 
 <div class="blocs">
     <h1 class="titles">EQUIPEMENTS ROBOT</h1>
     <div class="scrolable">
-        <div>Module test</div>
-        {#each display_connected_modules as module}
-            <p>{module}</p>
-        {/each}
-    </div>    <div class="scrolable">
-        {#each categories as category}
-            <svelte:component this={category} modules={{}}/>
+        {#each Object.entries($modules_by_categories) as [functionality, modules]}
+            {#if Object.entries(modules).length > 0}
+                {#if functionality == "Stockage d'énergie"}
+                    <Storage modules={modules}/>
+                {:else if functionality == "Mobilité"}
+                    <Mobility modules={modules}/>
+                {:else if functionality == "Processeur"}
+                    <Processor modules={modules}/>
+                {:else if functionality == "Réseau"}
+                    <Network modules={modules}/>
+                {:else if functionality == "Production d'énergie"}
+                    <Production modules={modules}/>
+                {:else if functionality == "Capteur"}
+                    <Sensor modules={modules}/>
+                {/if}
+            {/if}
         {/each}
     </div>   
 </div>

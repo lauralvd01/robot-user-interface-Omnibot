@@ -12,15 +12,11 @@
             src={picto_stockage}
         />
     </div>
-    {#await modules}
-        <p>Loading...</p>
-    {:then modules}
-        <ul>
-            {#each Object.entries(modules) as [name, count]}
-                <li>{name}  x{count}</li>
-            {/each}
-        </ul>
-    {/await}
+    <ul>
+        {#each Object.entries(modules) as [name, count]}
+            <li>{name} x{count}</li>
+        {/each}
+    </ul>
 </div>
 
 <style>
