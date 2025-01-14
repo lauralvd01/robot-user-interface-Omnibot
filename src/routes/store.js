@@ -1,15 +1,10 @@
 import { writable } from "svelte/store";
 
-    //import des images
-    import pictoIntelligence from "$lib/images/picto_intelligence.svg";
-    import picto_energie from "$lib/images/picto_energie.svg";
-    import picto_mobilite from "$lib/images/picto_mobilite.svg";
-    import picto_stockage from "$lib/images/picto_stockage_energie.svg";
-    import picto_capteur from "$lib/images/picto_capteur.svg";
-
     export const selectedTriangle = writable({ id: null, color: "#494949" }); //définition d'un emplacement par son id et sa couleur
 
     // Définition des listes de triangles et de trapèzes
+
+    // x goes ascending from left to right, y goes ascending from top to bottom
     export const triangles = [
         {
             id: 7,
@@ -79,29 +74,30 @@ import { writable } from "svelte/store";
         },
     ];
 
+    // x goes ascending from left to right, y goes ascending from top to bottom
     export const trapezes = [
         {
             id: 1,
-            x1: 275,
+            x1: 275, // Coin supérieur droit
             y1: 70.1,
-            x2: 125,
+            x2: 125, // Coin supérieur gauche
             y2: 70.1,
-            x3: 150,
+            x3: 150, // Coin inférieur gauche
             y3: 113.4,
-            x4: 250,
+            x4: 250, // Coin inférieur droit
             y4: 113.4,
             hoverColor: "#696761",
             clickColor: "#FF662E",
         },
         {
             id: 2,
-            x1: 350,
+            x1: 350, // Coin supérieur droit
             y1: 200,
-            x2: 275,
+            x2: 275, // Coin supérieur gauche
             y2: 70.1,
-            x3: 250,
+            x3: 250, // Coin inférieur gauche
             y3: 113.4,
-            x4: 300,
+            x4: 300, // Coin inférieur droit
             y4: 200,
             hoverColor: "#696761",
             clickColor: "#FF662E",
@@ -158,6 +154,21 @@ import { writable } from "svelte/store";
             hoverColor: "#696761",
             clickColor: "#FF662E",
         },
+    ];
+
+    export const centers = [
+        { id: 1, x: 200, y: 91.75 },
+        { id: 2, x: 293.75, y: 145.875 },
+        { id: 3, x: 293.75, y: 254.63 },
+        { id: 4, x: 200, y: 308.76 },
+        { id: 5, x: 106.25, y: 254.63 },
+        { id: 6, x: 106.25, y: 145.875 },
+        { id: 7, x: 200, y: 142.26 },
+        { id: 8, x: 250, y: 171.13 },
+        { id: 9, x: 250, y: 228.86 },
+        { id: 10, x: 200, y: 257.73 },
+        { id: 11, x: 150, y: 228.86 },
+        { id: 12, x: 150, y: 171.13 },
     ];
 
     // Fonction permettant de dessiner des triangles équilatéraux
@@ -219,35 +230,12 @@ import { writable } from "svelte/store";
         return !(has_neg && has_pos);
     }
 
-    export const triangleTitle = writable({
-        1: "Module Roue",
-        2: "Module Camera",
-        3: "Module Roue",
-        4: "Module Batterie",
-        5: "Module Roue",
-        6: "Module Camera",
-        7: "Unité centrale",
-        8: "Module 5G",
-        9: "Supercondensateur",
-        10: "Pile à hydrogène",
-        11: "Pile à hydrogène",
-        12: "Panneau solaire",
-    });
-
-    export const triangleData = writable({
-        1: "Information sur le module roue (id:1)",
-        2: "Information sur le module camera (id:2)",
-        3: "Information sur le module roue (id:3)",
-        4: "Information sur le module batterie (id:4)",
-        5: "Information sur le module roue (id:5)",
-        6: "Information sur le module Camera (id:6)",
-        7: "Information sur l'unité centrale (id:7)",
-        8: "Information sur le module 5G (id:8)",
-        9: "Information sur le Supercondensateur (id:9)",
-        10: "Information sur la pile à hydrogène (id:10)",
-        11: "Information sur la pile à hydrogène (id:11)",
-        12: "Information sur le panneau solaire (id:12)",
-    });
+    //import des images
+    import pictoIntelligence from "$lib/images/picto_intelligence.svg";
+    import picto_energie from "$lib/images/picto_energie.svg";
+    import picto_mobilite from "$lib/images/picto_mobilite.svg";
+    import picto_stockage from "$lib/images/picto_stockage_energie.svg";
+    import picto_capteur from "$lib/images/picto_capteur.svg";
 
     export const functionalityImages = {
         "Stockage d'énergie": picto_stockage,
@@ -255,20 +243,51 @@ import { writable } from "svelte/store";
         "Mobilité": picto_mobilite,
         "Capteur": picto_capteur,
         "Processeur": pictoIntelligence,
-        "Réseau": pictoIntelligence
+        "Réseau": pictoIntelligence,
     };
 
+    export const triangleTitle = writable({
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    });
+
+    export const triangleData = writable({
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    });
+
+
     export const triangleImages = writable({
-        1: picto_mobilite,
-        2: picto_capteur,
-        3: picto_mobilite,
-        4: picto_stockage,
-        5: picto_mobilite,
-        6: picto_capteur,
-        7: pictoIntelligence,
-        8: pictoIntelligence,
-        9: picto_stockage,
-        10: picto_energie,
-        11: picto_energie,
-        12: picto_energie,
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
     });
