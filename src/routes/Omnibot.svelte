@@ -77,7 +77,7 @@
 
     // Runs when the Omnibot component is mounted
     onMount(() => {
-        console.log("onMount triggered");
+        // console.log("onMount triggered");
 
         if (!canvas) {
             console.error("Canvas not initialized");
@@ -90,7 +90,7 @@
             return;
         }
 
-        console.log("Canvas and context initialized");
+        // console.log("Canvas and context initialized");
 
         // Gestion des événements sur le canvas
         canvas.addEventListener("click", (event) => {

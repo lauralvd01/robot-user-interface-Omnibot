@@ -3,6 +3,7 @@
     import Direction from './Direction.svelte'
     import OperatingMode from "./OperatingMode.svelte";
     import { onMount } from 'svelte';
+    import { writable } from 'svelte/store';
     
     //Creation de booléens pour savoir si une touche du clavier est pressée
     let isActiveKeyA = false;
@@ -11,12 +12,6 @@
     let isActiveKeyQ = false;
     let isActiveKeyS = false;
     let isActiveKeyD = false;
-    let batteryLevel = 0;
-    let robotState = {"status": "stopped", "speed": 0};
-    let UpdatedBatteryLevel = batteryLevel;
-    let UpdatedRobotState = robotState;
-    // $: displayBatteryLevel = batteryLevel;
-    // $: displayRobotState = robotState;
 
     //Fonctions permettant de savoir si la touche est pressée ou non
     function handleKeyDown(event) {
@@ -60,81 +55,34 @@
             isActiveKeyD = false;
         }
     }
-
-    //Fonction permettant de voir le niveau de batterie sur l'interface. NON TESTEE
-    async function fetchBatteryLevel(){
-        try{
-            console.log('Fetching battery level ...')
-            const response = await fetch('http://localhost:8001/battery');
-            const data = await response.json();
-            batteryLevel = Math.round(data.battery_level);
-        }catch (error){
-            console.error('Error:',error);
-        }
-    }
-
-    async function fetchRobotState() {
-        try {
-            const response = await fetch('http://localhost:8001/motor_state');
-            if (response.ok) {
-                const data = await response.json();
-                robotState = data;
-            } else {
-                console.error('Failed to fetch robot state:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error fetching robot state:', error);
-        }
-    }
     
     onMount(async () => {
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
-        
-        //Permet d'actualiser le niveau de batterie et le statut du robot sur l'interface
-        // await fetchBatteryLevel();
-        // await fetchRobotState();
-
-        // Refrexh battery level and robot status every 5 seconds
-        // const interval = setInterval(() => {UpdatedBatteryLevel = batteryLevel; UpdatedRobotState = robotState}, 5000);
-        
-        // Refrexh battery level and robot status every 5 seconds
-        // const interval1 = setInterval(fetchRobotState, 5000);
-        // const interval2 = setInterval(fetchBatteryLevel, 5000);
 
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
-            // clearInterval(interval);
-            // clearInterval(interval1);
-            // clearInterval(interval2);
         };
     });
 
-    console.log(robotState);
-    console.log(batteryLevel);
-    console.log('RobotInfos mounted');
 
-    function increment() {
-        batteryLevel += 2;
-        robotState.speed += 2;
+    export let batteries_data;
+
+    const batteries = writable({});
+
+    function updateBatteryLevel(batteries_data) {
+        if (batteries_data.length > 0) { 
+            for (const battery_data of batteries_data) {
+                $batteries[battery_data.slot_id] = {
+                    name: battery_data.name.toUpperCase(),
+                    state_of_charge: Math.round(battery_data.state_of_charge*100)
+                };
+            };
+        }
     }
-    // function update() {
-    //     displayBatteryLevel = batteryLevel;
-    //     displayRobotState = robotState;
-    // }
 
-    let state = UpdatedRobotState.status;
-    let speed = UpdatedRobotState.speed;
-    let count = 0;
-    $: ( () => {
-        count += 1
-        console.log(`Count updated ${count} times : ${batteryLevel}`);
-        state = `State updated ${count} times : ${UpdatedRobotState.status}`;
-        speed = `Speed updated ${count} times : ${UpdatedRobotState.speed}`;
-        console.log(`Battery level updated : ${UpdatedBatteryLevel}`);
-        console.log(`Robot state updated : status: ${UpdatedRobotState.status}, speed: ${UpdatedRobotState.speed}`);
-    }) ()
+    $: batteries_data && updateBatteryLevel(batteries_data);
 </script>
 
 
@@ -181,19 +129,17 @@
 
             <div class="command-row-element" style="width: 20%">
                 <div class="battery-lvl-container">
-                    <h1 class="titles">BATTERIE</h1>
-                    <div class="battery">
-                        <div class="battery-bar">
-                            <!--Actualisation de la barre de batterie selon le niveau de batterie restant dans l'Omnibot-->
-                            <div class="battery-level" style="width: {UpdatedBatteryLevel}%"></div> 
-                            <div class="battery-text">{UpdatedBatteryLevel}%</div>
+                    {#each Object.entries($batteries) as [battery_slot, battery]}
+                        <h1 class="titles">{battery["name"]}</h1>
+                        <div class="battery">
+                            <div class="battery-bar">
+                                <!--Actualisation de la barre de batterie selon le niveau de batterie restant dans l'Omnibot-->
+                                <div class="battery-level" style="width: {battery["state_of_charge"]}%"></div> 
+                                <div class="battery-text">{battery["state_of_charge"]}%</div>
+                            </div>
+                            <div class="battery-shape"></div>
                         </div>
-                        <div class="battery-shape"></div>
-                    </div>
-                    <p>{state}</p>
-                    <p>{speed}</p>
-                    <Button class="primary" on:click={increment}>Incrémenter</Button>
-                    <!-- <Button class="primary" on:click={update}>Actualiser</Button> -->
+                    {/each}
                 </div>
             </div>
         </div>
