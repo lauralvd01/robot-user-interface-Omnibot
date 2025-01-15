@@ -1,5 +1,4 @@
 <script>
-    
     import { onMount } from "svelte";
     import { writable } from "svelte/store";
     import {
@@ -15,7 +14,6 @@
 
     let canvas; // Initialisation du canvas
     let hoveredShape = null;
-    const draw_modules = writable(false);
 
     // Fonction pour redessiner le canvas avec les formes et les couleurs actuelles
     function redrawCanvas() {
@@ -64,23 +62,16 @@
             );
         }
 
-        if ($draw_modules) {
-            // Draw white circles in the middle of each triangle and each trapeze that are connected to a module
-            for (const center of centers) {
-                if ($triangleImages[center.id] !== null) {
-                    try {
-                        const image = document.getElementById(center.id);
-                        ctx.fillStyle = "white";
-                        ctx.beginPath();
-                        ctx.arc(center.x, center.y, 18, 0, 2 * Math.PI);
-                        ctx.fill();
-                        ctx.drawImage(image, center.x - 15, center.y - 15, 30, 30);
-                    } catch (error) {
-                        console.log("Error:", error);
-                        $draw_modules = false;
-                        $draw_modules = true;
-                    }
-                }
+        // Draw white circles in the middle of each triangle and each trapeze that are connected to a module
+        for (const center of centers) {
+            if ($triangleImages[center.id] !== null) {
+                // Check if there is a module connected on this slot and draw a white circle with the image in the middle
+                const image = document.getElementById(center.id);
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(center.x, center.y, 18, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.drawImage(image, center.x - 15, center.y - 15, 30, 30);
             }
         }
     }
@@ -196,40 +187,61 @@
 
     // Get connected_modules from parent component and update triangles and trapezes info accordingly
     export let connected_modules;
-    import { triangleTitle, triangleData, triangleImages, functionalityImages } from "./store";
+    import {
+        triangleTitle,
+        triangleData,
+        triangleImages,
+        functionalityImages,
+    } from "./store";
 
     function updateCanvasInfo(connected_modules) {
-        for (let index=0; index < connected_modules.length; index++) {
+        for (let index = 0; index < connected_modules.length; index++) {
             const module = connected_modules[index];
 
             if (module.module_id !== null && module.module_id !== 32) {
-                $triangleTitle[index+1] = module.name;
-                $triangleData[index+1] = `Module id : ${module.module_id}, Fonction : ${module.functionality !== null ? module.functionality : "Aucune"}, Caractéristiques : ${module.characteristics.length > 0 ? module.characteristics.join(", ") : "Aucune"}`;
-                $triangleImages[index+1] = module.functionality !== null ? functionalityImages[module.functionality] : null;
+                $triangleTitle[index + 1] = module.name;
+                $triangleData[index + 1] =
+                    `Module id : ${module.module_id}, Fonction : ${module.functionality !== null ? module.functionality : "Aucune"}, Caractéristiques : ${module.characteristics.length > 0 ? module.characteristics.join(", ") : "Aucune"}`;
+                $triangleImages[index + 1] =
+                    module.functionality !== null
+                        ? functionalityImages[module.functionality]
+                        : null;
             } else {
-                $triangleTitle[index+1] = "Emplacement vide";
-                $triangleData[index+1] = "Aucun module connecté";
-                $triangleImages[index+1] = null;
+                $triangleTitle[index + 1] = "Emplacement vide";
+                $triangleData[index + 1] = "Aucun module connecté";
+                $triangleImages[index + 1] = null;
             }
         }
-        $draw_modules = true;
+    }
+
+    // Redraw the canvas when at least one img component is mounted and the image loaded
+    function updateCanvasWhenLoaded(img_node) {
+        img_node.addEventListener("load", () => {
+            redrawCanvas();
+            return {};
+        });
     }
 
     $: connected_modules && updateCanvasInfo(connected_modules);
-    $: draw_modules && canvas && redrawCanvas();
 </script>
 
 <div class="canvas-container">
     <div style="display: none;">
-        {#if $draw_modules}
-            {#each Object.entries($triangleImages) as [id, image] }
-                {#if image !== null}
-                    <img id={id} src={image} alt={`Image for slot ${id}`} width="10px" height="10px"/>
-                {/if}
-            {/each}
-        {/if}
+        {#each Object.entries($triangleImages) as [id, image]}
+            {#if image !== null}
+                <img
+                    {id}
+                    src={image}
+                    alt={`Image for slot ${id}`}
+                    width="10px"
+                    height="10px"
+                    use:updateCanvasWhenLoaded
+                />
+            {/if}
+        {/each}
     </div>
-    <canvas bind:this={canvas} width="400" height="400"></canvas>
+    <canvas bind:this={canvas} width="400" height="400" autoclear={true}
+    ></canvas>
 </div>
 
 <style>
