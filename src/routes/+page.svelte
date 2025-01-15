@@ -32,8 +32,12 @@
             bannerHeight = banner.offsetHeight;
         }
 
-        // Fetch connected modules
-        await fetchConnectedModules();
+        // Fetch connected modules every second
+        const interval = setInterval(fetchConnectedModules, 1000);
+
+        return () => {
+            clearInterval(interval);
+        };
     });
 </script>
 
