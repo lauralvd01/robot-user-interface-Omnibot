@@ -114,6 +114,7 @@ async def move_robot():
 # OK
 @app.get("/battery")
 async def get_battery_status():
+    return battery_status
     try :
         response = await robot.get_battery_status()
         # print("Response", response)
@@ -360,8 +361,8 @@ async def fetch_modules():
     global implemented_modules
     
     try :
-        response = await robot.get_modules()
-        # response = response_get_modules
+        # response = await robot.get_modules()
+        response = response_get_modules
         if response["ok"] :
             module_ids = response["module_ids"]
             
