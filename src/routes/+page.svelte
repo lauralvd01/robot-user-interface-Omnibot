@@ -9,14 +9,15 @@
     import { writable } from "svelte/store";
 
     const connected_modules = writable([]);
+    const batteries_data = writable([]);
 
-    // Send a request to the backend to get connected modules
-    async function fetchConnectedModules() {
+    // Send a request to the backend to get the data
+    async function fetchData(endpoint, store) {
         try {
-            console.log("Fetching connected modules ...");
-            const response = await fetch("http://localhost:8001/fetch_modules"); // Send request and wait for response
-            const data = await response.json(); // Parse response and get data as a JSON object
-            connected_modules.set(data.data); // Set connected_modules store with the data received
+            console.log(`Fetching ${endpoint.split("fetch_")[1]} ...`);
+            const response = await fetch(endpoint); // Send a request to the backend
+            const data = await response.json(endpoint); // Parse response and get data as a JSON object
+            store.set(data.data); // Set the store with the data received
         } catch (error) {
             console.error("Error:", error);
         }
@@ -33,10 +34,16 @@
         }
 
         // Fetch connected modules every second
-        const interval = setInterval(fetchConnectedModules, 1000);
+        // fetchData("http://localhost:8001/fetch_connected_modules", connected_modules);
+        const interval = setInterval(() => fetchData("http://localhost:8001/fetch_connected_modules", connected_modules), 1000);
+
+        // Fetch batteries data every second
+        // fetchData("http://localhost:8001/fetch_batteries", batteries_data);
+        const interval2 = setInterval(() => fetchData("http://localhost:8001/fetch_batteries", batteries_data), 1000);
 
         return () => {
             clearInterval(interval);
+            clearInterval(interval2);
         };
     });
 </script>
@@ -58,7 +65,7 @@
             </div>
         </div>
         <div class="bottom">
-            <RobotInfos />
+            <RobotInfos batteries_data={$batteries_data}/>
         </div>
     </div>
 </div>
