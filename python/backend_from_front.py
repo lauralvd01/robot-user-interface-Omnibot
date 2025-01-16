@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import asyncio
 import keyboard
+from pydantic import BaseModel
 
 import backend_to_robot as robot
 
@@ -377,9 +378,13 @@ def read_modules_db():
 
 
 # Actual robot response from robot.get_modules (to test backend without having to run the robot)
-response_get_modules = {"ok": True, "module_ids": [
+response_get_modules1 = {"ok": True, "module_ids": [
     0, 2, 1, 32, 1, 32, 1, 3, 32, 4, 32, 32, 32]}
 
+response_get_modules2 = {"ok": True, "module_ids": [
+    0, 2, 32, 1, 32, 32, 1, 3, 32, 32, 32, 32, 32]}
+
+response_get_modules = response_get_modules1
 
 @app.get("/fetch_connected_modules")
 async def fetch_connected_modules():
@@ -420,15 +425,16 @@ BatteryDescriptor = {
 }
 
 # Actual robot response from robot.get_batteries_request (to test backend without having to run the robot)
-response_get_batteries = {'ok': True, 'batteries': [{'slot_id': 1, 'name': 'Battery on slot 1', 'state': 0,
+response_get_batteries1 = {'ok': True, 'batteries': [{'slot_id': 1, 'name': 'Battery on slot 1', 'state': 0,
                                                      'state_of_charge': 0.7799999713897705, 'current': 0.46000000834465027, 'temperature': 0.0, 'cell_voltages': [4025, 4025, 4025, 4025]}]}
 
 # Response with 2 batteries
-response_get_batteries = {'ok': True, 'batteries': [{'slot_id': 1, 'name': 'Battery on slot 1', 'state': 0,
-                                                     'state_of_charge': 0.7799999713897705, 'current': 0.46000000834465027, 'temperature': 0.0, 'cell_voltages': [4025, 4025, 4025, 4025]},
+response_get_batteries2 = {'ok': True, 'batteries': [{'slot_id': 1, 'name': 'Battery on slot 1', 'state': 0,
+                                                     'state_of_charge': 0.1799999713897705, 'current': 0.46000000834465027, 'temperature': 0.0, 'cell_voltages': [4025, 4025, 4025, 4025]},
                                                     {'slot_id': 2, 'name': 'Battery on slot 2', 'state': 0,
                                                      'state_of_charge': 0.4199999713897705, 'current': 0.46000000834465027, 'temperature': 0.0, 'cell_voltages': [4025, 4025, 4025, 4025]}]}
 
+response_get_batteries = response_get_batteries1
 
 @app.get("/fetch_batteries")
 async def fetch_batteries():
@@ -442,6 +448,44 @@ async def fetch_batteries():
     except Exception as e:
         return {"Error": str(e)}
 
+
+@app.get("/change_settings")
+def change_settings():
+    global response_get_modules
+    global response_get_batteries
+    if (response_get_modules == response_get_modules1):
+        response_get_modules = response_get_modules2
+        response_get_batteries = response_get_batteries2
+        return {"ok": True, "data": "Settings changed in mode 2"}
+    else:
+        response_get_modules = response_get_modules1
+        response_get_batteries = response_get_batteries1
+        return {"ok": True, "data": "Settings changed in mode 1"}
+
+
+class Move(BaseModel):
+    forward: bool
+    backward: bool
+    left: bool
+    right: bool
+    rotate_left: bool
+    rotate_right: bool
+
+linear_vel = 1
+angular_vel = 1
+
+@app.post("/post_move")
+async def post_move(body_move: Move):
+    print(body_move)
+    move_x = (1 if body_move.forward else -1 if body_move.backward else 0) * linear_vel
+    move_y = (1 if body_move.left else -1 if body_move.right else 0) * linear_vel
+    move_theta = (1 if body_move.rotate_left else -1 if body_move.rotate_right else 0) * angular_vel
+    print(move_x, move_y, move_theta)
+    try:
+        # await robot.move_robot(move_x,move_y,move_theta)
+        return {"ok": True, "linear_speed": linear_vel, "angular_speed": angular_vel}
+    except Exception as e:
+        return {"Error": str(e)}
 
 if __name__ == "__main__":
     read_modules_db()
