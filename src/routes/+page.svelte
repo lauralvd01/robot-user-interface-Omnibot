@@ -10,6 +10,7 @@
 
     const connected_modules = writable([]);
     const batteries_data = writable([]);
+    const settings = writable({});
 
     // Send a request to the backend to get the data
     async function fetchData(endpoint, store) {
@@ -41,9 +42,13 @@
         // fetchData("http://localhost:8001/fetch_batteries", batteries_data);
         const interval2 = setInterval(() => fetchData("http://localhost:8001/fetch_batteries", batteries_data), 1000);
 
+        // Temporary
+        const interval3 = setInterval(() => fetchData("http://localhost:8001/change_settings", settings), 5000);
+
         return () => {
             clearInterval(interval);
             clearInterval(interval2);
+            clearInterval(interval3);
         };
     });
 </script>

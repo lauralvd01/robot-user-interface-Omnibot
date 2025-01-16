@@ -16,6 +16,8 @@
 
     // Group modules by categories and set modules_by_categories accordingly
     function group_connected_modules_by_categories(connected_modules) {
+        $modules_by_categories = {"Stockage d'énergie": {}, "Mobilité": {}, "Processeur": {}, "Réseau": {}, "Production d'énergie": {}, "Capteur": {}};
+
         // Group modules by functionality
         let modules_group_by_categories = Object.groupBy(connected_modules, ({functionality}) => functionality);
         
@@ -24,6 +26,7 @@
             // For each functionality, count and store occurences of each module name : { name_module1: count_module1, name_module2: count_module2, ... }
             $modules_by_categories[functionality] = modules.map(({name}) => name).reduce(((acc, val) => { acc[val] = ( acc[val] || 0) + 1; return acc}), {});
         });
+        $modules_by_categories = $modules_by_categories;
     }
 
     // Wait for connected_modules to be fetched from parent component and then run group_connected_modules_by_categories
@@ -33,7 +36,7 @@
 <div class="blocs">
     <h1 class="titles">EQUIPEMENTS ROBOT</h1>
     <div class="scrolable">
-        {#each Object.entries($modules_by_categories) as [functionality, modules]}
+        {#each Object.entries($modules_by_categories) as [functionality, modules] (functionality)}
             {#if Object.entries(modules).length > 0}
                 {#if functionality == "Stockage d'énergie"}
                     <Storage modules={modules}/>
