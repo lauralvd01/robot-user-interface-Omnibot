@@ -1,9 +1,26 @@
 <script>
-    import Button from './Button.svelte';
     import Direction from './Direction.svelte'
     import OperatingMode from "./OperatingMode.svelte";
     import { onMount } from 'svelte';
     import { writable } from 'svelte/store';
+
+    function sendMoveData() {
+        // Send a request to the backend to move the robot
+        fetch('http://localhost:8001/post_move', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                forward: isActiveKeyZ,
+                backward: isActiveKeyS,
+                left: isActiveKeyQ,
+                right: isActiveKeyD,
+                rotate_left: isActiveKeyA,
+                rotate_right: isActiveKeyE
+            })
+        });
+    }
     
     //Creation de booléens pour savoir si une touche du clavier est pressée
     let isActiveKeyA = false;
@@ -33,6 +50,9 @@
         if (event.key.toLowerCase() === 'd'){
             isActiveKeyD = true;
         }
+        if (isActiveKeyZ || isActiveKeyS || isActiveKeyQ || isActiveKeyD || isActiveKeyA || isActiveKeyE) {
+            sendMoveData();
+        }
     }
 
     function handleKeyUp(event) {
@@ -54,6 +74,9 @@
         if (event.key.toLowerCase() === 'd') {
             isActiveKeyD = false;
         }
+        if ( !(isActiveKeyZ || isActiveKeyS || isActiveKeyQ || isActiveKeyD || isActiveKeyA || isActiveKeyE) ) {
+            sendMoveData();
+        }
     }
     
     onMount(async () => {
@@ -72,6 +95,7 @@
     const batteries = writable({});
 
     function updateBatteryLevel(batteries_data) {
+        $batteries = {};
         if (batteries_data.length > 0) { 
             for (const battery_data of batteries_data) {
                 $batteries[battery_data.slot_id] = {
@@ -79,6 +103,7 @@
                     state_of_charge: Math.round(battery_data.state_of_charge*100)
                 };
             };
+            $batteries = $batteries;
         }
     }
 
