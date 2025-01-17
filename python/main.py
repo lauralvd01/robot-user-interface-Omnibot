@@ -1,18 +1,34 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import grpc
 import protopy.techlab.api as api  # Assurez-vous d'importer correctement votre stub gRPC
 import asyncio
 from grpclib.client import Channel
 import keyboard
- 
+
+########################################################################### Configurations ###########################################################################
+
 app = FastAPI()
 
-origins = [
-    "http://localhost:5173",
-    # Ajoutez d'autres origines ici si nécessaire
+# Front possible ip addresses
+front_ip = [
+    "localhost",
+    "127.0.0.1"
 ]
+
+# Front possible ports
+front_ports = [
+    5173
+]
+
+# Backend ip address that the front will communicate with
+BACKEND_IP = "localhost"
+
+# Backend port that the front will communicate through
+BACKEND_PORT = 8001
+
+# List of possible front origins
+origins = [ f"http://{ip}:{port}" for ip in front_ip for port in front_ports ]	
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,6 +37,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+########################################################################### - ###########################################################################
+
+
 
 linear_vel = 0.2
 angular_vel = 0.5
@@ -92,5 +112,4 @@ async def get_motor_state():
     return robot_state
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8001)
-    # asyncio.run(get_battery_status())
+    uvicorn.run(app, host=BACKEND_IP, port=BACKEND_PORT)

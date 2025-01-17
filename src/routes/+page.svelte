@@ -1,12 +1,13 @@
 <script>
     import { onMount } from "svelte";
+    import { writable } from "svelte/store";
     import Banner from "./Banner.svelte";
     import RobotInfos from "./RobotInfos.svelte";
     import Blocs from "./Blocs.svelte";
     import Omnibot from "./Omnibot.svelte";
     import PageInfo from "./PageInfo.svelte";
 
-    import { writable } from "svelte/store";
+    import { backend_host, backend_port } from "../config.js";
 
     const connected_modules = writable([]);
     const batteries_data = writable([]);
@@ -35,15 +36,15 @@
         }
 
         // Fetch connected modules every second
-        // fetchData("http://localhost:8001/fetch_connected_modules", connected_modules);
-        const interval = setInterval(() => fetchData("http://localhost:8001/fetch_connected_modules", connected_modules), 1000);
+        // fetchData(`http://${backend_host}:${backend_port}/fetch_connected_modules`, connected_modules);
+        const interval = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_connected_modules`, connected_modules), 1000);
 
         // Fetch batteries data every second
-        // fetchData("http://localhost:8001/fetch_batteries", batteries_data);
-        const interval2 = setInterval(() => fetchData("http://localhost:8001/fetch_batteries", batteries_data), 1000);
+        // fetchData(`http://${backend_host}:${backend_port}/fetch_batteries`, batteries_data);
+        const interval2 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_batteries`, batteries_data), 1000);
 
         // Temporary
-        const interval3 = setInterval(() => fetchData("http://localhost:8001/change_settings", settings), 5000);
+        const interval3 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/change_settings`, settings), 5000);
 
         return () => {
             clearInterval(interval);
