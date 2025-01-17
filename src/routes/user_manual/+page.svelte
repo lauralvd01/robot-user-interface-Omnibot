@@ -36,12 +36,12 @@
 
 </script>
 
-<div style="display: none;">
+<div>
     <div>
         <Controller move={sendMoveData} />
     </div>
 </div>
-    <div>
+    <!-- <div>
         <label for="linear-range">Linear speed</label>
         <Range
             on:change={(e) => {
@@ -69,7 +69,7 @@
     <h3>
         Angular speed: {angular_speed}
     </h3>
-    </div>
+    </div> -->
     
     <style>
 

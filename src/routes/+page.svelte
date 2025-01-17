@@ -36,21 +36,21 @@
         }
 
         // Fetch connected modules every second
-        fetchData(`http://${backend_host}:${backend_port}/fetch_connected_modules`, connected_modules);
-        // const interval = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_connected_modules`, connected_modules), 1000);
+        // fetchData(`http://${backend_host}:${backend_port}/fetch_connected_modules`, connected_modules);
+        const interval = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_connected_modules`, connected_modules), 1000);
 
         // Fetch batteries data every second
-        fetchData(`http://${backend_host}:${backend_port}/fetch_batteries`, batteries_data);
-        // const interval2 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_batteries`, batteries_data), 1000);
+        // fetchData(`http://${backend_host}:${backend_port}/fetch_batteries`, batteries_data);
+        const interval2 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_batteries`, batteries_data), 1000);
 
         // Temporary
-        // const interval3 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/change_settings`, settings), 5000);
+        const interval3 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/change_settings`, settings), 5000);
 
-        // return () => {
-        //     clearInterval(interval);
-        //     clearInterval(interval2);
-        //     clearInterval(interval3);
-        // };
+        return () => {
+            clearInterval(interval);
+            clearInterval(interval2);
+            clearInterval(interval3);
+        };
     });
 </script>
 

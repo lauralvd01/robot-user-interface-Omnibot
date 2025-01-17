@@ -2,6 +2,7 @@
     import Direction from './Direction.svelte'
     import OperatingMode from "./OperatingMode.svelte";
     import Range from "./Range.svelte";
+    import Controller from "./Controller.svelte";
     import { onMount } from 'svelte';
     import { writable } from 'svelte/store';
 
@@ -23,19 +24,17 @@
             }),
         });
     }
+
+    const is_gamepad_connected = writable(false);
     
     // Send a request to the backend to move the robot
-    function sendMoveData() {
+    function sendMoveData(moves) {
         fetch(`http://${backend_host}:${backend_port}/post_move`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
-                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
-                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
-            })
+            body: JSON.stringify(moves)
         });
     }
     
@@ -68,7 +67,11 @@
             isActiveKeyD = true;
         }
         if (isActiveKeyZ || isActiveKeyS || isActiveKeyQ || isActiveKeyD || isActiveKeyA || isActiveKeyE) {
-            sendMoveData();
+            sendMoveData({
+                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
+                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
+                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
+            });
         }
     }
 
@@ -92,7 +95,11 @@
             isActiveKeyD = false;
         }
         if ( !(isActiveKeyZ || isActiveKeyS || isActiveKeyQ || isActiveKeyD || isActiveKeyA || isActiveKeyE) ) {
-            sendMoveData();
+            sendMoveData({
+                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
+                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
+                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
+            });
         }
     }
     
@@ -137,31 +144,34 @@
             <div class="command-row-element" style="width: 25%">
                 <div class="control-container">
                     <h1 class="titles">COMMANDES</h1>
-                    <div class="key {isActiveKeyA ? 'active' : ''}"> <!--vérification de si la touche est pressée -->
-                        <span class="first-line">A</span><br/>
-                        <span class="second-line">Rotation G</span>
-                    </div>
-                    <div class="key {isActiveKeyZ ? 'active' : ''}">
-                        <span class="first-line">Z</span><br/>
-                        <span class="second-line">Avancer</span>
-                    </div>
-                    <div class="key {isActiveKeyE ? 'active' : ''}">
-                        <span class="first-line">E</span><br/>
-                        <span class="second-line">Rotation D</span>
-                    </div>
-                    <div class="key {isActiveKeyQ ? 'active' : ''}">
-                        <span class="first-line">Q</span><br/>
-                        <span class="second-line">Gauche</span>
-                    </div>
-                    <div class="key {isActiveKeyS ? 'active' : ''}">
-                        <span class="first-line">S</span><br/>
-                        <span class="second-line">Reculer</span>
-                    </div>
-                    <div class="key {isActiveKeyD ? 'active' : ''}">
-                        <span class="first-line">D</span><br/>
-                        <span class="second-line">Droite</span>
-                    </div>
-                    
+                    {#if (!$is_gamepad_connected)}
+                        <div class="key {isActiveKeyA ? 'active' : ''}"> <!--vérification de si la touche est pressée -->
+                            <span class="first-line">A</span><br/>
+                            <span class="second-line">Rotation G</span>
+                        </div>
+                        <div class="key {isActiveKeyZ ? 'active' : ''}">
+                            <span class="first-line">Z</span><br/>
+                            <span class="second-line">Avancer</span>
+                        </div>
+                        <div class="key {isActiveKeyE ? 'active' : ''}">
+                            <span class="first-line">E</span><br/>
+                            <span class="second-line">Rotation D</span>
+                        </div>
+                        <div class="key {isActiveKeyQ ? 'active' : ''}">
+                            <span class="first-line">Q</span><br/>
+                            <span class="second-line">Gauche</span>
+                        </div>
+                        <div class="key {isActiveKeyS ? 'active' : ''}">
+                            <span class="first-line">S</span><br/>
+                            <span class="second-line">Reculer</span>
+                        </div>
+                        <div class="key {isActiveKeyD ? 'active' : ''}">
+                            <span class="first-line">D</span><br/>
+                            <span class="second-line">Droite</span>
+                        </div>
+                    {:else}
+                        <Controller move={sendMoveData}/>
+                    {/if}
                 </div>
             </div>
 
