@@ -483,23 +483,31 @@ def change_settings():
 
 
 class Move(BaseModel):
-    forward: bool
-    backward: bool
-    left: bool
-    right: bool
-    rotate_left: bool
-    rotate_right: bool
+    x_linear_vel: float
+    y_linear_vel: float
+    angular_vel: float
 
 linear_vel = 1
-angular_vel = 1
+angular_vel = 2
 
 @app.post("/post_move")
 async def post_move(body_move: Move):
-    print(body_move)
-    move_x = (1 if body_move.forward else -1 if body_move.backward else 0) * linear_vel
-    move_y = (1 if body_move.left else -1 if body_move.right else 0) * linear_vel
-    move_theta = (1 if body_move.rotate_left else -1 if body_move.rotate_right else 0) * angular_vel
-    print(move_x, move_y, move_theta)
+    #print(body_move)
+    move_x = body_move.x_linear_vel * linear_vel
+    move_y = body_move.y_linear_vel * linear_vel
+    move_theta = body_move.angular_vel * angular_vel
+    if move_x > 0 :
+        print("Moving forward")
+    elif move_x < 0 :
+        print("Moving backward")
+    if move_y > 0 :
+        print("Moving left")
+    elif move_y < 0 :
+        print("Moving right")
+    if move_theta > 0 :
+        print("Rotating left")
+    elif move_theta < 0 :
+        print("Rotating right")
     try:
         # await robot.move_robot(move_x,move_y,move_theta)
         return {"ok": True, "linear_speed": linear_vel, "angular_speed": angular_vel}
