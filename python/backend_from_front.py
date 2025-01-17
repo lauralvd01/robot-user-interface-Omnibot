@@ -481,6 +481,9 @@ def change_settings():
         response_get_batteries = response_get_batteries1
         return {"ok": True, "data": "Settings changed in mode 1"}
 
+class Speed(BaseModel):
+    linear_speed: float
+    angular_speed: float
 
 class Move(BaseModel):
     x_linear_vel: float
@@ -490,6 +493,14 @@ class Move(BaseModel):
 linear_vel = 1
 angular_vel = 2
 
+@app.post("/set_speed")
+def set_speed(body_speed: Speed):
+    global linear_vel
+    global angular_vel
+    linear_vel = body_speed.linear_speed
+    angular_vel = body_speed.angular_speed
+    return {"ok": True, "linear_speed": linear_vel, "angular_speed": angular_vel}
+
 @app.post("/post_move")
 async def post_move(body_move: Move):
     #print(body_move)
@@ -497,17 +508,17 @@ async def post_move(body_move: Move):
     move_y = body_move.y_linear_vel * linear_vel
     move_theta = body_move.angular_vel * angular_vel
     if move_x > 0 :
-        print("Moving forward")
+        print("Moving forward at speed", move_x)
     elif move_x < 0 :
-        print("Moving backward")
+        print("Moving backward at speed", move_x)
     if move_y > 0 :
-        print("Moving left")
+        print("Moving left at speed", move_y)
     elif move_y < 0 :
-        print("Moving right")
+        print("Moving right at speed", move_y)
     if move_theta > 0 :
-        print("Rotating left")
+        print("Rotating left at speed", move_theta)
     elif move_theta < 0 :
-        print("Rotating right")
+        print("Rotating right at speed", move_theta)
     try:
         # await robot.move_robot(move_x,move_y,move_theta)
         return {"ok": True, "linear_speed": linear_vel, "angular_speed": angular_vel}
