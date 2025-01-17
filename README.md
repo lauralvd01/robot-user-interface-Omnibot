@@ -9,7 +9,7 @@
 
 - Cloner localement le dossier [GitHub](https://github.com/mines-nancy/user_interface) (voir les [Tips GitHub](#tips-github))
 
-- Ouvrir un terminal (invité de commande, Command Prompt ou PowerShell) à la racine du dossier `user_interface`
+- Ouvrir un terminal (Command Prompt ou PowerShell) à la racine du dossier `user_interface`
 
 Pour vérifier que [Node.Js](https://nodejs.org/fr) est bien installé, entrer :
 
@@ -47,7 +47,7 @@ npm run dev -- --open
 
 - Cloner localement le dossier [GitHub](https://github.com/mines-nancy/user_interface) (voir les [Tips GitHub](#tips-github)), si ce n'est pas déjà fait
 
-- Ouvrir un terminal (invité de commande, Command Prompt ou PowerShell) **dans le dossier parent** du dossier `user_interface`
+- Ouvrir un terminal (Command Prompt ou PowerShell) **dans le dossier parent** du dossier `user_interface`
 
 Pour vérifier que [Python](https://www.python.org/downloads/) est bien installé, entrer :
 
@@ -74,7 +74,17 @@ python ./user_interface/python/backend_from_front.py
 
 ### Backend
 
-Entrer les adresses ip et les ports à utiliser dans les variables correspondantes dans le fichier `user_interface/python/backend_from_front.py` :
+- Entrer les adresses ip et les ports à utiliser pour ***se connecter au robot*** dans les variables correspondantes dans le fichier `user_interface/python/backend_from_front.py` :
+
+```python
+# Robot ip address that the backend will communicate with
+ROBOT_IP = "192.168.50.153"
+
+# Robot port that the backend will communicate through
+ROBOT_PORT = 6550
+```
+
+- Entrer les adresses ip et les ports à utiliser pour le ***backend*** dans les variables correspondantes dans le fichier `user_interface/python/backend_from_front.py` :
 
 ```python
 # Front possible ip addresses
@@ -94,6 +104,35 @@ BACKEND_IP = "localhost"
 # Backend port that the front will communicate through
 BACKEND_PORT = 8001
 ```
+
+
+### Frontend
+
+- Entrer les adresses ip et les ports à utiliser pour le ***front*** dans les variables correspondantes (port et host pour le server) dans le fichier `user_interface/vite.config.js` :
+
+```js
+// See https://vite.dev/config/server-options.html for more options
+export default defineConfig({
+	plugins: [sveltekit()],
+	server: { 				// Options for npm run dev
+		port: 5173,				// default = 5173
+		strictPort: true,		// true = fail if port is already in use, false = run server on next available port
+		host: 'localhost',		// default = 'localhost'
+	},
+	preview: { 				// Options for npm run preview (after npm run build)
+		port: 4173,				// default = 4173
+		strictPort: true,		// true = fail if port is already in use, false = run server on next available port
+	}
+});
+```
+
+- Entrer les adresses ip et les ports à utiliser pour le ***back*** dans les variables correspondantes dans le fichier `user_interface/src/config.js` :
+
+```js
+export const backend_host = "localhost";
+export const backend_port = 8001;
+```
+
 
 # Utilisation
 
@@ -149,22 +188,59 @@ L'interface peut mettre du temps à se charger. Une fois affichée, utiliser le 
 
 # Tips GitHub
 
+### Se déplacer de dossier en dossier dans le terminal (Command Prompt ou PowerShell)
+
+*(universel, ces commandes ne sont pas liées à Git)*
+
+```bash
+# Afficher la liste des fichiers et dossiers enfants (dans le dossier actuel)
+# Pour un bash / terminal sur Linux ou Ubuntu
+ls
+# Pour un Command Prompt ou PowerShell / terminal sur Windows
+dir
+
+# Pour afficher le chemin du dossier actuel
+# Pour un bash / terminal sur Linux ou Ubuntu, ou pour Windows PowerShell
+pwd
+# Pour Windows Command Prompt
+cd
+
+# Se déplacer dans un dossier enfant
+cd "<nom d'un dossier enfant>"
+
+# Se déplacer dans le dossier parent
+cd ..
+
+# Se déplacer dans un dossier grâce à son chemin d'accès complet
+cd "<chemin d'accès du dossier>"
+```
+
+## Installer et configurer Git
+
 - Installer [Git](https://git-scm.com/)
 
-- Se connecter en entrant dans un terminal (invité de commande, Command Prompt ou PowerShell) :
+- Se connecter en entrant dans un terminal (Command Prompt ou PowerShell) :
 
 ```bash
 git config --global user.name "<Your git account user name>"
 git config --global user.email "<Your git account email>"
 ```
 
-### Cloner un repository
+## Cloner un repository
 
-Dans un terminal (invité de commande, Command Prompt ou PowerShell) ouvert depuis le dossier local où le repository sera téléchargé :
+Dans un terminal (Command Prompt ou PowerShell) ouvert depuis le dossier local où le repository sera téléchargé :
 
 ```bash
 git clone "<adresse http du repository>"
 
 # Exemple pour le dossier user_interface
 git clone https://github.com/mines-nancy/user_interface
+```
+
+## Mettre à jour un repository local
+
+Dans un terminal (Command Prompt ou PowerShell) ouvert depuis le dossier où le repository a été téléchargé :
+
+```bash
+git pull
 ```

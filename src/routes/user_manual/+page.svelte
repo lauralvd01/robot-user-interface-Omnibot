@@ -2,12 +2,14 @@
     import { onMount } from "svelte";
     import { writable } from "svelte/store";
 
+    import { backend_host, backend_port } from "../config.js";
+
     const connected_modules = writable([]);
 
     async function fetchConnectedModules() {
         try {
             console.log("Fetching connected modules ...");
-            const response = await fetch("http://localhost:8001/fetch_modules");
+            const response = await fetch(`http://${backend_host}:${backend_port}/fetch_modules`);
             const data = await response.json();
             connected_modules.set(data.data);
         } catch (error) {

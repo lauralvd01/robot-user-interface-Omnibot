@@ -4,9 +4,11 @@
     import { onMount } from 'svelte';
     import { writable } from 'svelte/store';
 
+    import { backend_host, backend_port } from '../config.js';
+
     function sendMoveData() {
         // Send a request to the backend to move the robot
-        fetch('http://localhost:8001/post_move', {
+        fetch(`http://${backend_host}:${backend_port}/post_move`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
