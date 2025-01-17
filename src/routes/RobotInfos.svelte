@@ -14,12 +14,9 @@
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                forward: isActiveKeyZ,
-                backward: isActiveKeyS,
-                left: isActiveKeyQ,
-                right: isActiveKeyD,
-                rotate_left: isActiveKeyA,
-                rotate_right: isActiveKeyE
+                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
+                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
+                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
             })
         });
     }
