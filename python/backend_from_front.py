@@ -7,13 +7,29 @@ from pydantic import BaseModel
 
 import backend_to_robot as robot
 
+########################################################################### Configurations ###########################################################################
+
 app = FastAPI()
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173"
-    # Ajoutez d'autres origines ici si nécessaire
+# Front possible ip addresses
+front_ip = [
+    "localhost",
+    "127.0.0.1"
 ]
+
+# Front possible ports
+front_ports = [
+    5173
+]
+
+# Backend ip address that the front will communicate with
+BACKEND_IP = "localhost"
+
+# Backend port that the front will communicate through
+BACKEND_PORT = 8001
+
+# List of possible front origins
+origins = [ f"http://{ip}:{port}" for ip in front_ip for port in front_ports ]	
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,6 +38,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+########################################################################### - ###########################################################################
+
 
 linear_vel = 0.2
 angular_vel = 0.5
