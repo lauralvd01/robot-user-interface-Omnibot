@@ -3,11 +3,20 @@ import protopy.techlab.api as api
 from grpclib.client import Channel
 
 
+########################################################################### Configurations ###########################################################################
+
+# Robot ip address that the backend will communicate with
+ROBOT_IP = "192.168.50.153"
+
+# Robot port that the backend will communicate through
+ROBOT_PORT = 6550
+
+
 ##################################################################### Actual requests from backend #####################################################################
 
 # Robot response ex: GetModulesReply(module_id=[0, 2, 1, 32, 1, 32, 1, 3, 32, 4, 32, 32, 32])
 async def get_modules():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.OmnibotStub(channel)
         try:
             response = await robot.get_modules()
@@ -44,7 +53,7 @@ BatteryDescriptor = {
 # Battery on slot 1
 # BatteryDescriptor(state=0, state_of_charge=0.7199999690055847, current=0.4400000274181366, temperature=0.0, cell_voltages=[3982, 3982, 3982, 3982])
 async def get_batteries_request():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         try:
             response = await robot.get_batteries()
@@ -63,7 +72,7 @@ async def get_batteries_request():
 ##################################################################### - #####################################################################
 
 async def move_robot(linear_x, linear_y, angular):
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         try:
             await robot.move(linear_vel=api.Vector2(x=linear_x, y=linear_y), angular_vel=angular)
@@ -74,7 +83,7 @@ async def move_robot(linear_x, linear_y, angular):
 
 
 async def get_battery_status():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         try:
             response = await robot.get_batteries()
@@ -120,7 +129,7 @@ async def get_battery_status():
 
 # Error  (<Status.NOT_FOUND: 5>, 'No robot state', None)
 async def get_robot_status():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         try:
             response = await robot.get_robot_state()
@@ -133,7 +142,7 @@ async def get_robot_status():
 
 
 async def take_control():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         try:
             response = await robot.take_control()
@@ -146,7 +155,7 @@ async def take_control():
 
 
 async def move():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         try:
             response = await robot.move(linear_vel=api.Vector2(x=0.1, y=0), angular_vel=0)
@@ -174,7 +183,7 @@ Points = {
 
 
 async def goto():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         point = {"data": b'0',
                  "format": PointFormat["PointFormat_XY_44"], "frame": "string"}
@@ -189,7 +198,7 @@ async def goto():
 
 
 async def get_lights():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         try:
             response = await robot.get_lights()
@@ -217,7 +226,7 @@ async def get_lights():
 
 
 async def set_lights():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         light_command = {"state": 0, "color": api.Vector3f(x=0, y=0, z=0)}
         try:
@@ -296,7 +305,7 @@ async def set_lights():
 # Omniwheel on slot 4
 # PowerInfo(power_flow=0.0, energy=1.0)
 async def get_power_flow():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
         try:
             response = await robot.get_power_flow()
@@ -325,7 +334,7 @@ async def get_power_flow():
 
 # Robot response ListFramesReply(frame_info={})
 async def list_frames():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.LocationStub(channel)
         try:
             response = await robot.list_frames()
@@ -345,7 +354,7 @@ async def list_frames():
 
 # Error  LocationStub.get_transform() got an unexpected keyword argument 'parent'
 async def get_transform():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.LocationStub(channel)
         try:
             response = await robot.get_transform(frame="", parent="")
@@ -391,7 +400,7 @@ async def get_transform():
 
 
 async def get_gnss():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.LocationStub(channel)
         try:
             response = await robot.get_g_n_s_s()
@@ -404,7 +413,7 @@ async def get_gnss():
 
 # Error  'LocationStub' object has no attribute 'get_z_e_d_2_point_cloud'
 async def get_z_e_d_2_point_cloud():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.LocationStub(channel)
         try:
             response = await robot.get_z_e_d_2_point_cloud()
@@ -416,7 +425,7 @@ async def get_z_e_d_2_point_cloud():
 
 
 async def get_cameras_state():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.LocationStub(channel)
         try:
             response = await robot.get_cameras_state()
@@ -483,7 +492,7 @@ async def get_cameras_state():
 
 
 async def set_camera_config():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.LocationStub(channel)
         try:
             response = await robot.set_camera_config(name="", config={"power": True})
@@ -495,7 +504,7 @@ async def set_camera_config():
 
 
 async def move_camera():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.LocationStub(channel)
         try:
             response = await robot.move_camera(name="", movement={"target": api.Vector3(0, 0, 0), "velocity": api.Vector3(0, 0, 0)})
@@ -507,7 +516,7 @@ async def move_camera():
 
 
 async def reset_camera():
-    async with Channel(host='192.168.50.153', port=6550) as channel:
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.LocationStub(channel)
         try:
             response = await robot.reset_camera(name="")
