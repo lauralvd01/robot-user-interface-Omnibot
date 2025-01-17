@@ -5,7 +5,11 @@
     // Props
     export let min = 0;
     export let max = 100;
+    export let step = 1;
     export let initialValue = 0;
+    min = min/step;
+    max = max/step;
+    initialValue = initialValue/step;
     export let id = null;
     export let value =
         typeof initialValue === "string"
@@ -202,6 +206,11 @@
                 on:mouseout={() => (thumbHover = false)}
                 on:focus={() => {}}
                 on:blur={() => {}}
+                role="slider"
+                aria-valuemin={min}
+                aria-valuemax={max}
+                aria-valuenow={value}
+                tabindex="0"
             >
                 {#if holding || thumbHover}
                     <div
@@ -209,7 +218,7 @@
                         in:fly={{ y: 7, duration: 200 }}
                         out:fade={{ duration: 100 }}
                     >
-                        {value}
+                        {(value*step).toFixed(1)}
                     </div>
                 {/if}
             </div>
@@ -249,7 +258,7 @@
     .range__wrapper:focus-visible > .range__track {
         box-shadow:
             0 0 0 2px white,
-            0 0 0 3px var(--track-focus, #6185ff);
+            0 0 0 3px var(--track-focus, #e42618);
     }
 
     .range__track {
@@ -259,10 +268,10 @@
     }
 
     .range__track--highlighted {
-        background-color: var(--track-highlight-bgcolor, #6185ff);
+        background-color: var(--track-highlight-bgcolor, #e42618);
         background: var(
             --track-highlight-bg,
-            linear-gradient(90deg, #6185ff, #9c65ff)
+            linear-gradient(90deg, #e42618, #4b1338)
         );
         width: 0;
         height: 6px;
@@ -306,8 +315,8 @@
         padding: 4px 0;
         border-radius: 4px;
         text-align: center;
-        background-color: var(--tooltip-bgcolor, #6185ff);
-        background: var(--tooltip-bg, linear-gradient(45deg, #6185ff, #9c65ff));
+        background-color: var(--tooltip-bgcolor, #e42618);
+        background: var(--tooltip-bg, linear-gradient(45deg, #e42618, #4b1338));
     }
 
     .range__tooltip::after {
@@ -316,7 +325,7 @@
         position: absolute;
         height: 7px;
         width: 7px;
-        background-color: var(--tooltip-bgcolor, #6185ff);
+        background-color: var(--tooltip-bgcolor, #e42618);
         bottom: -3px;
         left: calc(50% - 3px);
         clip-path: polygon(0% 0%, 100% 100%, 0% 100%);

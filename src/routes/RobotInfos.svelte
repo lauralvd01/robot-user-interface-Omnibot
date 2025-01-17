@@ -1,13 +1,31 @@
 <script>
     import Direction from './Direction.svelte'
     import OperatingMode from "./OperatingMode.svelte";
+    import Range from "./Range.svelte";
     import { onMount } from 'svelte';
     import { writable } from 'svelte/store';
 
     import { backend_host, backend_port } from '../config.js';
 
+    const step = 0.1;
+    const speed_data = writable({linear_speed: 1/step, angular_speed: 2/step});
+    
+    // Send a request to the backend to change robot speed settigs
+    function sendSpeedData() {
+        fetch(`http://${backend_host}:${backend_port}/set_speed`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                linear_speed: Math.round($speed_data.linear_speed*step*10)/10,
+                angular_speed: Math.round($speed_data.angular_speed*step*10)/10,
+            }),
+        });
+    }
+    
+    // Send a request to the backend to move the robot
     function sendMoveData() {
-        // Send a request to the backend to move the robot
         fetch(`http://${backend_host}:${backend_port}/post_move`, {
             method: 'POST',
             headers: {
@@ -149,6 +167,14 @@
 
             <div class="command-row-element" style="width: 30%">
                 <OperatingMode/> <!--Import du composant OperatingMode-->
+                <div style="width: 60%; margin: 10px 0px;">
+                    <label for="linear-range" class="speed-label">Linear speed</label>
+                    <Range on:change={(e) => {$speed_data.linear_speed = e.detail.value; sendSpeedData();}} 
+                        min={0} max={5} step={step} bind:value={$speed_data.linear_speed} id="speed-slider"/>
+                    <label for="angular-range" class="speed-label">Angular speed</label>
+                    <Range on:change={(e) => {$speed_data.angular_speed = e.detail.value; sendSpeedData();}} 
+                        min={0} max={5} step={step} bind:value={$speed_data.angular_speed} id="angular-slider"/>
+                </div>
             </div>
 
             <div class="command-row-element" style="width: 20%">
@@ -190,6 +216,16 @@
     .command-row-element {
         flex-shrink: 0;
         overflow-y: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .speed-label {
+        color:#FF662E;
+        font-family: 'Roboto',sans-serif;
+        font-weight: 600;
     }
 
     .control-container {
