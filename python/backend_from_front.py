@@ -468,18 +468,18 @@ async def fetch_batteries():
         return {"Error": str(e)}
 
 
-@app.get("/change_settings")
-def change_settings():
+@app.get("/fetch_settings")
+def fetch_settings():
     global response_get_modules
     global response_get_batteries
     if (response_get_modules == response_get_modules1):
         response_get_modules = response_get_modules2
         response_get_batteries = response_get_batteries2
-        return {"ok": True, "data": "Settings changed in mode 2"}
+        return {"ok": True, "data": ["Settings changed in mode 2"]}
     else:
         response_get_modules = response_get_modules1
         response_get_batteries = response_get_batteries1
-        return {"ok": True, "data": "Settings changed in mode 1"}
+        return {"ok": True, "data": ["Settings changed in mode 1"]}
 
 class Speed(BaseModel):
     linear_speed: float
@@ -499,11 +499,12 @@ def set_speed(body_speed: Speed):
     global angular_vel
     linear_vel = body_speed.linear_speed
     angular_vel = body_speed.angular_speed
+    print("Linear speed set to", linear_vel)
+    print("Angular speed set to", angular_vel)
     return {"ok": True, "linear_speed": linear_vel, "angular_speed": angular_vel}
 
 @app.post("/post_move")
 async def post_move(body_move: Move):
-    #print(body_move)
     move_x = body_move.x_linear_vel * linear_vel
     move_y = body_move.y_linear_vel * linear_vel
     move_theta = body_move.angular_vel * angular_vel
