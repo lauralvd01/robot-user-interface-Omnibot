@@ -468,38 +468,58 @@ async def fetch_batteries():
         return {"Error": str(e)}
 
 
-@app.get("/change_settings")
-def change_settings():
+@app.get("/fetch_settings")
+def fetch_settings():
     global response_get_modules
     global response_get_batteries
     if (response_get_modules == response_get_modules1):
         response_get_modules = response_get_modules2
         response_get_batteries = response_get_batteries2
-        return {"ok": True, "data": "Settings changed in mode 2"}
+        return {"ok": True, "data": ["Settings changed in mode 2"]}
     else:
         response_get_modules = response_get_modules1
         response_get_batteries = response_get_batteries1
-        return {"ok": True, "data": "Settings changed in mode 1"}
+        return {"ok": True, "data": ["Settings changed in mode 1"]}
 
+class Speed(BaseModel):
+    linear_speed: float
+    angular_speed: float
 
 class Move(BaseModel):
-    forward: bool
-    backward: bool
-    left: bool
-    right: bool
-    rotate_left: bool
-    rotate_right: bool
+    x_linear_vel: float
+    y_linear_vel: float
+    angular_vel: float
 
 linear_vel = 1
-angular_vel = 1
+angular_vel = 2
+
+@app.post("/set_speed")
+def set_speed(body_speed: Speed):
+    global linear_vel
+    global angular_vel
+    linear_vel = body_speed.linear_speed
+    angular_vel = body_speed.angular_speed
+    print("Linear speed set to", linear_vel)
+    print("Angular speed set to", angular_vel)
+    return {"ok": True, "linear_speed": linear_vel, "angular_speed": angular_vel}
 
 @app.post("/post_move")
 async def post_move(body_move: Move):
-    print(body_move)
-    move_x = (1 if body_move.forward else -1 if body_move.backward else 0) * linear_vel
-    move_y = (1 if body_move.left else -1 if body_move.right else 0) * linear_vel
-    move_theta = (1 if body_move.rotate_left else -1 if body_move.rotate_right else 0) * angular_vel
-    print(move_x, move_y, move_theta)
+    move_x = body_move.x_linear_vel * linear_vel
+    move_y = body_move.y_linear_vel * linear_vel
+    move_theta = body_move.angular_vel * angular_vel
+    if move_x > 0 :
+        print("Moving forward at speed", move_x)
+    elif move_x < 0 :
+        print("Moving backward at speed", move_x)
+    if move_y > 0 :
+        print("Moving left at speed", move_y)
+    elif move_y < 0 :
+        print("Moving right at speed", move_y)
+    if move_theta > 0 :
+        print("Rotating left at speed", move_theta)
+    elif move_theta < 0 :
+        print("Rotating right at speed", move_theta)
     try:
         # await robot.move_robot(move_x,move_y,move_theta)
         return {"ok": True, "linear_speed": linear_vel, "angular_speed": angular_vel}

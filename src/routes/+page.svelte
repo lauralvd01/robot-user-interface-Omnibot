@@ -44,7 +44,7 @@
         const interval2 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_batteries`, batteries_data), 1000);
 
         // Temporary
-        const interval3 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/change_settings`, settings), 5000);
+        const interval3 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_settings`, settings), 5000);
 
         return () => {
             clearInterval(interval);
