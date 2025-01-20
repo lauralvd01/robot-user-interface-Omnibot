@@ -6,12 +6,14 @@
     import Blocs from "./Blocs.svelte";
     import Omnibot from "./Omnibot.svelte";
     import PageInfo from "./PageInfo.svelte";
+    import Button from "./Button.svelte";
 
     import { backend_host, backend_port } from "../config.js";
 
     const connected_modules = writable([]);
     const batteries_data = writable([]);
-    const settings = writable({});
+    const settings = writable(1);
+    const simulating = writable(true);
 
     // Send a request to the backend to get the data
     async function fetchData(endpoint, store) {
@@ -19,10 +21,21 @@
             console.log(`Fetching ${endpoint.split("fetch_")[1]} ...`);
             const response = await fetch(endpoint); // Send a request to the backend
             const data = await response.json(endpoint); // Parse response and get data as a JSON object
-            store.set(data.data); // Set the store with the data received
+            console.log(data);
+            if (data.ok === true) {
+                store.set(data.data); // Set the store with the data received
+            } else {
+                console.error("Error:", data.error);
+                store.set(data.default); // Set the store with the default value
+            }
         } catch (error) {
             console.error("Error:", error);
+            store.set([]); // Set the store with an empty array
         }
+    }
+
+    function simulateRobot() {
+        fetchData(`http://${backend_host}:${backend_port}/fetch_simulating`, simulating);
     }
 
     let bannerHeight = 0;
@@ -63,6 +76,7 @@
                     <Blocs connected_modules={$connected_modules}/>
                 </div>
                 <div class="omnibot">
+                    <Button class="primary-inverse" on:click={simulateRobot}>{ $simulating ? "Se connecter au robot" : "Simuler le robot" }</Button>
                     <Omnibot connected_modules={$connected_modules}/>
                 </div>
                 <div class="infos">
@@ -123,6 +137,10 @@
     .omnibot {
         width: 33%;
         flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
     }
 
     .infos {
@@ -138,4 +156,5 @@
         margin-top: 2%;
         margin-bottom: 1%;
     }
+
 </style>

@@ -222,6 +222,7 @@
     }
 
     $: connected_modules && updateCanvasInfo(connected_modules);
+    // $: () => {if (Object.entries($triangleImages).find((element) => element[1] !== null) === undefined ) { redrawCanvas(); }}; // Redraw when there is no module
 </script>
 
 <div class="canvas-container">
