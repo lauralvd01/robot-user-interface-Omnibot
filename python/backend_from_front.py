@@ -380,7 +380,7 @@ async def reset_camera():
 
 all_modules = []
 implemented_modules = {}
-
+simulating = True
 
 def read_modules_db():
     global all_modules
@@ -394,6 +394,19 @@ def read_modules_db():
     for module in all_modules:
         if module["module_id"]:
             implemented_modules[module["module_id"]] = module
+
+
+
+# Allow to send real requests to the robot or assume that the robot is not connected and then simulate the responses
+@app.get("/fetch_simulating")
+def fetch_simulating():
+    global simulating
+
+    print("Simulating is", simulating)
+    simulating = not simulating
+    print("Simulating is now", simulating)
+    return {"ok": True, "data": simulating}
+
 
 
 # Actual robot response from robot.get_modules (to test backend without having to run the robot)
@@ -410,8 +423,12 @@ async def fetch_connected_modules():
     global implemented_modules
 
     try:
-        # response = await robot.get_modules()
-        response = response_get_modules
+        response = None
+        if simulating :
+            response = response_get_modules
+        else :
+            response = await robot.get_modules()
+        
         if response["ok"]:
             module_ids = response["module_ids"]
 
@@ -423,7 +440,7 @@ async def fetch_connected_modules():
         else:
             raise Exception(response["Error"])
     except Exception as e:
-        return {"Error": str(e)}
+        return {"ok": False, "error": str(e), "default": []}
 
 
 BatteryState = [
@@ -458,14 +475,18 @@ response_get_batteries = response_get_batteries1
 @app.get("/fetch_batteries")
 async def fetch_batteries():
     try:
-        # response = await robot.get_batteries_request()
-        response = response_get_batteries
+        response = None
+        if simulating :
+            response = response_get_batteries
+        else :
+            response = await robot.get_batteries_request()
+            
         if response["ok"]:
             return {"ok": True, "data": response["batteries"]}
         else:
             raise Exception(response["Error"])
     except Exception as e:
-        return {"Error": str(e)}
+        return {"ok": False, "error": str(e), "default": []}
 
 
 @app.get("/fetch_settings")
@@ -475,11 +496,11 @@ def fetch_settings():
     if (response_get_modules == response_get_modules1):
         response_get_modules = response_get_modules2
         response_get_batteries = response_get_batteries2
-        return {"ok": True, "data": ["Settings changed in mode 2"]}
+        return {"ok": True, "data": 2}
     else:
         response_get_modules = response_get_modules1
         response_get_batteries = response_get_batteries1
-        return {"ok": True, "data": ["Settings changed in mode 1"]}
+        return {"ok": True, "data": 1}
 
 class Speed(BaseModel):
     linear_speed: float
@@ -501,7 +522,6 @@ def set_speed(body_speed: Speed):
     angular_vel = body_speed.angular_speed
     print("Linear speed set to", linear_vel)
     print("Angular speed set to", angular_vel)
-    return {"ok": True, "linear_speed": linear_vel, "angular_speed": angular_vel}
 
 @app.post("/post_move")
 async def post_move(body_move: Move):
@@ -520,11 +540,13 @@ async def post_move(body_move: Move):
         print("Rotating left at speed", move_theta)
     elif move_theta < 0 :
         print("Rotating right at speed", move_theta)
+        
     try:
-        # await robot.move_robot(move_x,move_y,move_theta)
-        return {"ok": True, "linear_speed": linear_vel, "angular_speed": angular_vel}
+        if not simulating :
+            await robot.move_robot(move_x,move_y,move_theta)
+        print("Robot moved")
     except Exception as e:
-        return {"Error": str(e)}
+        print("Error in moving robot :", str(e))
 
 if __name__ == "__main__":
     read_modules_db()

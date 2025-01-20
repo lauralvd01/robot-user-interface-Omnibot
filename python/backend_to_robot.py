@@ -69,8 +69,6 @@ async def get_batteries_request():
             return {"ok": False, "Error": str(e)}
 
 
-##################################################################### - #####################################################################
-
 async def move_robot(linear_x, linear_y, angular):
     async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
@@ -80,6 +78,9 @@ async def move_robot(linear_x, linear_y, angular):
         except Exception as e:
             print(e)
             return {"ok": False, "Error": str(e)}
+
+
+##################################################################### - #####################################################################
 
 
 async def get_battery_status():
