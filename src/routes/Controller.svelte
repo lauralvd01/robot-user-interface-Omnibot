@@ -1,6 +1,5 @@
 
 <script>
-	
     export let move;
 
 	let poll;
@@ -72,7 +71,7 @@
 		rx: 0,
 		rx: 0
 	};
-	
+
 	const plugIn = () => {
         console.log("Gamepad connected");
 		startController();
@@ -87,7 +86,12 @@
 		
 		const gamepads = navigator.getGamepads();
 		if (!gamepads) { return; }
-		const pad = gamepads[0];
+		const defined_gamepads = gamepads.reduce((acc, pad) => {
+			if (pad) { acc.push(pad); }
+			return acc;
+		}, []);
+		if (!defined_gamepads.length) { return; }
+		const pad = defined_gamepads[0];
 		const buttons = ["a","b","x","y","lb","rb","lt","rt","map","menu","lstick","rstick","du","dd","dl","dr","xbox"];
 		const axes = ["lx","ly","rx","ry"];
 		
@@ -142,7 +146,8 @@
 	
 	.controller {
 		position: relative;
-		width: 80%;
+		width: 90%;
+		margin-bottom: 5%;
 	}
 	
 	.controller > * {
@@ -165,8 +170,8 @@
 		background-position: center;
 		position: relative;
 		width: 100%;
-		height: 0;
 		padding-top: 56.2416%;
+		border-radius: 5%;
 	}
 	
 	.well {

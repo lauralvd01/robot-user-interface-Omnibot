@@ -24,8 +24,6 @@
             }),
         });
     }
-
-    const is_gamepad_connected = writable(false);
     
     // Send a request to the backend to move the robot
     function sendMoveData(moves) {
@@ -132,8 +130,16 @@
     }
 
     $: batteries_data && updateBatteryLevel(batteries_data);
+
+    
+    const is_gamepad_connected = writable(false);
+    $: is_gamepad_connected && console.log("Gamepad connected ?", $is_gamepad_connected);
 </script>
 
+<svelte:window 
+  on:gamepadconnected={e => {is_gamepad_connected.set(true)}}
+  on:gamepaddisconnected={e => {is_gamepad_connected.set(false);}}
+/>
 
 <div class="content">
         <div class="command-row">
@@ -143,8 +149,9 @@
 
             <div class="command-row-element" style="width: 25%">
                 <div class="control-container">
-                    <h1 class="titles">COMMANDES</h1>
+                    <p class="titles">COMMANDES</p>
                     {#if (!$is_gamepad_connected)}
+                        <div class="keyborad">
                         <div class="key {isActiveKeyA ? 'active' : ''}"> <!--vérification de si la touche est pressée -->
                             <span class="first-line">A</span><br/>
                             <span class="second-line">Rotation G</span>
@@ -169,9 +176,11 @@
                             <span class="first-line">D</span><br/>
                             <span class="second-line">Droite</span>
                         </div>
-                    {:else}
-                        <Controller move={sendMoveData}/>
+                        </div>
                     {/if}
+                    <div class="pad_controller" style='--displayGamepad:{$is_gamepad_connected ? "flex" : "none"};'>
+                        <Controller move={sendMoveData}/>
+                    </div>
                 </div>
             </div>
 
@@ -239,23 +248,41 @@
     }
 
     .control-container {
-        width: 300px;
-        height: 30%;
+        width: 100%;
+        height: 90%;
         background-color: #A8A8A8;
+        border-radius: 5%;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .keyborad {
+        width: 90%;
+        height: 90%;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         grid-template-rows: auto auto auto;
-        border-radius: 10px;
-        text-align: center;
+        margin-bottom: 5%;
+    }
+
+    .pad_controller {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        display: var(--displayGamepad);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 
     .titles {
-        grid-column: 1 / span 3;
         font-weight: bold;
         font-size: 24px;
         color:black;
         font-family: 'Roboto',sans-serif;
-
     }
 
     span{
