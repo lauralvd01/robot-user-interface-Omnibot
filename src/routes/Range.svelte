@@ -170,6 +170,8 @@
         thumb.style.left = `${offsetLeft}px`;
         progressBar.style.width = `${offsetLeft}px`;
     }
+
+    export let d_speed_is_moving;
 </script>
 
 <svelte:window
@@ -212,7 +214,7 @@
                 aria-valuenow={value}
                 tabindex="0"
             >
-                {#if holding || thumbHover}
+                {#if holding || thumbHover || d_speed_is_moving}
                     <div
                         class="range__tooltip"
                         in:fly={{ y: 7, duration: 200 }}

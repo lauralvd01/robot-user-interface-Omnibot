@@ -82,6 +82,8 @@
 		cancelAnimationFrame(poll);
 	}
 	
+	export let d_speed; // = {"du": false, "dd": false, "dl": false, "dr": false};
+
 	const startController = () => {
 		
 		const gamepads = navigator.getGamepads();
@@ -99,6 +101,15 @@
 			buttonMap[buttons[i]] = ( button.pressed ) ? button.value : 0;
             if (button.pressed && button.value > 0.01) {
                 console.log(buttons[i], button.value);
+				if (buttons[i] === "du") {
+					d_speed["du"] = true;
+				} else if (buttons[i] === "dd") {
+					d_speed["dd"] = true;
+				} else if (buttons[i] === "dl") {
+					d_speed["dl"] = true;
+				} else if (buttons[i] === "dr") {
+					d_speed["dr"] = true;
+				}
             }
 		});
 		
