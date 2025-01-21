@@ -80,7 +80,7 @@
                     <Omnibot connected_modules={$connected_modules}/>
                 </div>
                 <div class="infos">
-                    <PageInfo />
+                    <PageInfo batteries_data={$batteries_data}/>
                 </div>
             </div>
         </div>

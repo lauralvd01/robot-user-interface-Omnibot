@@ -39,18 +39,23 @@
         font-family: "Roboto", sans-serif;
     }
 
-    .picto {
-        height: 40px;
-        width: 40px;
+    .picto{
+        height: 80%;
+        width: 80%;
+        position: relative;
     }
 
-    .image-container {
-        display: inline-block;
+    .image-container{
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background-color: white;
         border-radius: 50%;
+        width: 50px;
+        height: 50px;
         margin: 5px;
-        padding: 3px;
     }
+
 
     ul li::before {
         color: white;
