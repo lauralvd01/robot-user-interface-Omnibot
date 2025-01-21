@@ -245,7 +245,7 @@
 
             if (module.module_id !== null && module.module_id !== 32) {
                 $triangleTitle[index + 1] = module.name;
-                $triangleData[index + 1] = module;
+                $triangleData[index + 1] = {"slot_id": index+1, ...module};
                     // `Module id : ${module.module_id}, Fonction : ${module.functionality !== null ? module.functionality : "Aucune"}, Caractéristiques : ${module.characteristics.length > 0 ? module.characteristics.join(", ") : "Aucune"}`;
                 $triangleImages[index + 1] =
                     module.functionality !== null
