@@ -41,139 +41,30 @@ app.add_middleware(
 
 ########################################################################### - ###########################################################################
 
-
-linear_vel = 0.2
-angular_vel = 0.5
-robot_state = {"status": "not started yet", "speed": 0}
 battery_status = {"battery_level": 100}
-
-# TODO See if not duplicating code (cf frontend)
-
-
-async def monitor_keyboard():
-    while True:
-        if keyboard.is_pressed('z'):
-            try:
-                await robot.move_robot(linear_vel, 0, 0)
-                robot_state = {"status": "moving forward", "speed": linear_vel}
-                print(robot_state)
-            except Exception as e:
-                print(e)
-        elif keyboard.is_pressed('s'):
-            try:
-                await robot.move_robot(-linear_vel, 0, 0)
-                robot_state = {
-                    "status": "moving backward", "speed": linear_vel}
-                print(robot_state)
-            except Exception as e:
-                print(e)
-        elif keyboard.is_pressed('d'):
-            try:
-                await robot.move_robot(0, -linear_vel, 0)
-                robot_state = {"status": "moving right", "speed": linear_vel}
-                print(robot_state)
-            except Exception as e:
-                print(e)
-        elif keyboard.is_pressed('q'):
-            try:
-                await robot.move_robot(0, linear_vel, 0)
-                robot_state = {"status": "moving left", "speed": linear_vel}
-                print(robot_state)
-            except Exception as e:
-                print(e)
-        elif keyboard.is_pressed('a'):
-            try:
-                await robot.move_robot(0, 0, angular_vel)
-                robot_state = {"status": "rotating left", "speed": angular_vel}
-                print(robot_state)
-            except Exception as e:
-                print(e)
-        elif keyboard.is_pressed('e'):
-            try:
-                await robot.move_robot(0, 0, -angular_vel)
-                robot_state = {"status": "rotating right",
-                               "speed": angular_vel}
-                print(robot_state)
-            except Exception as e:
-                print(e)
-        elif keyboard.is_pressed('space'):
-            try:
-                await robot.move_robot(0, 0, 0)
-                robot_state = {"status": "stopped", "speed": 0}
-                print(robot_state)
-            except Exception as e:
-                print(e)
-
-        elif keyboard.is_pressed('o'):
-            print("Test ok")
-            robot_state["status"] = "Test OK"
-
-        await asyncio.sleep(0.1)
-
-# TODO Test : for now pressed key is not detected ?
-# @app.on_event("startup")
-# async def startup_event():
-#     asyncio.create_task(monitor_keyboard()) ########### TODO : To understand
-
-# OK
-
-
-@app.get("/")
-def get_actual_state():
-    return {"battery_status": battery_status, "robot_state": robot_state}
-
-# OK
-
-
-@app.get("/move_robot")
-async def move_robot():
-    try:
-        response = await robot.move_robot(0, 0, 1)
-        if response["ok"]:
-            robot_state["status"] = "moving"
-            robot_state["speed"] = 1
-            return robot_state
-        else:
-            raise Exception(response["Error"])
-    except Exception as e:
-        print("Error in moving robot :", e)
-        return robot_state
-
-# OK
-
 
 @app.get("/battery")
 async def get_battery_status():
-    return battery_status
-    try:
-        response = await robot.get_battery_status()
-        # print("Response", response)
-
-        if response["ok"]:
-            # print("Former battery", battery_status)
-            battery_status["battery_level"] = response["battery_level"]
-            # print("Actualized battery", response, battery_status)
-            return battery_status
-        else:
-            raise Exception(response["Error"])
-
-    except Exception as e:
-        print("Error in fetching battery status :", e)
+    global battery_status
+    if simulating :
         return battery_status
+    else :
+        try:
+            response = await robot.get_battery_status()
+            # print("Response", response)
 
-# OK
+            if response["ok"]:
+                # print("Former battery", battery_status)
+                battery_status["battery_level"] = response["battery_level"]
+                # print("Actualized battery", response, battery_status)
+                return battery_status
+            else:
+                raise Exception(response["Error"])
 
+        except Exception as e:
+            print("Error in fetching battery status :", e)
+            return battery_status
 
-@app.get("/motor_state")
-def get_motor_state():
-    return robot_state
-
-# OK
-
-
-@app.get("/connected_modules")
-def get_connected_modules():
-    return {"connected_modules": ["camera", "lidar", "imu", "gps", "motors", "batteries"]}
 
 
 # TEST Robot data -- Basic_robot
@@ -189,8 +80,6 @@ async def get_robot_status():
         return {"Error": str(e)}
 
 # OK
-
-
 @app.get("/take_control")
 async def take_control():
     try:
@@ -200,8 +89,6 @@ async def take_control():
         return {"Error": str(e)}
 
 # OK #################################### Si appui long d'entrée au début => continue à avancer (envoie plusieurs fois la requête), presque mouvement en continu mais pas vraiment droit => performances des moteurs et du move à vérifier
-
-
 @app.get("/move")
 async def move():
     try:
@@ -212,8 +99,6 @@ async def move():
 
 # NOT OK
 # Error  'BasicRobotControlStub' object has no attribute 'goto'
-
-
 @app.get("/goto")
 async def goto():
     try:
@@ -223,8 +108,6 @@ async def goto():
         return {"Error": str(e)}
 
 # OK - à tester avec des lumières
-
-
 @app.get("/get_lights")
 async def get_lights():
     try:
@@ -235,8 +118,6 @@ async def get_lights():
 
 # NOT OK
 # Error  'BasicRobotControlStub' object has no attribute 'set_lights'
-
-
 @app.get("/set_lights")
 async def set_lights():
     try:
@@ -246,8 +127,6 @@ async def set_lights():
         return {"Error": str(e)}
 
 # OK
-
-
 @app.get("/get_batteries_request")
 async def get_batteries_request():
     try:
@@ -257,8 +136,6 @@ async def get_batteries_request():
         return {"Error": str(e)}
 
 # OK
-
-
 @app.get("/get_power_flow")
 async def get_power_flow():
     try:
@@ -293,8 +170,6 @@ async def list_frames():
 
 # NOT OK
 # Error  LocationStub.get_transform() got an unexpected keyword argument 'parent'
-
-
 @app.get("/get_transform")
 async def get_transform():
     try:
@@ -305,8 +180,6 @@ async def get_transform():
 
 # NOT OK
 # Error  (<Status.NOT_FOUND: 5>, 'No GNSS data', None)
-
-
 @app.get("/get_gnss")
 async def get_gnss():
     try:
@@ -341,8 +214,6 @@ async def get_cameras_state():
 
 # NOT OK
 # Error  'BasicRobotControlStub' object has no attribute 'set_lights'
-
-
 @app.get("/set_lights")
 async def set_lights():
     try:
@@ -353,8 +224,6 @@ async def set_lights():
 
 # NOT OK
 # Error  'LocationStub' object has no attribute 'move_camera'
-
-
 @app.get("/move_camera")
 async def move_camera():
     try:
@@ -365,8 +234,6 @@ async def move_camera():
 
 # NOT OK
 # Error  'LocationStub' object has no attribute 'reset_camera'
-
-
 @app.get("/reset_camera")
 async def reset_camera():
     try:
@@ -548,6 +415,48 @@ async def post_move(body_move: Move):
     except Exception as e:
         print("Error in moving robot :", str(e))
 
+
+# message PowerInfo {
+#   float power_flow = 1;  # Watts flowing in (+) or out (-) of a component
+#   float energy = 2;  # Total joules in (+) or out (-) of a component
+# }
+
+# Robot response GetPowerFlowReply(components={
+    # 'Omniwheel on slot 6': PowerInfo(power_flow=0.6000000238418579, energy=1.0), 
+    # 'Charger on slot 9': PowerInfo(power_flow=0.0, energy=0.0), 
+    # 'Omniwheel on slot 2': PowerInfo(power_flow=0.0, energy=1019.0), 
+    # 'Battery on slot 1': PowerInfo(power_flow=7.900000095367432, energy=40.0), 
+    # 'Compute on slot 7': PowerInfo(power_flow=-7.400000095367432, energy=-36.0), 
+    # 'Omniwheel on slot 4': PowerInfo(power_flow=0.0, energy=0.0)})
+
+
+# Actual robot response from robot.get_power_flow (to test backend without having to run the robot)
+response_get_power_info = {"ok": True, "power_infos": [
+    {"slot_id": 6, "name": 'Omniwheel on slot 6', "power_flow": 0.6000000238418579, "energy": 1.0},
+    {"slot_id": 9, "name": 'Charger on slot 9', "power_flow": 0.0, "energy": 0.0},
+    {"slot_id": 2, "name": 'Omniwheel on slot 2', "power_flow": 0.0, "energy": 1019.0},
+    {"slot_id": 1, "name": 'Battery on slot 1', "power_flow": 7.900000095367432, "energy": 40.0},
+    {"slot_id": 7, "name": 'Compute on slot 7', "power_flow": -7.400000095367432, "energy": -36.0},
+    {"slot_id": 4, "name": 'Omniwheel on slot 4', "power_flow": 0.0, "energy": 0.0}
+]}
+
+@app.get("/fetch_power_infos")
+async def fetch_power_infos():
+    try:
+        response = None
+        if simulating :
+            response = response_get_power_info
+        else :
+            response = await robot.get_power_flow()
+        
+        if response["ok"]:
+            return {"ok": True, "data": response["power_infos"]}
+        else:
+            raise Exception(response["Error"])
+    except Exception as e:
+        return {"ok": False, "error": str(e), "default": []}
+    
+    
 if __name__ == "__main__":
     read_modules_db()
 
