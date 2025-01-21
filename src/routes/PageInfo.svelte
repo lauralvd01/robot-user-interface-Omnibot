@@ -9,34 +9,51 @@
     // Déclaration réactive pour mettre à jour le contenu lorsque selectedTriangle change
     $: {
         const id = $selectedTriangle.id;
-        currentContent = id !== null ? $triangleData[id] : "Cliquer sur un bloc pour avoir les informations liées à celui-ci";
-        currentImage = id !=  null ? $triangleImages[id] : null;
-        currentTitle = id != null ? $triangleTitle[id] : " ";
+        if (id !== null) {
+            const module = $triangleData[id]
+            currentContent = module;
+            // console.log(module);
+            // `Module id : ${module.module_id}, Fonction : ${module.functionality !== null ? module.functionality : "Aucune"}, Caractéristiques : ${module.characteristics.length > 0 ? module.characteristics.join(", ") : "Aucune"}`;
+            currentImage = $triangleImages[id];
+            currentTitle = $triangleTitle[id];
+        }
+        else {
+            currentContent = "Cliquez sur un bloc afin d'avoir les informations lié a celui-ci";
+            currentImage = null;
+            currentTitle = "Aucun bloc sélectionné";
+        }
         };
     
     
-
-
     export let batteries_data;
 
     const batteries = writable({});
 
-    function updateBatteryLevel(batteries_data) {
+    function updateBatteryData(batteries_data) {
         $batteries = {};
         if (batteries_data.length > 0) {
             for (const battery_data of batteries_data) {
                 $batteries[battery_data.slot_id] = {
                     name: battery_data.name.toUpperCase(),
+                    state: battery_data.state,
                     state_of_charge: Math.round(
                         battery_data.state_of_charge * 100,
                     ),
+                    current: Math.round(
+                        battery_data.current * 100,
+                    ),
+                    temperature: Math.round(
+                        battery_data.temperature * 100,
+                    ),
+                    cell_voltages: battery_data.cell_voltages,
+                    power_flow: 0,
+                    energy: 0
                 };
             }
-            $batteries = $batteries;
         }
     }
 
-    $: batteries_data && updateBatteryLevel(batteries_data);
+    $: batteries_data && updateBatteryData(batteries_data);
 </script>
 
 <div class="info-bloc">
@@ -49,7 +66,31 @@
             {/if}
             <h1>{currentTitle}</h1>
         </div>
-        <p>{currentContent}</p>
+        <div class="content-container">
+        {#if currentImage}
+            <p>Fonction : {currentContent.functionality}</p>
+            <p>Caractéristiques : </p>
+            {#if currentContent.characteristics.length > 0}
+                {#if currentTitle === "Batterie"}
+                    <ul>
+                        {#each currentContent.characteristics as characteristic}
+                            <li>{characteristic} : {$batteries[1][characteristic]}</li>
+                        {/each}
+                    </ul>
+                {:else}
+                    <ul>
+                        {#each currentContent.characteristics as characteristic}
+                            <li>{characteristic} : </li>
+                        {/each}
+                    </ul>
+                {/if}
+            {:else}
+                <p>Aucune</p>
+            {/if}
+        {:else}
+            <p>{currentContent}</p>
+        {/if}
+        </div>
 
         <!-- <div class="button-container">
             <Button class="primary">Plus d'informations</Button>
@@ -92,9 +133,31 @@
         height: 50px;
     }
 
+    .content-container {
+        display: flex;
+        align-items: start;
+        flex-direction: column;
+        justify-content: start;
+        width: 90%;
+        height: 80%;
+        position: relative;
+        overflow: hidden;
+    }
+
     p {
         font-family: 'Roboto', sans-serif;
         font-size: 16px;
+        margin: 0;
+    }
+
+    ul {
+        list-style-type: circle;
+        margin: 0;
+    }
+
+    li {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
     }
 
     h1 {

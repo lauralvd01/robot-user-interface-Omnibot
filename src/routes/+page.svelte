@@ -21,7 +21,7 @@
             console.log(`Fetching ${endpoint.split("fetch_")[1]} ...`);
             const response = await fetch(endpoint); // Send a request to the backend
             const data = await response.json(endpoint); // Parse response and get data as a JSON object
-            // console.log(data);
+            console.log(data);
             if (data.ok === true) {
                 store.set(data.data); // Set the store with the data received
             } else {

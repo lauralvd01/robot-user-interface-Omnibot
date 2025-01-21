@@ -171,7 +171,6 @@
                     ),
                 };
             }
-            $batteries = $batteries;
         }
     }
 
