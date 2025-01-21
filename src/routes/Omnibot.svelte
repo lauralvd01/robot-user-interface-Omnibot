@@ -194,6 +194,52 @@
     } from "./store";
 
     function updateCanvasInfo(connected_modules) {
+        if (connected_modules.length === 0) {
+            // Reset the store
+            triangleTitle.set({
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    });
+            triangleData.set({
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    });
+            triangleImages.set({
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    });
+            return;
+        }
         for (let index = 0; index < connected_modules.length; index++) {
             const module = connected_modules[index];
 
@@ -222,7 +268,6 @@
     }
 
     $: connected_modules && updateCanvasInfo(connected_modules);
-    // $: () => {if (Object.entries($triangleImages).find((element) => element[1] !== null) === undefined ) { redrawCanvas(); }}; // Redraw when there is no module
 </script>
 
 <div class="canvas-container">
@@ -239,6 +284,15 @@
                 />
             {/if}
         {/each}
+        {#if connected_modules.length === 0}
+            <img
+                src={"./src/lib/images/logo_omnibot.svg"}
+                alt={"Default image"}
+                width="10px"
+                height="10px"
+                use:updateCanvasWhenLoaded
+            />
+        {/if}
     </div>
     <canvas bind:this={canvas} width="400" height="400" autoclear={true}
     ></canvas>
