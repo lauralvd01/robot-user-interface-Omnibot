@@ -56,4 +56,22 @@
         color:black;
     }
 
+    .primary-inverse{
+        border:solid 2px #ff3700;
+        border-radius: 12px;
+        font-family: "Roboto";
+        font-weight: 500;
+        background-color: white;
+        color:#ff3700;
+    }
+
+    .primary-inverse:hover{
+        border:solid 2px black;
+        border-radius: 12px;
+        font-family: "Roboto";
+        font-weight: 500;
+        background-color: #ff3700;
+        color:white;
+    }
+
 </style>

@@ -36,16 +36,20 @@
     }
 
     .picto{
-        height: 40px;
-        width: 40px;
+        height: 80%;
+        width: 80%;
+        position: relative;
     }
 
     .image-container{
-        display: inline-block;
-        background-color: white; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
         border-radius: 50%;
-        margin: 5px; 
-        padding: 3px;
+        width: 50px;
+        height: 50px;
+        margin: 5px;
     }
 
     ul li::before {

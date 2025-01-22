@@ -194,13 +194,59 @@
     } from "./store";
 
     function updateCanvasInfo(connected_modules) {
+        if (connected_modules.length === 0) {
+            // Reset the store
+            triangleTitle.set({
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    });
+            triangleData.set({
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    });
+            triangleImages.set({
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        6: null,
+        7: null,
+        8: null,
+        9: null,
+        10: null,
+        11: null,
+        12: null
+    });
+            return;
+        }
         for (let index = 0; index < connected_modules.length; index++) {
             const module = connected_modules[index];
 
             if (module.module_id !== null && module.module_id !== 32) {
                 $triangleTitle[index + 1] = module.name;
-                $triangleData[index + 1] =
-                    `Module id : ${module.module_id}, Fonction : ${module.functionality !== null ? module.functionality : "Aucune"}, Caractéristiques : ${module.characteristics.length > 0 ? module.characteristics.join(", ") : "Aucune"}`;
+                $triangleData[index + 1] = {"slot_id": index+1, ...module};
+                    // `Module id : ${module.module_id}, Fonction : ${module.functionality !== null ? module.functionality : "Aucune"}, Caractéristiques : ${module.characteristics.length > 0 ? module.characteristics.join(", ") : "Aucune"}`;
                 $triangleImages[index + 1] =
                     module.functionality !== null
                         ? functionalityImages[module.functionality]
@@ -238,6 +284,15 @@
                 />
             {/if}
         {/each}
+        {#if connected_modules.length === 0}
+            <img
+                src={"./src/lib/images/logo_omnibot.svg"}
+                alt={"Default image"}
+                width="10px"
+                height="10px"
+                use:updateCanvasWhenLoaded
+            />
+        {/if}
     </div>
     <canvas bind:this={canvas} width="400" height="400" autoclear={true}
     ></canvas>

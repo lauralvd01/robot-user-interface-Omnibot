@@ -69,8 +69,6 @@ async def get_batteries_request():
             return {"ok": False, "Error": str(e)}
 
 
-##################################################################### - #####################################################################
-
 async def move_robot(linear_x, linear_y, angular):
     async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
         robot = api.BasicRobotControlStub(channel)
@@ -80,6 +78,26 @@ async def move_robot(linear_x, linear_y, angular):
         except Exception as e:
             print(e)
             return {"ok": False, "Error": str(e)}
+
+
+async def get_power_flow():
+    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
+        robot = api.BasicRobotControlStub(channel)
+        try:
+            response = await robot.get_power_flow()
+            # print("Robot response", response)
+            if response:
+                power_infos = []
+                for name, power in response.components.items():
+                    power_info = {"slot_id": int(name.split(" ")[-1]), "name": name, "power_flow": power.power_flow, "energy": power.energy}
+                    power_infos.append(power_info)
+                return {"ok": True, "power_infos": power_infos}
+        except Exception as e:
+            # print("Error ", e)
+            return {"ok": False, "Error": str(e)}
+
+
+##################################################################### - #####################################################################
 
 
 async def get_battery_status():
@@ -304,19 +322,7 @@ async def set_lights():
 
 # Omniwheel on slot 4
 # PowerInfo(power_flow=0.0, energy=1.0)
-async def get_power_flow():
-    async with Channel(host=ROBOT_IP, port=ROBOT_PORT) as channel:
-        robot = api.BasicRobotControlStub(channel)
-        try:
-            response = await robot.get_power_flow()
-            print("Robot response", response)
-            if response:
-                for name, powerflow in response.components.items():
-                    print(name)
-                    print(powerflow)
-                    print()
-        except Exception as e:
-            print("Error ", e)
+# get_power_flow();
 
 
 # TEST robot data -- Omnibot
