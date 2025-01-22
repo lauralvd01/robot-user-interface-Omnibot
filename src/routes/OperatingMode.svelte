@@ -1,10 +1,24 @@
+<script>
+    import { wheels_count } from "./store";
+
+    const possible_options = ["Pas de roues", "Une roue ?", "Roue normales", "Tri-roues"];
+    let actual_options = [];
+
+    function updateOptions(wheels_count) {
+        actual_options = [];
+        actual_options.push(possible_options[wheels_count]);
+    }
+
+    $: updateOptions($wheels_count);
+</script>
+
 <div class="operating-mode">
     <h1 class="titles">MODE DE FONCTIONNEMENT</h1>
     <!--Creation d'un menu déroulant-->
     <select>
-        <option value="option2" selected>Tri-roues</option> <!--Option sélectionnée de base-->
-        <option value="option3">Pas de roues</option>
-        <option value="option4">Roue normales</option>
+        {#each actual_options as mode_option, index}
+            <option value={index}>{mode_option}</option>
+        {/each}
     </select>
 </div>
 
@@ -19,6 +33,7 @@
     .operating-mode{
         margin:15px;
     }
+
     select {
         background-color: #FF662E;
         color: black;

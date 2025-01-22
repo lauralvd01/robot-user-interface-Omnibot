@@ -7,6 +7,7 @@
     import Sensor from './module_blocs/Sensor.svelte';
 
     import { writable } from 'svelte/store';
+    import { wheels_count } from './store';
 
     // Get connected_modules from parent component
     export let connected_modules;
@@ -25,8 +26,10 @@
             let [functionality, modules] = element;
             // For each functionality, count and store occurences of each module name : { name_module1: count_module1, name_module2: count_module2, ... }
             $modules_by_categories[functionality] = modules.map(({name}) => name).reduce(((acc, val) => { acc[val] = ( acc[val] || 0) + 1; return acc}), {});
+            if (functionality == "Mobilité") {
+                wheels_count.set($modules_by_categories[functionality]["Roue Omnidirectionnelle"] || 0);
+            }
         });
-        $modules_by_categories = $modules_by_categories;
     }
 
     // Wait for connected_modules to be fetched from parent component and then run group_connected_modules_by_categories
