@@ -54,8 +54,11 @@
         });
     }
 
+    const moving = writable({x_linear_vel: 0, y_linear_vel: 0, angular_vel: 0});
+
     // Send a request to the backend to move the robot
     function sendMoveData(moves) {
+        $moving = {...moves};
         fetch(`http://${backend_host}:${backend_port}/post_move`, {
             method: "POST",
             headers: {
@@ -192,16 +195,15 @@
 
 <div class="content">
     <div class="command-row">
-        <div class="command-row-element" style="width: 25%">
-            <Direction />
-            <!--Import du composant Direction-->
+        <div class="command-row-element" style="width: 20%">
+            <Direction moving={$moving}/>
         </div>
 
         <div class="command-row-element" style="width: 25%">
             <div class="control-container">
                 <p class="titles">COMMANDES</p>
                 {#if !$is_gamepad_connected}
-                    <div class="keyborad">
+                    <div class="keyboard">
                         <div class="key {isActiveKeyA ? 'active' : ''}">
                             <!--vérification de si la touche est pressée -->
                             <span class="first-line">A</span><br />
@@ -275,7 +277,7 @@
             </div>
         </div>
 
-        <div class="command-row-element" style="width: 20%">
+        <div class="command-row-element" style="width: 25%">
             <div class="battery-lvl-container">
                 {#each Object.entries($batteries) as [battery_slot, battery]}
                     <h1 class="titles">{battery["name"]}</h1>
@@ -343,7 +345,7 @@
         justify-content: space-between;
     }
 
-    .keyborad {
+    .keyboard {
         width: 90%;
         height: 90%;
         display: grid;
