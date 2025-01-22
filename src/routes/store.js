@@ -291,3 +291,5 @@ import { writable } from "svelte/store";
         11: null,
         12: null
     });
+
+export const wheels_count = writable(0);
