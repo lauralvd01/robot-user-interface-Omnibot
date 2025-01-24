@@ -262,6 +262,10 @@ def read_modules_db():
         if module["module_id"]:
             implemented_modules[module["module_id"]] = module
 
+@app.get("/fetch_modules")
+def fetch_modules():
+    global all_modules
+    return {"ok": True, "data": all_modules}
 
 
 # Allow to send real requests to the robot or assume that the robot is not connected and then simulate the responses
