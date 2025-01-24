@@ -444,12 +444,20 @@ response_get_power_info = {"ok": True, "power_infos": [
     {"slot_id": 4, "name": 'Omniwheel on slot 4', "power_flow": 0.0, "energy": 0.0}
 ]}
 
+
+
 @app.get("/fetch_power_infos")
 async def fetch_power_infos():
     try:
         response = None
         if simulating :
             response = response_get_power_info
+            
+            # Change power_infos values every fetch
+            for i in range(len(response["power_infos"])):
+                response["power_infos"][i]["power_flow"] = response["power_infos"][i]["power_flow"] * 1.5
+                response["power_infos"][i]["energy"] = response["power_infos"][i]["energy"] * 1.5
+            
         else :
             response = await robot.get_power_flow()
         
