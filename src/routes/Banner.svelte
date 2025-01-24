@@ -1,22 +1,21 @@
 <script >
-    import logo_omnibot from '$lib/images/logo_omnibot.svg'
+    import logo_omnibot from '../lib/images/logo_omnibot.svg'
     import Button from "./Button.svelte";
-    import logo_mines from '$lib/images/logo_mines.svg'
+    import logo_mines from '../lib/images/logo_mines.svg'
     import { goto } from '$app/navigation'
 
-    function hangleNavigationToUserManual() {
-        goto('/user_manual');
-    }
 </script>
 
 <header>
     <div class="banner">
-        <img class="logo" alt="Logo omnibot" src={logo_omnibot}/>
+        <a  href="/">
+            <img class="logo" alt="Logo omnibot" src={logo_omnibot}/>
+        </a>
         <!--Creation d'une barre de navigation-->
         <nav class="buttons-container">
-            <Button class="default">PANNEAU DE CONTROLE</Button>
-            <Button class="default" on:click={hangleNavigationToUserManual}>MANUEL D'UTILISATION</Button>
-            <Button class="default">LE PROJET</Button>
+            <Button class="default" on:click={() => goto('/modules_page')}>MODULES</Button>
+            <Button class="default" on:click={() => goto('/graphics')}>GRAPHICS</Button>
+            <Button class="default" on:click={() => goto('/graphics')}>RECORDS</Button>
         </nav>
         <img class="logo" alt="logo mines" src={logo_mines}>
     </div>

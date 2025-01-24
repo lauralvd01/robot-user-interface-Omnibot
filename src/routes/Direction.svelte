@@ -60,11 +60,4 @@
         width: 30%;
         transition: transform 0.1s;
     }
-
-    .point {
-        height: 30%;
-        width: 30%;
-        background-color: black;
-        border-radius: 50%;
-    }
 </style>
