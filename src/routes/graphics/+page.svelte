@@ -2,10 +2,47 @@
     import { onMount } from "svelte";
     import { writable } from "svelte/store";
     import Banner from "../Banner.svelte";
+    import Graphic from "./Graphic.svelte";
+    // import data from "./data.js";
 
     import { backend_host, backend_port } from "../../config.js";
 
-    const modules = writable([]);
+    const power_infos = writable([]);
+    const data = writable({});
+    const data_array = writable([]);
+
+    function updateData(power_infos) {
+        power_infos.forEach(module => {
+            if ($data[module.slot_id]) {
+                $data[module.slot_id].push({date: new Date(), power_flow: module.power_flow});
+            } else {
+                $data[module.slot_id] = [{date: new Date(), power_flow: module.power_flow}];
+            }
+            });
+        data_array.set(Object.entries($data).map(([key, value]) => ({id: key, data: value})));
+        console.log("Data_array ",$data_array);
+    };
+//         [
+//   {
+//     id: 'Northeast',
+//     data: northeast
+//   },
+//   {
+//     id: 'Midwest',
+//     data: midwest
+//   },
+//   {
+//     id: 'South',
+//     data: south
+//   },
+//   {
+//     id: 'West',
+//     data: west
+//   }
+// ]
+    // }
+
+    $: power_infos && data && data_array && updateData($power_infos);
 
     // Send a request to the backend to get the data
     async function fetchData(endpoint, store) {
@@ -36,8 +73,13 @@
             bannerHeight = banner.offsetHeight;
         }
 
-        // Fetch existant modules
-        fetchData(`http://${backend_host}:${backend_port}/fetch_modules`, modules);
+        // Fetch power_infos data
+        // fetchData(`http://${backend_host}:${backend_port}/fetch_power_infos`, power_infos);
+        const interval = setInterval(() => {fetchData(`http://${backend_host}:${backend_port}/fetch_power_infos`, power_infos);},5000);
+
+        return () => {
+            clearInterval(interval);
+        };
     });
 </script>
 
@@ -45,13 +87,20 @@
     <Banner />
     <div class="body" style="margin-top: {bannerHeight}px;">
         <div class="content">
+            {#if $data_array.length === 0}
+                <p>Loading...</p>
+            {:else}
+                {#key $data_array}  
+                    <Graphic data={$data_array} width={1000} height={500}/> 
+                {/key}
+            {/if}
         </div>
     </div>
 </div>
 
 <style>
     * {
-        margin: 0px 5px 0px 5px;
+        margin: 0;
         padding: 0;
         box-sizing: border-box;
     }
@@ -63,10 +112,12 @@
     }
 
     .body {
-        margin: 0px 20px 0px 20px;
-        padding: 0;
+        margin: 20px;
+        display: flex;
         width: 100%;
         height: 100%;
+        flex-direction: column;
+        align-items: center;
     }
 
     .content {
@@ -74,7 +125,8 @@
         flex-direction: column;
         flex-grow: 1;
         overflow: auto;
-        height: 80%;
+        height: 100%;
+        width: 80%;
     }
 
     </style>

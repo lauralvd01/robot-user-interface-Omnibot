@@ -5,7 +5,9 @@
 
     import { backend_host, backend_port } from "../../config.js";
 
-    const modules = writable([]);
+    const records = writable([]);
+
+    $: console.log($records);
 
     // Send a request to the backend to get the data
     async function fetchData(endpoint, store) {
@@ -37,7 +39,7 @@
         }
 
         // Fetch existant modules
-        fetchData(`http://${backend_host}:${backend_port}/fetch_modules`, modules);
+        fetchData(`http://${backend_host}:${backend_port}/fetch_power_infos`, records);
     });
 </script>
 
@@ -51,7 +53,8 @@
 
 <style>
     * {
-        margin: 0px 5px 0px 5px;
+        /* margin: 0px 5px 0px 5px; */
+        margin: 0;
         padding: 0;
         box-sizing: border-box;
     }
@@ -63,10 +66,14 @@
     }
 
     .body {
-        margin: 0px 20px 0px 20px;
-        padding: 0;
+        /* margin: 0px 20px 0px 20px;
+        padding: 0; */
+        margin: 20px;
+        display: flex;
         width: 100%;
         height: 100%;
+        /* flex-direction: column;
+        align-items: center; */
     }
 
     .content {
@@ -74,7 +81,9 @@
         flex-direction: column;
         flex-grow: 1;
         overflow: auto;
-        height: 80%;
+        height: 100%;
+        /* width: 70%; */
+        width: 60%;
     }
 
     </style>

@@ -133,6 +133,7 @@
         ) {
             console.log("Module valide :", newModule);
             // Traitement à ajouter ici
+            // Actualiser la liste des modules
         } else {
             alert("Vérifier que les champs requis sont remplis, ou que l'id choisi n'est pas déjà utilisé");
         }
