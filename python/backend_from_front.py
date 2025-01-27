@@ -455,8 +455,8 @@ async def fetch_power_infos():
             
             # Change power_infos values every fetch
             for i in range(len(response["power_infos"])):
-                response["power_infos"][i]["power_flow"] = response["power_infos"][i]["power_flow"] * 1.5
-                response["power_infos"][i]["energy"] = response["power_infos"][i]["energy"] * 1.5
+                response["power_infos"][i]["power_flow"] = (response["power_infos"][i]["power_flow"] * 1.5) % 10
+                response["power_infos"][i]["energy"] = (response["power_infos"][i]["energy"] * 1.5) % 50
             
         else :
             response = await robot.get_power_flow()
