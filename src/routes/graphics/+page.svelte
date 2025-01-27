@@ -3,7 +3,6 @@
     import { writable } from "svelte/store";
     import Banner from "../Banner.svelte";
     import Graphic from "./Graphic.svelte";
-    // import data from "./data.js";
 
     import { backend_host, backend_port } from "../../config.js";
 
@@ -22,25 +21,6 @@
         data_array.set(Object.entries($data).map(([key, value]) => ({id: key, data: value})));
         console.log("Data_array ",$data_array);
     };
-//         [
-//   {
-//     id: 'Northeast',
-//     data: northeast
-//   },
-//   {
-//     id: 'Midwest',
-//     data: midwest
-//   },
-//   {
-//     id: 'South',
-//     data: south
-//   },
-//   {
-//     id: 'West',
-//     data: west
-//   }
-// ]
-    // }
 
     $: power_infos && data && data_array && updateData($power_infos);
 
@@ -64,6 +44,8 @@
     }
 
     let bannerHeight = 0;
+    let content_width = 0;
+    let content_height = 0;
 
     // Function that runs when the component is mounted
     onMount(async () => {
@@ -71,6 +53,12 @@
         const banner = document.querySelector(".banner");
         if (banner) {
             bannerHeight = banner.offsetHeight;
+        }
+
+        const content = document.querySelector(".content");
+        if (content) {
+            content_width = content.offsetWidth;
+            content_height = content.offsetHeight;
         }
 
         // Fetch power_infos data
@@ -81,19 +69,132 @@
             clearInterval(interval);
         };
     });
+
+
+    import { curveLinear, scaleLinear, scaleUtc } from 'd3';
+
+    // Global style
+    // let margin = 15; // the margin, in pixels (15)
+    // let marginTop = 15; // the top margin, in pixels (40)
+    // let marginRight = 15; // the right margin, in pixels (0)
+    // let marginBottom = 15; // the bottom margin, in pixels (30)
+    // let marginLeft = 15; // the left margin, in pixels (50)
+
+    const width = writable(0); // the outer width of the chart, in pixels (600)
+    let height = 0; // the outer height of the chart, in pixels (350)
+
+    let inset = 0; // inset (padding) the default range (0)
+    let insetTop = inset; // inset from top
+    let insetRight = inset; // inset from right
+    let insetBottom = inset; // inset from bottom
+    let insetLeft = inset; // inset from left
+
+    // let xRange = [marginLeft + insetLeft, width - marginRight - insetRight]; // [left, right]
+    // let yRange = [height - marginBottom - insetBottom, marginTop + insetTop]; // [bottom, top]
+
+    // Labels and formats
+    let xLabel = '-> time'; // a label for the y-axis ('')
+    let yLabel = '↑ Power flow (Watts flowing in (+) or out (-) of a component)'; // a label for the y-axis
+    let xFormat = ''; // a format specifier string for the y-axis
+    let yFormat = 'W'; // a format specifier string for the y-axis
+
+    let xType = scaleUtc; // type of x-scale
+    let yType = scaleLinear; // type of y-scale
+
+    let xScalefactor = $width / 80; //x-axis number of values
+    let yScalefactor = height / 40; //y-axis number of values
+    let curve = curveLinear; // method of interpolation between points
+
+    // Number of colors array elements must match number of data sets
+    let colors = ["#e42618","#239e99","#a04040","#4B1338", "#4b1338", "#656780"]; // fill color for dots && number of colors in fill array MUST match number of subsets in data ("#F50057","#42A5F5","#26A69A","#9575CD"])
+
+    // Inner style
+    let horizontalGrid = true; // show horizontal grid lines
+    let verticalGrid = true; // show vertical grid lines
+    let showDots = true; // whether dots should be displayed
+    let dotsFilled = true; // whether dots should be filled or outlined
+    let r = 4; // (fixed) radius of dots, in pixels (5)
+    let strokeWidth = 3; // stroke width of line, in pixels (5)
+    let strokeOpacity = 0.4; // stroke opacity of line (0.8)
+    let tooltipBackground = 'white'; // background color of tooltip
+    let tooltipTextColor = 'black'; // text color of tooltip
+
+    let strokeLinecap = 'round'; // stroke line cap of the line
+    let strokeLinejoin = 'round'; // stroke line join of the line
+    
+    let props = {
+        // margin,
+        // marginTop,
+        // marginRight,
+        // marginBottom,
+        // marginLeft,
+        width: {$width},
+        height,
+        inset,
+        insetTop,
+        insetRight,
+        insetBottom,
+        insetLeft,
+        // xRange,
+        // yRange,
+        xLabel,
+        yLabel,
+        xFormat,
+        yFormat,
+        xType,
+        yType,
+        xScalefactor,
+        yScalefactor,
+        curve,
+        colors,
+        horizontalGrid,
+        verticalGrid,
+        showDots,
+        dotsFilled,
+        r,
+        strokeWidth,
+        strokeOpacity,
+        tooltipBackground,
+        tooltipTextColor,
+        strokeLinecap,
+        strokeLinejoin
+    };
+
+    
+    function calculateGraphicDimensions(content_width, content_height) {
+        if (content_width > 0) {
+            props.width = Math.round(content_width - (15+10+10+15));
+            props.height = Math.round(0.4*props.width);
+            props.xScalefactor = props.width / 80;
+            props.yScalefactor = props.height / 40;
+            width.set(props.width);
+        }
+    }
+
+    $: calculateGraphicDimensions(content_width, content_height);
 </script>
 
 <div class="homepage">
     <Banner />
     <div class="body" style="margin-top: {bannerHeight}px;">
-        <div class="content">
-            {#if $data_array.length === 0}
-                <p>Loading...</p>
-            {:else}
-                {#key $data_array}  
-                    <Graphic data={$data_array} width={1000} height={500}/> 
-                {/key}
-            {/if}
+        <div class="sidebar">
+            <h2>Caractéristique</h2>
+            <h2>Modules</h2>
+        </div>
+
+
+
+
+        <div class="content" bind:clientWidth={content_width} bind:clientHeight={content_height}>
+            {#key $width}
+                {#if $data_array.length === 0}
+                    <p>Loading...</p>
+                {:else}
+                    {#key $data_array}  
+                        <Graphic data={$data_array} props={props}/> 
+                    {/key}
+                {/if}
+            {/key}
         </div>
     </div>
 </div>
@@ -112,21 +213,32 @@
     }
 
     .body {
-        margin: 20px;
+        margin:2%;
         display: flex;
-        width: 100%;
+        width: 96%;
         height: 100%;
-        flex-direction: column;
-        align-items: center;
+        font-family: "Roboto", sans-serif;
     }
 
-    .content {
+    .sidebar {
+        width: 30%;
+        padding: 20px;
+        background-color: #ffd7c9;
+        border-radius: 10px;
+        margin-right: 2%;
+    }
+
+    .sidebar h2 {
+        margin-bottom: 20px;
+        font-weight: bold;
+   }
+
+   .content {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
         overflow: auto;
         height: 100%;
-        width: 80%;
+        width: 60%;
     }
-
     </style>

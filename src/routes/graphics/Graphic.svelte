@@ -1,46 +1,55 @@
 <script>
-  import { line, curveLinear, Delaunay, range, scaleLinear, scaleUtc } from 'd3';
+  import {
+    line,
+    curveLinear,
+    Delaunay,
+    range,
+    scaleLinear,
+    scaleUtc,
+  } from "d3";
   export let data;
-  
-  const marginTop = 40; // the top margin, in pixels
-  const marginRight = 0; // the right margin, in pixels
-  const marginBottom = 30; // the bottom margin, in pixels
-  const marginLeft = 50; // the left margin, in pixels
-  const inset = 0; // inset the default range, in pixels
-  export let width = 600; // the outer width of the chart, in pixels
-  export let height = 350; // the outer height of the chart, in pixels
-  const xLabel = '-> time'; // a label for the y-axis
-  const yLabel = '↑ Power flow (Watts flowing in (+) or out (-) of a component)'; // a label for the y-axis
-  const xFormat = ''; // a format specifier string for the y-axis
-  const yFormat = 'W'; // a format specifier string for the y-axis
-  const horizontalGrid = true; // show horizontal grid lines
-  const verticalGrid = true; // show vertical grid lines
-  const colors = ["#e42618","#239e99","#a04040","#4B1338", "#4b1338", "#656780"]; // fill color for dots && number of colors in fill array MUST match number of subsets in data
-  const showDots = true; // whether dots should be displayed
-  const dotsFilled = true; // whether dots should be filled or outlined
-  const r = 5; // (fixed) radius of dots, in pixels
-  const strokeWidth = 5; // stroke width of line, in pixels
-  const strokeOpacity = 0.8; // stroke opacity of line
-  const tooltipBackground = 'white'; // background color of tooltip
-  const tooltipTextColor = 'black'; // text color of tooltip
-  const strokeLinecap = 'round'; // stroke line cap of the line
-  const strokeLinejoin = 'round'; // stroke line join of the line
-  const xScalefactor = width / 120; //x-axis number of values
-  const yScalefactor = height / 40; //y-axis number of values
-  const curve = curveLinear; // method of interpolation between points
-  const xType = scaleUtc; // type of x-scale
-  const insetTop = inset; // inset from top
-  const insetRight = inset; // inset from right
-  const insetBottom = inset; // inset fro bottom
-  const insetLeft = inset; // inset from left
-  const xRange = [marginLeft + insetLeft, width - marginRight - insetRight]; // [left, right]
-  const yType = scaleLinear; // type of y-scale
-  const yRange = [height - marginBottom - insetBottom, marginTop + insetTop]; // [bottom, top]
+  export let props;
 
-  let x, y, dotInfo, lines, xVals = [], yVals = [], points = [], subsets = [], colorVals = [];
-  
+  const margin = props.margin || 15; // the margin, in pixels (15)
+  const marginTop = props.marginTop || 40; // the top margin, in pixels (40)
+  const marginRight = props.marginRight || 0; // the right margin, in pixels (0)
+  const marginBottom = props.marginBottom || 30; // the bottom margin, in pixels (30)
+  const marginLeft = props.marginLeft || 59; // the left margin, in pixels (50)
+  const inset = props.inset || 0; // inset the default range, in pixels
+  const width = props.width || 600; // the outer width of the chart, in pixels
+  const height = props.height || 350; // the outer height of the chart, in pixels
+  const xLabel = props.xLabel || "->"; // a label for the x-axis
+  const yLabel = props.yLabel || "↑"; // a label for the y-axis
+  const xFormat = props.xFormat || ""; // a format specifier string for the x-axis
+  const yFormat = props.yFormat || ""; // a format specifier string for the y-axis
+  const xType = props.xType || scaleUtc; // type of x-scale
+  const yType = props.yType || scaleLinear; // type of y-scale
+  const horizontalGrid = props.horizontalGrid || true; // show horizontal grid lines
+  const verticalGrid = props.verticalGrid || true; // show vertical grid lines
+  const colors = props.colors || ["#F50057", "#42A5F5", "#26A69A", "#9575CD"]; // fill color for dots && number of colors in fill array MUST match number of subsets in data
+  const showDots = props.showDots || true; // whether dots should be displayed
+  const dotsFilled = props.dotsFilled || true; // whether dots should be filled or outlined
+  const r = props.r || 5; // (fixed) radius of dots, in pixels
+  const strokeWidth = props.strokeWidth || 5; // stroke width of line, in pixels
+  const strokeOpacity = props.strokeOpacity || 0.8; // stroke opacity of line
+  const tooltipBackground = props.tooltipBackground || "white"; // background color of tooltip
+  const tooltipTextColor = props.tooltipTextColor || "black"; // text color of tooltip
+  const strokeLinecap = props.strokeLinecap || "round"; // stroke line cap of the line
+  const strokeLinejoin = props.strokeLinejoin || "round"; // stroke line join of the line
+  const xScalefactor = props.xScalefactor || width / 80; //x-axis number of values
+  const yScalefactor = props.yScalefactor || height / 40; //y-axis number of values
+  const curve = props.curve || curveLinear; // method of interpolation between points
+  const insetTop = props.insetTop || inset; // inset from top
+  const insetRight = props.insetRight || inset; // inset from right
+  const insetBottom = props.insetBottom || inset; // inset from bottom
+  const insetLeft = props.insetLeft || inset; // inset from left
+  const xRange = props.xRange || [marginLeft + insetLeft,width - marginRight - insetRight]; // [left, right]
+  const yRange = props.yRange || [height - marginBottom - insetBottom,marginTop + insetTop]; // [bottom, top]
+
+  let x,y,dotInfo,lines,xVals = [],yVals = [],points = [],subsets = [],colorVals = [];
+
   // For a single set of data
-  if (!('data' in data[0])) {
+  if (!("data" in data[0])) {
     x = Object.keys(data[0])[0];
     y = Object.keys(data[0])[1];
     xVals = data.map((el) => el[x]);
@@ -49,7 +58,7 @@
     points = data.map((el) => ({
       x: el[x],
       y: el[y],
-      color: 0
+      color: 0,
     }));
   }
   // For data with subsets (NOTE: expects 'id' and 'data' keys)
@@ -57,19 +66,18 @@
     x = Object.keys(data[0]?.data[0])[0];
     y = Object.keys(data[0]?.data[0])[1];
     data.forEach((subset, i) => {
-    subset.data.forEach((coordinate) => {
-      xVals.push(coordinate[x]);
-      yVals.push(coordinate[y]);
-      colorVals.push(i);
-      points.push(
-        { 
+      subset.data.forEach((coordinate) => {
+        xVals.push(coordinate[x]);
+        yVals.push(coordinate[y]);
+        colorVals.push(i);
+        points.push({
           x: coordinate[x],
           y: coordinate[y],
-          color: i
+          color: i,
         });
+      });
+      subsets.push(subset.id);
     });
-    subsets.push(subset.id);
-  });
   }
 
   const I = range(xVals.length);
@@ -80,13 +88,15 @@
   const yDomain = [0, Math.max(...yVals)];
   const xScale = xType(xDomain, xRange);
   const yScale = yType(yDomain, yRange);
-  const niceY = scaleLinear().domain([0, Math.max(...yVals)]).nice();
+  const niceY = scaleLinear()
+    .domain([0, Math.max(...yVals)])
+    .nice();
 
   const chartLine = line()
-    .defined(i => cleanData[i])
+    .defined((i) => cleanData[i])
     .curve(curve)
-    .x(i => xScale(xVals[i]))
-    .y(i => yScale(yVals[i]));
+    .x((i) => xScale(xVals[i]))
+    .y((i) => yScale(yVals[i]));
 
   $: {
     lines = [];
@@ -96,76 +106,143 @@
     });
   }
 
-  const pointsScaled = points.map((el) => [xScale(el.x), yScale(el.y), el.color]);
+  const pointsScaled = points.map((el) => [
+    xScale(el.x),
+    yScale(el.y),
+    el.color,
+  ]);
   const delaunayGrid = Delaunay.from(pointsScaled);
   const voronoiGrid = delaunayGrid.voronoi([0, 0, width, height]);
-  
-  const  xTicks = xScale.ticks(xScalefactor);
-  const  xTicksFormatted = xTicks.map((el) => el.getFullYear());
-  const  yTicks = niceY.ticks(yScalefactor);
+
+  const xTicks = xScale.ticks(xScalefactor);
+  const xTicksFormatted = xTicks.map((el) => el.getFullYear());
+  const yTicks = niceY.ticks(yScalefactor);
 </script>
 
-<div class="chart-container">
-  <svg {width} {height} viewBox="0 0 {width} {height}"
-    cursor='crosshair'
-    on:mouseout="{() => dotInfo = null}"
-    on:blur="{() => dotInfo = null}"
+<div
+  class="chart-container"
+  style:margin=15px>
+  <!-- style:margin-top={marginTop}
+  style:margin-left={marginLeft}
+  style:margin-right={marginRight}
+  style:margin-bottom={marginBottom}
+> -->
+  <!-- Title -->
+  <h2>{yLabel} en fontion du {xLabel}</h2>
+
+  <!-- Y label -->
+  <label for="yLabel" style:margin-left=10px style:align-self=start>{yLabel}</label>
+
+  <!-- Graph background -->
+  <svg
+    {width}
+    {height}
+    viewBox="0 0 {width} {height}"
+    cursor="crosshair"
+    on:mouseout={() => (dotInfo = null)}
+    on:blur={() => (dotInfo = null)}
     role="img"
   >
     <!-- Dots (if enabled) -->
     {#if showDots && !dotInfo}
       {#each I as i}
-        <g class='dot' pointer-events='none'>
+        <g class="dot" pointer-events="none">
           <circle
             cx={xScale(xVals[i])}
             cy={yScale(yVals[i])}
-            r={r}
+            {r}
             stroke={colors[colorVals[i]]}
-            fill={dotsFilled ? colors[colorVals[i]] : 'none'}
+            fill={dotsFilled ? colors[colorVals[i]] : "none"}
           />
         </g>
       {/each}
     {/if}
     <!-- Chart lines -->
     {#each lines as subsetLine, i}
-    <g class='chartlines' pointer-events='none'>
-      {#if dotInfo}
-        <path class="line" fill='none' stroke-opacity={points[dotInfo[1]].color === i ? '1' : '0.1'} stroke={colors[i]} d={subsetLine} stroke-width={strokeWidth} stroke-linecap={strokeLinecap} stroke-linejoin={strokeLinejoin}/>
-        <circle cx={xScale(points[dotInfo[1]].x)} cy={yScale(points[dotInfo[1]].y)} r={r} stroke={colors[points[dotInfo[1]].color]} fill={dotsFilled} />
-      {:else}
-        <path class="line" fill='none' stroke={colors[i]} d={subsetLine}
-          stroke-opacity={strokeOpacity} stroke-width={strokeWidth} stroke-linecap={strokeLinecap} stroke-linejoin={strokeLinejoin} />
-      {/if}
-    </g>
+      <g class="chartlines" pointer-events="none">
+        {#if dotInfo}
+          <path
+            class="line"
+            fill="none"
+            stroke-opacity={points[dotInfo[1]].color === i ? "1" : "0.1"}
+            stroke={colors[i]}
+            d={subsetLine}
+            stroke-width={strokeWidth}
+            stroke-linecap={strokeLinecap}
+            stroke-linejoin={strokeLinejoin}
+          />
+          <circle
+            cx={xScale(points[dotInfo[1]].x)}
+            cy={yScale(points[dotInfo[1]].y)}
+            {r}
+            stroke={colors[points[dotInfo[1]].color]}
+            fill={dotsFilled}
+          />
+        {:else}
+          <path
+            class="line"
+            fill="none"
+            stroke={colors[i]}
+            d={subsetLine}
+            stroke-opacity={strokeOpacity}
+            stroke-width={strokeWidth}
+            stroke-linecap={strokeLinecap}
+            stroke-linejoin={strokeLinejoin}
+          />
+        {/if}
+      </g>
     {/each}
-    
+
     <!-- Y-axis and horizontal grid lines -->
-    <g class="y-axis" transform="translate({marginLeft}, 0)" pointer-events='none'>
-      <path class="domain" stroke="black" d="M{insetLeft}, {marginTop} V{height - marginBottom + 6}"/>
+    <g
+      class="y-axis"
+      transform="translate({marginLeft}, 0)"
+      pointer-events="none"
+    >
+      <path
+        class="domain"
+        stroke="black"
+        d="M{insetLeft}, {marginTop} V{height - marginBottom + 6}"
+      />
       {#each yTicks as tick, i}
         <g class="tick" transform="translate(0, {yScale(tick)})">
-          <line class="tick-start" x1={insetLeft - 6} x2={insetLeft}/>
+          <line class="tick-start" x1={insetLeft - 6} x2={insetLeft} />
           {#if horizontalGrid}
-            <line class="tick-grid" x1={insetLeft} x2={width - marginLeft - marginRight}/>
+            <line
+              class="tick-grid"
+              x1={insetLeft}
+              x2={width - marginLeft - marginRight}
+            />
           {/if}
-          <text  x="-{marginLeft}" y="5">{tick + yFormat}</text>
+          <text x="-{marginLeft}" y="5">{tick + yFormat}</text>
         </g>
       {/each}
-      <text x="-{marginLeft}" y={marginTop - 10}>{yLabel}</text>
+      <!-- <text x="-{marginLeft}" y={marginTop - 10}>^</text> -->
     </g>
     <!-- X-axis and vertical grid lines -->
-    <g class="x-axis" transform="translate(0,{height - marginBottom - insetBottom})" pointer-events='none'>
-      <path class="domain" stroke="black" d="M{marginLeft},0.5 H{width - marginRight}"/>
+    <g
+      class="x-axis"
+      transform="translate(0,{height - marginBottom - insetBottom})"
+      pointer-events="none"
+    >
+      <path
+        class="domain"
+        stroke="black"
+        d="M{marginLeft},0.5 H{width - marginRight}"
+      />
       {#each xTicks as tick, i}
         <g class="tick" transform="translate({xScale(tick)}, 0)">
-          <line class="tick-start" stroke='black' y2='6' />
+          <line class="tick-start" stroke="black" y2="6" />
           {#if verticalGrid}
             <line class="tick-grid" y2={-height + 70} />
           {/if}
-          <text font-size='8px' x={-marginLeft/4} y="20">{xTicksFormatted[i] + xFormat}</text>
+          <text font-size="8px" x={-marginLeft / 4} y="20"
+            >{xTicksFormatted[i] + xFormat}</text
+          >
         </g>
       {/each}
-      <text x={width - marginLeft - marginRight - 40} y={marginBottom}>{xLabel}</text>
+      <!-- <text x={width - marginLeft - marginRight - 40} y={marginBottom}
+        >{xLabel}</text> -->
     </g>
 
     {#each pointsScaled as point, i}
@@ -174,48 +251,79 @@
         fill-opacity="0"
         class="voronoi-cell"
         d={voronoiGrid.renderCell(i)}
-        on:mouseover="{(e) => dotInfo = [point, i, e] }"
-        on:focus="{(e) => dotInfo = [point, i, e]}"
+        on:mouseover={(e) => {(dotInfo = [point, i, e]); console.log(dotInfo)}}
+        on:focus={(e) => (dotInfo = [point, i, e])}
         role="button"
         tabindex="0"
       ></path>
     {/each}
+
+    <!-- Tooltip -->
   </svg>
+
+    {#if dotInfo}
+        <!-- style="left:{dotInfo[2].clientX + 2}px"
+        style:top="{dotInfo[2].clientY + 2}px"  -->
+      <div
+        class="tooltip"
+        style="left:{dotInfo[0][0] + 1}px"
+        style:top="{dotInfo[0][1] + 1}px" 
+        style:background-color={tooltipBackground}
+        style:color={tooltipTextColor}
+      >
+        {subsets ? subsets[points[dotInfo[1]].color] : ""}:
+        {points[dotInfo[1]].x.getFullYear()}: {points[dotInfo[1]].y.toFixed(
+          2,
+        )}{yFormat}
+      </div>
+    {/if}
+
+  <!-- X label -->
+  <label for="xLabel" style:align-self=end>{xLabel}</label>
+  {#if dotInfo}
+      <p>left:{dotInfo[0][0] + 1}px</p>
+      <p>top:{dotInfo[0][1] + 1}px</p>
+      <p>{subsets ? subsets[points[dotInfo[1]].color] : ""}</p>
+      <p>{points[dotInfo[1]].x.getFullYear()}: {points[dotInfo[1]].y.toFixed(2)}{yFormat}</p>
+      <p>{points[dotInfo[1]].x}</p>
+  {/if}
+
 </div>
-<!-- Tooltip -->
-{#if dotInfo}
-  <div class="tooltip" style='position:absolute; left:{dotInfo[2].clientX + 12}px; top:{dotInfo[2].clientY + 12}px; pointer-events:none; background-color:{tooltipBackground}; color:{tooltipTextColor}'>
-    {subsets ? subsets[points[dotInfo[1]].color] : ''}:  
-    {points[dotInfo[1]].x.getFullYear()}: {points[dotInfo[1]].y.toFixed(2)}{yFormat}
-  </div>
-{/if}
 
 <style>
   .chart-container {
     justify-content: center;
     align-items: center;
-    margin-top: 50px;
-    margin-left: 8
-    0px;
+    text-align: center;
+    display:flex;
+    flex-direction: column;
   }
-  svg {
-    max-width: 100%;
-    height: auto;
-    height: "intrinsic";
-    margin: auto;
+
+  .chart-container h2 {
+    margin-bottom: 10px;
+    font-weight: bold;
   }
-  path {
-    fill: "green"
-  }
+
   .y-axis {
-    font-size: "10px";
-    font-family: sans-serif;
-    text-anchor: "end";
+    font-size: 10px;
+    font-family: "Roboto", sans-serif;
+    text-anchor: start;
   }
+
+  svg {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  
+  path {
+    fill: "green";
+  }
+
   .x-axis {
-    font-size: "10px";
-    font-family: sans-serif;
-    text-anchor: "end";
+    padding-top: 3px;
+    font-size: 10px;
+    font-family: "Roboto", sans-serif;
+    text-anchor: end;
   }
   .tick {
     opacity: 1;
@@ -227,7 +335,7 @@
   .tick-grid {
     stroke: black;
     stroke-opacity: 0.2;
-    font-size: "11px";
+    font-size: 11px;
     color: black;
   }
   .tick text {
@@ -235,9 +343,14 @@
     text-anchor: start;
   }
 
-  .tooltip{
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
     border-radius: 5px;
     padding: 5px;
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    box-shadow:
+      rgba(0, 0, 0, 0.4) 0px 2px 4px,
+      rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+      rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
   }
 </style>

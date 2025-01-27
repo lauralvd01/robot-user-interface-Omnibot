@@ -320,7 +320,6 @@
 
 <style>
     * {
-        /* margin: 0px 5px 0px 5px; */
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -333,18 +332,13 @@
     }
 
     .body {
-        /* margin: 0px 20px 0px 20px;
-        padding: 0; */
-        margin: 20px;
+        margin: 2%;
         display: flex;
-        width: 100%;
+        width: 96%;
         height: 100%;
-        /* flex-direction: column;
-        align-items: center; */
     }
 
     .sidebar {
-        /* width: 25%; */
         width: 30%;
         padding: 20px;
         background-color: #ffd7c9;
@@ -352,7 +346,7 @@
         /* border-right: 1px solid #ddd;
         box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); */
         /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
-        margin-right: 20px;
+        margin-right: 2%;
     }
 
     .sidebar h2 {
@@ -441,79 +435,12 @@
     }
 
 
-    /* .sidebar h3 {
-        margin-bottom: 20px;
-        color: #333;
-    }
-
-    .sidebar form {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    .form-group input, .form-group select, .form-group button {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-
-    .form-group ul {
-        list-style: none;
-        padding: 0;
-    }
-
-    .form-group ul li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px 0;
-    } */
-/* 
-    .sidebar label {
-        margin-bottom: 10px;
-        font-size: 14px;
-        color: #555;
-    }
-
-    .sidebar input, .sidebar select, .sidebar button { */
-    /* .sidebar button {
-        margin-top: 5px;
-        margin-bottom: 15px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 14px;
-
-        background-color: #FF662E;
-        color: #fff;
-        border: none;
-        cursor: pointer;
-    }
-
-    .sidebar button:hover {
-        background-color: #e55a27;
-        font-weight: bold;
-    } */
-
     .content {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
         overflow: auto;
         height: 100%;
-        /* width: 70%; */
         width: 60%;
     }
 
@@ -551,14 +478,6 @@
         margin-left: 5%;
         padding-left: 3%; */
     }
-
-    /* .inline-enum li::before {
-            content: "•";
-            color: white;
-            display: inline-block;
-            width: 1em;
-            margin-left: -1em;
-    } */
 
     .picto {
         /* height: 80%;
