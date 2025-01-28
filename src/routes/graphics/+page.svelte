@@ -74,7 +74,6 @@
     import { curveLinear, scaleLinear, scaleUtc } from 'd3';
 
     // Global style
-    // let margin = 15; // the margin, in pixels (15)
     // let marginTop = 15; // the top margin, in pixels (40)
     // let marginRight = 15; // the right margin, in pixels (0)
     // let marginBottom = 15; // the bottom margin, in pixels (30)
@@ -83,18 +82,16 @@
     const width = writable(0); // the outer width of the chart, in pixels (600)
     let height = 0; // the outer height of the chart, in pixels (350)
 
-    let inset = 0; // inset (padding) the default range (0)
+    let inset = 0; // inset the default range (padding) (0)
     let insetTop = inset; // inset from top
     let insetRight = inset; // inset from right
     let insetBottom = inset; // inset from bottom
     let insetLeft = inset; // inset from left
 
-    // let xRange = [marginLeft + insetLeft, width - marginRight - insetRight]; // [left, right]
-    // let yRange = [height - marginBottom - insetBottom, marginTop + insetTop]; // [bottom, top]
-
     // Labels and formats
+    let title = 'Power flow (Watts flowing in (+) or (out) of a component) over time'; // a title for the chart ('')
     let xLabel = '-> time'; // a label for the y-axis ('')
-    let yLabel = '↑ Power flow (Watts flowing in (+) or out (-) of a component)'; // a label for the y-axis
+    let yLabel = '↑ Power flow (Watts)'; // a label for the y-axis
     let xFormat = ''; // a format specifier string for the y-axis
     let yFormat = 'W'; // a format specifier string for the y-axis
 
@@ -123,11 +120,10 @@
     let strokeLinejoin = 'round'; // stroke line join of the line
     
     let props = {
-        // margin,
         // marginTop,
         // marginRight,
         // marginBottom,
-        // marginLeft,
+        marginLeft: 35,
         width: {$width},
         height,
         inset,
@@ -135,8 +131,7 @@
         insetRight,
         insetBottom,
         insetLeft,
-        // xRange,
-        // yRange,
+        title,
         xLabel,
         yLabel,
         xFormat,
