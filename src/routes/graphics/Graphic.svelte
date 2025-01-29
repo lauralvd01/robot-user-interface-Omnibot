@@ -96,8 +96,10 @@
 
 
   // Create functions to scale x and y values to the chart width and height
+  const Ymin = Math.min(...yVals)
+  const Ymax = Math.max(...yVals);
   const xDomain = [xVals[0], xVals[xVals.length - 1]]; // Assuming xVals is sorted : [ first x value, last x value ] = [ min x value, max x value ]
-  const yDomain = [0, Math.max(...yVals)]; // Assuming all yVals are positive : [ 0, max y value ]
+  const yDomain = [Ymin, Ymax]; // Assuming all yVals are positive : [ 0, max y value ]
   // xRange = [ left, right ] x_positions of the x axis ( in pixels inside the (0 0 width height) viewbox)
   // yRange = [ bottom, top ] y_positions of the y axis ( in pixels inside the (0 0 width height) viewbox)
   const xScale = xType(xDomain, xRange); // xScale(x_value) = x_position in the svg, xScale.invert(x_position) = x_value
@@ -105,7 +107,7 @@
   
   // Assuming yType is scaleLinear, get a visual y scale that extends the domain so that it starts and ends on rounds values
   const niceY = scaleLinear()
-    .domain([0, Math.max(...yVals)])
+    .domain(yDomain)
     .nice();
   
   // Get the list of ticks (values for the legend) for the x and y axis
@@ -224,7 +226,7 @@
         <path
           class="domain"
           stroke="black"
-          d="M0, 0 V{height - marginBottom + 8}"
+          d="M0, 0 V{height - marginBottom + 16}"
         />
         {#each yTicks as tick, i}
           <g class="tick" transform="translate(0, {yScale(tick)})">
@@ -240,13 +242,13 @@
       <!-- X-axis and vertical grid lines -->
       <g
         class="x-axis"
-        transform="translate(0,{height - marginBottom})"
+        transform="translate(0,{height - marginBottom + 5})"
         pointer-events="none"
       >
         <path
           class="domain"
           stroke="black"
-          d="M{marginLeft},0.5 H{width - marginRight}"
+          d="M{marginLeft},0.5 H{width - marginRight + 8}"
         />
         {#each xTicks as tick, i}
           <g class="tick" transform="translate({xScale(tick)}, 0)">
@@ -279,7 +281,7 @@
     {#if dotInfo}
       <div
         class="tooltip"
-        style:left="{Math.max(-marginLeft,xScale(points[dotInfo[1]].x)-100)}px"
+        style:left="{Math.max(50-marginLeft,xScale(points[dotInfo[1]].x)-100)}px"
         style:top="{yScale(points[dotInfo[1]].y)-40}px" 
         style:background-color={tooltipBackground}
         style:color={tooltipTextColor}
@@ -357,6 +359,5 @@
       rgba(0, 0, 0, 0.4) 0px 2px 4px,
       rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
       rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
-    max-width: 100px;
   }
 </style>
