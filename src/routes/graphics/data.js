@@ -89,21 +89,240 @@ const midwest = csvConvert(csvMidwest);
 const south = csvConvert(csvSouth);
 const west = csvConvert(csvWest);
 
-export default [
+// export default [
+//   {
+//     id: 'Northeast',
+//     data: northeast
+//   },
+//   {
+//     id: 'Midwest',
+//     data: midwest
+//   },
+//   {
+//     id: 'South',
+//     data: south
+//   },
+//   {
+//     id: 'West',
+//     data: west
+//   }
+// ]
+
+const data = [
   {
-    id: 'Northeast',
-    data: northeast
+      "id": "1",
+      "data": [
+          {
+              "date": "2025-01-29T07:57:13.563Z",
+              "power_flow": 4.952049864301216
+          },
+          {
+              "date": "2025-01-29T07:57:18.561Z",
+              "power_flow": 1.1421121946777362
+          },
+          {
+              "date": "2025-01-29T07:57:23.557Z",
+              "power_flow": 2.5697524380249064
+          },
+          {
+              "date": "2025-01-29T07:57:28.563Z",
+              "power_flow": 5.781942985556039
+          },
+          {
+              "date": "2025-01-29T07:57:33.563Z",
+              "power_flow": 3.0093717175010894
+          },
+          {
+              "date": "2025-01-29T07:57:38.565Z",
+              "power_flow": 6.771086364377451
+          }
+      ]
   },
   {
-    id: 'Midwest',
-    data: midwest
+      "id": "2",
+      "data": [
+          {
+              "date": "2025-01-29T07:57:13.563Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:18.561Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:23.557Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:28.563Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:33.563Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:38.565Z",
+              "power_flow": 0
+          }
+      ]
   },
   {
-    id: 'South',
-    data: south
+      "id": "4",
+      "data": [
+          {
+              "date": "2025-01-29T07:57:13.563Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:18.561Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:23.557Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:28.563Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:33.563Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:38.565Z",
+              "power_flow": 0
+          }
+      ]
   },
   {
-    id: 'West',
-    data: west
+      "id": "6",
+      "data": [
+          {
+              "date": "2025-01-29T07:57:13.563Z",
+              "power_flow": 0.31357345307100104
+          },
+          {
+              "date": "2025-01-29T07:57:18.561Z",
+              "power_flow": 0.7055402694097523
+          },
+          {
+              "date": "2025-01-29T07:57:23.557Z",
+              "power_flow": 1.5874656061719428
+          },
+          {
+              "date": "2025-01-29T07:57:28.563Z",
+              "power_flow": 3.5717976138868712
+          },
+          {
+              "date": "2025-01-29T07:57:33.563Z",
+              "power_flow": 8.036544631245459
+          },
+          {
+              "date": "2025-01-29T07:57:38.565Z",
+              "power_flow": 3.082225420302282
+          }
+      ]
+  },
+  {
+      "id": "7",
+      "data": [
+          {
+              "date": "2025-01-29T07:57:13.563Z",
+              "power_flow": 2.558412658205498
+          },
+          {
+              "date": "2025-01-29T07:57:18.561Z",
+              "power_flow": 5.75642848096237
+          },
+          {
+              "date": "2025-01-29T07:57:23.557Z",
+              "power_flow": 2.9519640821653326
+          },
+          {
+              "date": "2025-01-29T07:57:28.563Z",
+              "power_flow": 6.641919184871998
+          },
+          {
+              "date": "2025-01-29T07:57:33.563Z",
+              "power_flow": 4.944318165961995
+          },
+          {
+              "date": "2025-01-29T07:57:38.565Z",
+              "power_flow": 1.1247158734144893
+          }
+      ]
+  },
+  {
+      "id": "9",
+      "data": [
+          {
+              "date": "2025-01-29T07:57:13.563Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:18.561Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:23.557Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:28.563Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:33.563Z",
+              "power_flow": 0
+          },
+          {
+              "date": "2025-01-29T07:57:38.565Z",
+              "power_flow": 0
+          }
+      ]
   }
 ]
+
+const power_infos = [
+  {
+      "slot_id": 6,
+      "name": "Omniwheel on slot 6",
+      "power_flow": 3.082225420302282,
+      "energy": 42.36751010036096
+  },
+  {
+      "slot_id": 9,
+      "name": "Charger on slot 9",
+      "power_flow": 0,
+      "energy": 0
+  },
+  {
+      "slot_id": 2,
+      "name": "Omniwheel on slot 2",
+      "power_flow": 0,
+      "energy": 5.150145009625703
+  },
+  {
+      "slot_id": 1,
+      "name": "Battery on slot 1",
+      "power_flow": 6.771086364377451,
+      "energy": 4.642944121733308
+  },
+  {
+      "slot_id": 7,
+      "name": "Compute on slot 7",
+      "power_flow": 1.1247158734144893,
+      "energy": 24.511175559833646
+  },
+  {
+      "slot_id": 4,
+      "name": "Omniwheel on slot 4",
+      "power_flow": 0,
+      "energy": 0
+  }
+]
+
+
+export default data;

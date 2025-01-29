@@ -7,16 +7,19 @@
     scaleLinear,
     scaleUtc,
   } from "d3";
-  export let data;
+
+  // export let data;
+  import data from "./data.js";
+  console.log(data);
+
   export let props;
 
   const marginTop = props.marginTop || 40; // the top margin, in pixels (40)
-  const marginRight = props.marginRight || 0; // the right margin, in pixels (0)
-  const marginBottom = props.marginBottom || 30; // the bottom margin, in pixels (30)
-  const marginLeft = props.marginLeft || 50; // the left margin, in pixels (50)
-  const inset = props.inset || 0; // inset the default range, in pixels
-  const width = props.width || 600; // the outer width of the chart, in pixels
-  const height = props.height || 350; // the outer height of the chart, in pixels
+  const marginRight = props.marginRight || 5; // the right margin, in pixels (0)
+  const marginBottom = props.marginBottom || 35; // the bottom margin, in pixels (30)
+  const marginLeft = props.marginLeft || 35; // the left margin, in pixels (50)
+  const width = props.width || 550; // the outer width of the chart, in pixels
+  const height = props.height || Math.round(0.4*width); // the outer height of the chart, in pixels
   const title = props.title || "Graphic title"; // a title for the chart
   const xLabel = props.xLabel || "->"; // a label for the x-axis
   const yLabel = props.yLabel || "↑"; // a label for the y-axis
@@ -39,12 +42,10 @@
   const xScalefactor = props.xScalefactor || width / 80; //x-axis number of values
   const yScalefactor = props.yScalefactor || height / 40; //y-axis number of values
   const curve = props.curve || curveLinear; // method of interpolation between points
-  const insetTop = props.insetTop || inset; // inset from top
-  const insetRight = props.insetRight || inset; // inset from right
-  const insetBottom = props.insetBottom || inset; // inset from bottom
-  const insetLeft = props.insetLeft || inset; // inset from left
-  const xRange = props.xRange || [marginLeft + insetLeft,width - marginRight - insetRight]; // [left, right]
-  const yRange = props.yRange || [height - marginBottom - insetBottom,marginTop + insetTop]; // [bottom, top]
+  const xRange = props.xRange || [marginLeft, width - marginRight]; // [left, right]
+  const yRange = props.yRange || [height - marginBottom, marginTop]; // [bottom, top]
+  // xRange = [ left, right ] x_positions of the x axis ( in pixels inside the (0 0 width height) viewbox)
+  // yRange = [ bottom, top ] y_positions of the y axis ( in pixels inside the (0 0 width height) viewbox)
 
   let x,y,dotInfo,lines,xVals = [],yVals = [],points = [],subsets = [],colorVals = [];
 
@@ -62,61 +63,87 @@
     }));
   }
   // For data with subsets (NOTE: expects 'id' and 'data' keys)
+
+  // One dataset = "title_X,title_Y\nvalue_X_1,value_Y_1\nvalue_X_2,value_Y_2\n..."
+  // Converted datasets array = [ { id: 1, data: [ { title_X: value_X_1, title_Y: value_Y_1 }, ... ] }, ... ]  
   else {
-    x = Object.keys(data[0]?.data[0])[0];
-    y = Object.keys(data[0]?.data[0])[1];
+    x = Object.keys(data[0]?.data[0])[0]; // title_X
+    y = Object.keys(data[0]?.data[0])[1]; // title_Y
     data.forEach((subset, i) => {
+      // subset = { id: 1, data: [ { title_X: value_X_1, title_Y: value_Y_1 }, ... ] }
+      // i = subset index in data array
       subset.data.forEach((coordinate) => {
-        xVals.push(coordinate[x]);
-        yVals.push(coordinate[y]);
-        colorVals.push(i);
+        // coordinate = { title_X: value_X_n, title_Y: value_Y_n }
+        // coordinate[x] = coordinate[title_X] = value_X_n
+        xVals.push(new Date(coordinate[x])); // xVals = [ value_X_1, value_X_2, ... ] all X_values for all subsets, for all datasets        ## Assuming x values are dates
+        yVals.push(coordinate[y]); // yVals = [ value_Y_1, value_Y_2, ... ] all Y_values for all subsets, for all datasets
+        // Associate each point of the dataset with the dataset color : color of subset data[index] = colors[index]
+        colorVals.push(i); // colorVals = [ 0, 0, ... ], lenght = lenght(subset.data), then [ 1, 1, ... ], then [ 2, 2, ... ] for each dataset
+        // Create a point with associated color for each coordinate of the subset, for all datasets
         points.push({
-          x: coordinate[x],
+          x: new Date(coordinate[x]), // Assuming x values are dates
           y: coordinate[y],
           color: i,
         });
       });
-      subsets.push(subset.id);
+      subsets.push(subset.id); // subsets = [ 1, 2, ... ] all subset ids
     });
   }
 
-  const I = range(xVals.length);
-  const gaps = (d, i) => !isNaN(xVals[i]) && !isNaN(yVals[i]);
-  const cleanData = points.map(gaps);
+  const I = range(xVals.length); // list of integers betwwen 0 (included) and xVals.length (excluded)
+  const gaps = (d, i) => !isNaN(xVals[i]) && !isNaN(yVals[i]); // check if xVals[i] and yVals[i] data are correct numbers 
+  const cleanData = points.map(gaps); // cleanData = [ true, true, ... ] if xVals[i] and yVals[i] are correct numbers, false otherwise
 
-  const xDomain = [xVals[0], xVals[xVals.length - 1]];
-  const yDomain = [0, Math.max(...yVals)];
-  const xScale = xType(xDomain, xRange);
-  const yScale = yType(yDomain, yRange);
+
+  // Create functions to scale x and y values to the chart width and height
+  const xDomain = [xVals[0], xVals[xVals.length - 1]]; // Assuming xVals is sorted : [ first x value, last x value ] = [ min x value, max x value ]
+  const yDomain = [0, Math.max(...yVals)]; // Assuming all yVals are positive : [ 0, max y value ]
+  // xRange = [ left, right ] x_positions of the x axis ( in pixels inside the (0 0 width height) viewbox)
+  // yRange = [ bottom, top ] y_positions of the y axis ( in pixels inside the (0 0 width height) viewbox)
+  const xScale = xType(xDomain, xRange); // xScale(x_value) = x_position in the svg, xScale.invert(x_position) = x_value
+  const yScale = yType(yDomain, yRange); // yScale(y_value) = y_position in the svg, yScale.invert(y_position) = y_value
+  
+  // Assuming yType is scaleLinear, get a visual y scale that extends the domain so that it starts and ends on rounds values
   const niceY = scaleLinear()
     .domain([0, Math.max(...yVals)])
     .nice();
+  
+  // Get the list of ticks (values for the legend) for the x and y axis
+  const xTicks = xScale.ticks(xScalefactor); // Scalefactor = number of ticks wished (may differ as ticks are restricted to rounded-values)
+  const xTicksFormatted = xTicks.map((el) => el.getMinutes() + "min" + el.getSeconds() + "s");
+  const yTicks = niceY.ticks(yScalefactor); // Scalefactor = number of ticks wished (may differ as ticks are restricted to rounded-values)
 
+  // Create a function that takes an array of indexes as an input to draw a curve line between points designed by these indexes
+  // I is the array of the xVals, yVals and colorVals indexes. One element i for I array designates a point in the chart : xVals[i], yVals[i], colorVals[i]
   const chartLine = line()
-    .defined((i) => cleanData[i])
-    .curve(curve)
-    .x((i) => xScale(xVals[i]))
-    .y((i) => yScale(yVals[i]));
+    .defined((i) => cleanData[i]) // draw the line if xVals[i] and yVals[i] are correct numbers
+    .curve(curve) // curve type
+    .x((i) => xScale(xVals[i])) // x pixel position of the point indexed by i
+    .y((i) => yScale(yVals[i])); // y pixel position of the point indexed by i
 
+  // Every time there is a change, draw the lines
   $: {
     lines = [];
-    colors.forEach((color, j) => {
-      const filteredI = I.filter((el, i) => colorVals[i] === j);
-      lines.push(chartLine(filteredI));
+    colors.forEach((color, j) => { // for each color in colors, indexed by j (colors[j] = color of the dataset j --> for a point in the dataset j, colorVals[i] = j)
+      const filteredI = I.filter((el, i) => colorVals[i] === j); // get the indexes i of the points xVals[i], yVals[i], colorVals[i] that have the right color (colorVals[i] === j)
+      lines.push(chartLine(filteredI)); // draw the line between the points indexed by filteredI
     });
   }
 
+  // Get the list of points pixel positions and color
   const pointsScaled = points.map((el) => [
     xScale(el.x),
     yScale(el.y),
     el.color,
   ]);
-  const delaunayGrid = Delaunay.from(pointsScaled);
-  const voronoiGrid = delaunayGrid.voronoi([0, 0, width, height]);
 
-  const xTicks = xScale.ticks(xScalefactor);
-  const xTicksFormatted = xTicks.map((el) => el.getMinutes() + "min" + el.getSeconds() + "s");
-  const yTicks = niceY.ticks(yScalefactor);
+  // Create a Delaunay grid and a Voronoi grid from the points
+  // Given a set of points (here positionned on the svg by pixels x and y), the Voronoi diagram partitions the plane 
+  // into cells. These cells represent the region of the plane that is closest to the corresponding point.
+  // This will allow to detect the closest point to the mouse cursor and display a tooltip
+  const delaunayGrid = Delaunay.from(pointsScaled);
+  const voronoiGrid = delaunayGrid.voronoi([0, 0, width, height]); // [Xmin, Ymin, Xmax, Ymax]
+
 </script>
 
 <div class="chart-container">
@@ -126,8 +153,8 @@
   <!-- Y label -->
   <label for="yLabel" style:margin-left=10px style:align-self=start>{yLabel}</label>
 
-  <div style:position=relative>
-    <!-- Graph background -->
+  <div style:position=relative style:margin-top=10px>
+    <!-- Graph background : a box of pixels going from x=0, y=0 (top left) to x=width, y=height (bottom right) -->
     <svg
       {width}
       {height}
@@ -151,6 +178,7 @@
           </g>
         {/each}
       {/if}
+
       <!-- Chart lines -->
       {#each lines as subsetLine, i}
         <g class="chartlines" pointer-events="none">
@@ -196,26 +224,23 @@
         <path
           class="domain"
           stroke="black"
-          d="M{insetLeft}, {marginTop} V{height - marginBottom + 6}"
+          d="M0, 0 V{height - marginBottom + 8}"
         />
         {#each yTicks as tick, i}
           <g class="tick" transform="translate(0, {yScale(tick)})">
-            <line class="tick-start" x1={insetLeft - 6} x2={insetLeft} />
+            <line class="tick-start" x1={-8} />
             {#if horizontalGrid}
-              <line
-                class="tick-grid"
-                x1={insetLeft}
-                x2={width - marginLeft - marginRight}
-              />
+              <line class="tick-grid" x2={width - marginRight}/>
             {/if}
             <text x="-{marginLeft}" y="5">{tick + yFormat}</text>
           </g>
         {/each}
       </g>
+
       <!-- X-axis and vertical grid lines -->
       <g
         class="x-axis"
-        transform="translate(0,{height - marginBottom - insetBottom})"
+        transform="translate(0,{height - marginBottom})"
         pointer-events="none"
       >
         <path
@@ -225,17 +250,16 @@
         />
         {#each xTicks as tick, i}
           <g class="tick" transform="translate({xScale(tick)}, 0)">
-            <line class="tick-start" stroke="black" y2="6" />
+            <line class="tick-start" stroke="black" y2="8" />
             {#if verticalGrid}
-              <line class="tick-grid" y2={-height + 70} />
+              <line class="tick-grid" y2={- (height - marginBottom)} />
             {/if}
-            <text font-size="8px" x={-marginLeft / 4} y="20"
-              >{xTicksFormatted[i] + xFormat}</text
-            >
+            <text font-size="8px" x={-marginLeft / 4} y="20">{xTicksFormatted[i] + xFormat}</text>
           </g>
         {/each}
       </g>
 
+      <!-- Voronoi grid for mouse events -->
       {#each pointsScaled as point, i}
         <path
           stroke="none"
@@ -255,7 +279,7 @@
     {#if dotInfo}
       <div
         class="tooltip"
-        style:left="{Math.max(100-marginLeft,xScale(points[dotInfo[1]].x)-100)}px"
+        style:left="{Math.max(-marginLeft,xScale(points[dotInfo[1]].x)-100)}px"
         style:top="{yScale(points[dotInfo[1]].y)-40}px" 
         style:background-color={tooltipBackground}
         style:color={tooltipTextColor}
