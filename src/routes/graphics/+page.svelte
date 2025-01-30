@@ -125,6 +125,26 @@
     }
 
     $: calculateGraphicDimensions(content_width, content_height);
+
+    let svgRef = null;
+
+    function downloadSvg() {
+        console.log("svgRef", svgRef);
+        if (svgRef) {
+            const htmlStr = svgRef.outerHTML;
+            const blob = new Blob([htmlStr], { type: "image/svg+xml" });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.setAttribute("download", "chart.svg");
+            a.setAttribute("href", url);
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+    }
 </script>
 
 <div class="homepage">
@@ -148,7 +168,8 @@
                     {/key}
                 {/if} -->
                 {#if props.width !== 0}
-                    <Graphic props={props}/>
+                    <Graphic props={props} bind:svgRef={svgRef}/>
+                    <button on:click={downloadSvg}>Download</button>
                 {/if}
             {/key}
         </div>

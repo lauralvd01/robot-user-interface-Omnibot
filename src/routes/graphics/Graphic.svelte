@@ -90,6 +90,13 @@
     });
   }
 
+  const date = points[0].x;
+  const year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  if (month < 10) month = "0" + month;
+  const day = date.getDate();
+  const hour = date.getHours();
+
   const I = range(xVals.length); // list of integers betwwen 0 (included) and xVals.length (excluded)
   const gaps = (d, i) => !isNaN(xVals[i]) && !isNaN(yVals[i]); // check if xVals[i] and yVals[i] data are correct numbers 
   const cleanData = points.map(gaps); // cleanData = [ true, true, ... ] if xVals[i] and yVals[i] are correct numbers, false otherwise
@@ -146,6 +153,7 @@
   const delaunayGrid = Delaunay.from(pointsScaled);
   const voronoiGrid = delaunayGrid.voronoi([0, 0, width, height]); // [Xmin, Ymin, Xmax, Ymax]
 
+  export let svgRef;
 </script>
 
 <div class="chart-container">
@@ -165,7 +173,14 @@
       on:mouseout={() => (dotInfo = null)}
       on:blur={() => (dotInfo = null)}
       role="img"
+      xmlns="http://www.w3.org/2000/svg"
+      bind:this={svgRef}
     >
+
+    <text class="hidden-title" x={marginLeft + 5} y={16} font-size="14px" color="black" font-family="Roboto">{title}</text>
+    <text class="hidden-title" x={marginLeft + 5} y={marginTop + 12} font-size="12px" color="black" font-family="Roboto">{yLabel}</text>
+    <text class="hidden-title" x={width - marginRight} y={height} font-size="12px" color="black" font-family="Roboto" text-anchor="end">{xLabel} ({year}/{month}/{day} . {hour}h)</text>
+
       <!-- Dots (if enabled) -->
       {#if showDots && !dotInfo}
         {#each I as i}
@@ -230,11 +245,11 @@
         />
         {#each yTicks as tick, i}
           <g class="tick" transform="translate(0, {yScale(tick)})">
-            <line class="tick-start" x1={-8} />
+            <line class="tick-start" stroke="black" x1={-8}/>
             {#if horizontalGrid}
-              <line class="tick-grid" x2={width - marginRight}/>
+              <line class="tick-grid" stroke=black stroke-opacity="0.2" x2={width - marginRight}/>
             {/if}
-            <text x="-{marginLeft}" y="5">{tick + yFormat}</text>
+            <text font-size="11px" x="-{marginLeft}" y="5">{tick + yFormat}</text>
           </g>
         {/each}
       </g>
@@ -254,9 +269,9 @@
           <g class="tick" transform="translate({xScale(tick)}, 0)">
             <line class="tick-start" stroke="black" y2="8" />
             {#if verticalGrid}
-              <line class="tick-grid" y2={- (height - marginBottom)} />
+              <line class="tick-grid" stroke=black stroke-opacity="0.2" y2={- (height - marginBottom)} />
             {/if}
-            <text font-size="8px" x={-marginLeft / 4} y="20">{xTicksFormatted[i] + xFormat}</text>
+            <text font-size="8px" x={-marginLeft / 4} y="18">{xTicksFormatted[i] + xFormat}</text>
           </g>
         {/each}
       </g>
@@ -293,7 +308,7 @@
   </div>
 
   <!-- X label -->
-  <label for="xLabel" style:align-self=end>{xLabel} ({points[0].x.getFullYear()}/{points[0].x.getMonth()+1}/{points[0].x.getDate()} {points[0].x.getHours()}h)</label>
+  <label for="xLabel" style:align-self=end>{xLabel} ({year}/{month}/{day} . {hour}h)</label>
 </div>
 
 <style>
@@ -311,43 +326,47 @@
     font-weight: bold;
   }
 
-  .y-axis {
-    font-size: 10px;
-    font-family: "Roboto", sans-serif;
-    text-anchor: start;
-  }
-
   svg {
     margin-left: 10px;
     margin-right: 10px;
   }
   
+  .hidden-title {
+    display: none;
+  }
+
   path {
     fill: "green";
   }
 
-  .x-axis {
-    font-size: 10px;
+  .y-axis {
+    font-size: "10px";
     font-family: "Roboto", sans-serif;
-    text-anchor: end;
+    text-anchor: "start";
+  }
+
+  .x-axis {
+    font-size: "10px";
+    font-family: "Roboto", sans-serif;
+    text-anchor: "end";
   }
 
   .tick {
-    opacity: 1;
+    opacity: "1";
   }
+
   .tick-start {
-    stroke: black;
-    stroke-opacity: 1;
+    stroke: "black";
+    stroke-opacity: "1";
   }
+  
   .tick-grid {
     stroke: black;
-    stroke-opacity: 0.2;
-    font-size: 11px;
-    color: black;
+    stroke-opacity: "0.2";
   }
   .tick text {
-    fill: black;
-    text-anchor: start;
+    fill: "black";
+    text-anchor: "start";
   }
 
   .tooltip {
