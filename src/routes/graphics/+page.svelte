@@ -1,10 +1,33 @@
 <script>
     import { onMount } from "svelte";
-    import { writable } from "svelte/store";
+    import { writable, derived } from "svelte/store";
     import Banner from "../Banner.svelte";
     import Graphic from "./Graphic.svelte";
 
+    
+    import {data, connected_modules} from "./data.js";
+
     import { backend_host, backend_port } from "../../config.js";
+    
+    // // Send a request to the backend to get the data
+    // async function fetchData(endpoint, store) {
+    //     try {
+    //         console.log(`Fetching ${endpoint.split("fetch_")[1]} ...`);
+    //         const response = await fetch(endpoint); // Send a request to the backend
+    //         const data = await response.json(endpoint); // Parse response and get data as a JSON object
+    //         // console.log(data);
+    //         if (data.ok === true) {
+    //             store.set(data.data); // Set the store with the data received
+    //         } else {
+    //             console.error("Error:", data.error);
+    //             store.set(data.default); // Set the store with the default value
+    //         }
+    //     } catch (error) {
+    //         console.error("Error:", error);
+    //         store.set([]); // Set the store with an empty array
+    //     }
+    // }
+
 
     // const power_infos = writable([]);
     // const data = writable({});
@@ -25,24 +48,54 @@
 
     // $: power_infos && data && data_array && updateData($power_infos);
 
-    // // Send a request to the backend to get the data
-    // async function fetchData(endpoint, store) {
-    //     try {
-    //         console.log(`Fetching ${endpoint.split("fetch_")[1]} ...`);
-    //         const response = await fetch(endpoint); // Send a request to the backend
-    //         const data = await response.json(endpoint); // Parse response and get data as a JSON object
-    //         // console.log(data);
-    //         if (data.ok === true) {
-    //             store.set(data.data); // Set the store with the data received
-    //         } else {
-    //             console.error("Error:", data.error);
-    //             store.set(data.default); // Set the store with the default value
-    //         }
-    //     } catch (error) {
-    //         console.error("Error:", error);
-    //         store.set([]); // Set the store with an empty array
+    const availableModules = writable([]);
+    const selectedModules = writable([]); // Liste des modules cochés
+    const selectedCharacteristic = writable(""); // Caractéristique choisie
+    const selectedUnit = writable(""); // Unité associée
+    const yLabel = writable("Y label"); // Légende Y par défaut
+    const graphTitle = writable("Titre du graphique"); // Titre du graphique
+
+    const allCharacteristics = {
+        power_flow: ["Puissance","W"],
+        energy: ["Energie","J"],
+        state_of_charge: ["Etat de charge","%"],
+        speed: ["Vitesse","m/s"],
+        current: ["Courant","A"],
+        temperature: ["Température","°C"],
+        cell_voltages: ["Tension des cellules","V"],
+    }
+
+    if (connected_modules) availableModules.set(connected_modules.filter((mod) => mod.characteristics.length > 0)); // Exclure les modules vides
+
+    // Liste des caractéristiques disponibles en fonction des modules cochés
+    const availableCharacteristics = derived(selectedModules, ($selectedModules) => {
+        if ($selectedModules.length === 0) return [];
+
+        const commonCharacteristics = $selectedModules
+            .map((mod) => mod.characteristics.filter((c) => c !== "name" && c !== "state"))
+            .reduce((a, b) => a.filter((c) => b.includes(c)));
+
+        return commonCharacteristics;
+    });
+
+    // Met à jour l'unité lorsqu'on change la caractéristique
+    selectedCharacteristic.subscribe((char) => {
+        if (char && allCharacteristics[char]) {
+            console.log(allCharacteristics[char]);
+            yLabel.set(allCharacteristics[char][0] || "");
+            selectedUnit.set(allCharacteristics[char][1] || "");
+        }
+    });
+
+
+    // selectedModules.subscribe((modules) => {
+    //     if (modules.length === 0) {
+    //         selectedCharacteristic.set("");
     //     }
-    // }
+    // });
+
+
+
 
     let bannerHeight = 0;
     let content_width = 0;
@@ -71,37 +124,46 @@
         // };
     });
 
+
+
     import { curveLinear, scaleLinear, scaleUtc } from "d3";
 
     const width = writable(0); // the outer width of the chart, in pixels (600)
     let height = 0; // the outer height of the chart, in pixels (350)
+    $: height = Math.round(0.4 * $width);
 
-    let props = {
-        width: $width,
-        height: height,
+    const props = writable({}); // the properties of the chart
+    props.set({
+        // width: $width,
+        // height: height,
 
         // Labels and formats
-        title: "Power flow (Watts flowing in (+) or (out) of a component) over time", // a title for the chart ('')
-        xLabel: "-> time", // a label for the x-axis
-        yLabel: "↑ Power flow (Watts)", // a label for the y-axis
-        xFormat: "", // a format specifier string for the x-axis
-        yFormat: "W", // a format specifier string for the y-axis
+        // title: $graphTitle, // a title for the chart ('')
+        xLabel: "-> temps", // a label for the x-axis
+        // yLabel: "↑ " + $yLabel + "(" + $selectedUnit + ")", // a label for the y-axis
+        // yFormat: $selectedUnit, // a format specifier string for the y-axis
 
         xType: scaleUtc, // type of x-scale
         yType: scaleLinear, // type of y-scale
 
-        xScalefactor: $width / 80, // x-axis number of values
-        yScalefactor: height / 40, // y-axis number of values
+        // xScalefactor: $width / 80, // x-axis number of values
+        // yScalefactor: height / 40, // y-axis number of values
         curve: curveLinear, // method of interpolation between points
 
-        // Number of colors array elements must match number of data sets
+        // Number of colors array elements must match number of data sets (or be superior)
         colors: [
-            "#e42618",
-            "#239e99",
-            "#a04040",
-            "#4B1338",
-            "#4b1338",
-            "#656780",
+            "#FF662E", // Orange vif
+            "#E42618", // Rouge profond
+            "#239E99", // Bleu-vert
+            "#A04040", // Marron rougeâtre
+            "#4B1338", // Bordeaux foncé
+            "#656780", // Gris bleuté
+            "#FFB400", // Jaune doré
+            "#0A9D58", // Vert foncé
+            "#0085C7", // Bleu vif
+            "#C724B1", // Violet magenta
+            "#795548", // Brun terreux
+            "#1E1E1E", // Gris anthracite
         ], // fill color for dots && number of colors in fill array MUST match number of subsets in data ("#F50057","#42A5F5","#26A69A","#9575CD"])
 
         // Inner style
@@ -116,7 +178,19 @@
         tooltipTextColor: "black", // text color of tooltip
         strokeLinecap: "round", // stroke line cap of the line
         strokeLinejoin: "round", // stroke line join of the line
-    };
+    });
+
+    function updateProps(width, graphTitle, yLabel, selectedUnit) {
+        $props.width = width;
+        $props.height = Math.round(0.4 * width);
+        $props.xScalefactor = width / 80;
+        $props.yScalefactor = Math.round(0.4 * width) / 40;
+        $props.title = graphTitle;
+        $props.yLabel = "↑ " + yLabel + " (" + selectedUnit + ")";
+        $props.yFormat = selectedUnit;}
+
+    $: updateProps($width, $graphTitle, $yLabel, $selectedUnit);
+        
 
     function calculateGraphicDimensions(content_width, content_height) {
         if (content_width > 0) {
@@ -130,6 +204,11 @@
 
     $: calculateGraphicDimensions(content_width, content_height);
 
+
+
+
+
+    
     let svgRef = null;
 
     function downloadSvg() {
@@ -182,29 +261,72 @@
     }
 </script>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="homepage">
     <Banner />
     <div class="body" style="margin-top: {bannerHeight}px;">
         <div class="sidebar">
-            <h2>Caractéristique</h2>
-            <h2>Modules</h2>
+                <h2>Caractéristique</h2>
+                <div class="select-group">
+                    <label for="variable">Variable :</label>
+                    <select bind:value={$selectedCharacteristic}>
+                        <option value="" disabled>Choisir une caractéristique</option>
+                        {#each $availableCharacteristics as char}
+                            <option value={char}>{char}</option>
+                        {/each}
+                    </select>
+                </div>
+            
+                <div class="input-group">
+                    <label for="unit">Unité :</label>
+                    <input type="text" bind:value={$selectedUnit} />
+                </div>
+            
+                <div class="input-group">
+                    <label for="yLabel">Légende Y :</label>
+                    <input type="text" bind:value={$yLabel} />
+                </div>
+            
+                <div class="input-group">
+                    <label for="title">Titre du graphique :</label>
+                    <input type="text" bind:value={$graphTitle} />
+                </div>
+            
+                <h2>Modules</h2>
+                {#each $availableModules as module, index}
+                    <div class="module-entry">
+                        <span class="slot-id">Slot {index + 1}</span>
+                        <span class="module-name">{module.name}</span>
+                        <input 
+                            type="checkbox" 
+                            bind:group={$selectedModules} 
+                            value={module} 
+                        />
+                    </div>
+                {/each}      
         </div>
+
 
         <div
             class="content"
             bind:clientWidth={content_width}
             bind:clientHeight={content_height}
         >
-            {#key $width}
-                <!-- {#if $data_array.length === 0}
-                    <p>Loading...</p>
-                {:else}
-                    {#key $data_array}  
-                        <Graphic data={$data_array} props={props}/> 
-                    {/key}
-                {/if} -->
-                {#if props.width !== 0}
-                    <Graphic {props} bind:svgRef />
+            {#key $props}
+                {#if $props.width !== 0 && $selectedCharacteristic !== ""}
+                    <Graphic props={$props} bind:svgRef={svgRef} data={data}/>
 
                     <!-- Barre d'outils -->
                     <div class="toolbar">
@@ -250,6 +372,8 @@
                             </button>
                         </div>
                     </div>
+                {:else}
+                    <p>Choisir un ou plusieurs modules ainsi que la caractéristique commune à afficher</p>
                 {/if}
             {/key}
         </div>
@@ -288,6 +412,47 @@
     .sidebar h2 {
         margin-bottom: 20px;
         font-weight: bold;
+    }
+
+    .select-group, .input-group {
+        width: 100%;
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .select-group label, .input-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    select, input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .module-entry {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff;
+        padding: 8px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .module-entry .slot-id {
+        font-weight: bold;
+        color: #ff662e;
+    }
+
+    .module-entry .module-name {
+        flex-grow: 1;
+        margin-left: 10px;
     }
 
     .content {

@@ -8,9 +8,9 @@
     scaleUtc,
   } from "d3";
 
-  // export let data;
-  import data from "./data.js";
-  console.log(data);
+  export let data;
+  // import {data} from "./data.js";
+  // console.log(data);
 
   export let props;
 

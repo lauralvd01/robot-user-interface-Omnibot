@@ -108,7 +108,7 @@ const west = csvConvert(csvWest);
 //   }
 // ]
 
-const data = [
+export const data = [
   {
       "id": "1",
       "data": [
@@ -325,4 +325,156 @@ const power_infos = [
 ]
 
 
-export default data;
+export const connected_modules = [
+      {
+        "module_id": 2,
+        "name": "Batterie",
+        "position": [
+          "Latérale"
+        ],
+        "functionality": "Stockage d'énergie",
+        "characteristics": [
+          "name",
+          "state",
+          "state_of_charge",
+          "current",
+          "temperature",
+          "cell_voltages",
+          "power_flow",
+          "energy"
+        ]
+      },
+      {
+        "module_id": 1,
+        "name": "Roue Omnidirectionnelle",
+        "position": [
+          "Latérale"
+        ],
+        "functionality": "Mobilité",
+        "characteristics": [
+          "name",
+          "state",
+          "speed",
+          "power_flow",
+          "energy"
+        ]
+      },
+      {
+        "module_id": 32,
+        "name": "Vide",
+        "position": [
+          "Latérale",
+          "Supérieure"
+        ],
+        "functionality": null,
+        "characteristics": []
+      },
+      {
+        "module_id": 1,
+        "name": "Roue Omnidirectionnelle",
+        "position": [
+          "Latérale"
+        ],
+        "functionality": "Mobilité",
+        "characteristics": [
+          "name",
+          "state",
+          "speed",
+          "power_flow",
+          "energy"
+        ]
+      },
+      {
+        "module_id": 32,
+        "name": "Vide",
+        "position": [
+          "Latérale",
+          "Supérieure"
+        ],
+        "functionality": null,
+        "characteristics": []
+      },
+      {
+        "module_id": 1,
+        "name": "Roue Omnidirectionnelle",
+        "position": [
+          "Latérale"
+        ],
+        "functionality": "Mobilité",
+        "characteristics": [
+          "name",
+          "state",
+          "speed",
+          "power_flow",
+          "energy"
+        ]
+      },
+      {
+        "module_id": 3,
+        "name": "Jetson Nano",
+        "position": [
+          "Supérieure"
+        ],
+        "functionality": "Processeur",
+        "characteristics": [
+          "name",
+          "control_state",
+          "control_mode",
+          "power_flow",
+          "energy"
+        ]
+      },
+      {
+        "module_id": 32,
+        "name": "Vide",
+        "position": [
+          "Latérale",
+          "Supérieure"
+        ],
+        "functionality": null,
+        "characteristics": []
+      },
+      {
+        "module_id": 4,
+        "name": "Chargeur USB-C",
+        "position": [
+          "Supérieure"
+        ],
+        "functionality": "Production d'énergie",
+        "characteristics": [
+          "name",
+          "power_flow",
+          "energy"
+        ]
+      },
+      {
+        "module_id": 32,
+        "name": "Vide",
+        "position": [
+          "Latérale",
+          "Supérieure"
+        ],
+        "functionality": null,
+        "characteristics": []
+      },
+      {
+        "module_id": 32,
+        "name": "Vide",
+        "position": [
+          "Latérale",
+          "Supérieure"
+        ],
+        "functionality": null,
+        "characteristics": []
+      },
+      {
+        "module_id": 32,
+        "name": "Vide",
+        "position": [
+          "Latérale",
+          "Supérieure"
+        ],
+        "functionality": null,
+        "characteristics": []
+      }
+    ]
