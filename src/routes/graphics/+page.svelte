@@ -71,53 +71,57 @@
         // };
     });
 
-
-    import { curveLinear, scaleLinear, scaleUtc } from 'd3';
-
+    import { curveLinear, scaleLinear, scaleUtc } from "d3";
 
     const width = writable(0); // the outer width of the chart, in pixels (600)
     let height = 0; // the outer height of the chart, in pixels (350)
 
     let props = {
-		width: $width,
-		height: height,
+        width: $width,
+        height: height,
 
         // Labels and formats
-        title: 'Power flow (Watts flowing in (+) or (out) of a component) over time',   // a title for the chart ('')
-        xLabel: '-> time',              // a label for the x-axis
-        yLabel: '↑ Power flow (Watts)', // a label for the y-axis
-        xFormat: '',                    // a format specifier string for the x-axis
-        yFormat: 'W',                   // a format specifier string for the y-axis
+        title: "Power flow (Watts flowing in (+) or (out) of a component) over time", // a title for the chart ('')
+        xLabel: "-> time", // a label for the x-axis
+        yLabel: "↑ Power flow (Watts)", // a label for the y-axis
+        xFormat: "", // a format specifier string for the x-axis
+        yFormat: "W", // a format specifier string for the y-axis
 
-        xType: scaleUtc,                // type of x-scale
-        yType: scaleLinear,             // type of y-scale
+        xType: scaleUtc, // type of x-scale
+        yType: scaleLinear, // type of y-scale
 
-        xScalefactor: $width / 80,      // x-axis number of values
-        yScalefactor: height / 40,      // y-axis number of values
-        curve: curveLinear,             // method of interpolation between points
-        
+        xScalefactor: $width / 80, // x-axis number of values
+        yScalefactor: height / 40, // y-axis number of values
+        curve: curveLinear, // method of interpolation between points
+
         // Number of colors array elements must match number of data sets
-        colors: ["#e42618","#239e99","#a04040","#4B1338", "#4b1338", "#656780"], // fill color for dots && number of colors in fill array MUST match number of subsets in data ("#F50057","#42A5F5","#26A69A","#9575CD"])
-        
+        colors: [
+            "#e42618",
+            "#239e99",
+            "#a04040",
+            "#4B1338",
+            "#4b1338",
+            "#656780",
+        ], // fill color for dots && number of colors in fill array MUST match number of subsets in data ("#F50057","#42A5F5","#26A69A","#9575CD"])
+
         // Inner style
-        horizontalGrid: true,           // show horizontal grid lines
-        verticalGrid: true,             // show vertical grid lines
-        showDots: true,                 // whether dots should be displayed or not
-        dotsFilled: true,               // whether dots should be filled or outlined
-        r: 4,                           // (fixed) radius of dots, in pixels (5)
-        strokeWidth: 3,                 // stroke width of line, in pixels (5)
-        strokeOpacity: 0.4,             // stroke opacity of line (0.8)
-        tooltipBackground: "white",     // background color of tooltip
-        tooltipTextColor: "black",      // text color of tooltip
-        strokeLinecap: "round",         // stroke line cap of the line
-        strokeLinejoin: "round"         // stroke line join of the line
+        horizontalGrid: true, // show horizontal grid lines
+        verticalGrid: true, // show vertical grid lines
+        showDots: true, // whether dots should be displayed or not
+        dotsFilled: true, // whether dots should be filled or outlined
+        r: 4, // (fixed) radius of dots, in pixels (5)
+        strokeWidth: 3, // stroke width of line, in pixels (5)
+        strokeOpacity: 0.4, // stroke opacity of line (0.8)
+        tooltipBackground: "white", // background color of tooltip
+        tooltipTextColor: "black", // text color of tooltip
+        strokeLinecap: "round", // stroke line cap of the line
+        strokeLinejoin: "round", // stroke line join of the line
     };
 
-    
     function calculateGraphicDimensions(content_width, content_height) {
         if (content_width > 0) {
-            props.width = Math.round(content_width - (15+10+10+15));
-            props.height = Math.round(0.4*props.width);
+            props.width = Math.round(content_width - (15 + 10 + 10 + 15));
+            props.height = Math.round(0.4 * props.width);
             props.xScalefactor = props.width / 80;
             props.yScalefactor = props.height / 40;
             width.set(props.width);
@@ -145,6 +149,37 @@
             URL.revokeObjectURL(url);
         }
     }
+
+    let playing = false;
+    let paused = false;
+    let stopped = false;
+
+    function togglePlayPause() {
+        if (playing) {
+            playing = false;
+            paused = true;
+        } else {
+            playing = true;
+            paused = false;
+            stopped = false;
+        }
+    }
+
+    function stopGraph() {
+        playing = false;
+        paused = false;
+        stopped = true;
+    }
+
+    function restartGraph() {
+        playing = true;
+        paused = false;
+        stopped = false;
+    }
+
+    function saveData() {
+        console.log("Données enregistrées !");
+    }
 </script>
 
 <div class="homepage">
@@ -155,10 +190,11 @@
             <h2>Modules</h2>
         </div>
 
-
-
-
-        <div class="content" bind:clientWidth={content_width} bind:clientHeight={content_height}>
+        <div
+            class="content"
+            bind:clientWidth={content_width}
+            bind:clientHeight={content_height}
+        >
             {#key $width}
                 <!-- {#if $data_array.length === 0}
                     <p>Loading...</p>
@@ -168,8 +204,52 @@
                     {/key}
                 {/if} -->
                 {#if props.width !== 0}
-                    <Graphic props={props} bind:svgRef={svgRef}/>
-                    <button on:click={downloadSvg}>Download</button>
+                    <Graphic {props} bind:svgRef />
+
+                    <!-- Barre d'outils -->
+                    <div class="toolbar">
+                        <div class="toolbar-row">
+                            <button class="tool-btn" on:click={togglePlayPause}>
+                                <span class="icon">{playing ? "⏸️" : "▶️"}</span
+                                >
+                                <span class="label"
+                                    >{playing ? "Pause" : "Start"}</span
+                                >
+                            </button>
+
+                            <button
+                                class="tool-btn"
+                                on:click={stopGraph}
+                                disabled={!playing && !paused}
+                            >
+                                <span class="icon">⏹️</span>
+                                <span class="label">Stop</span>
+                            </button>
+
+                            <button class="tool-btn" on:click={restartGraph}>
+                                <span class="icon">🔄</span>
+                                <span class="label">Restart</span>
+                            </button>
+
+                            <button
+                                class="tool-btn"
+                                on:click={saveData}
+                                disabled={!paused && !stopped}
+                            >
+                                <span class="icon">💾</span>
+                                <span class="label">Enregistrer</span>
+                            </button>
+
+                            <button
+                                class="tool-btn"
+                                on:click={downloadSvg}
+                                disabled={!paused && !stopped}
+                            >
+                                <span class="icon">📤</span>
+                                <span class="label">Exporter</span>
+                            </button>
+                        </div>
+                    </div>
                 {/if}
             {/key}
         </div>
@@ -190,7 +270,7 @@
     }
 
     .body {
-        margin:2%;
+        margin: 2%;
         display: flex;
         width: 96%;
         height: 100%;
@@ -208,9 +288,9 @@
     .sidebar h2 {
         margin-bottom: 20px;
         font-weight: bold;
-   }
+    }
 
-   .content {
+    .content {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
@@ -218,4 +298,45 @@
         height: 100%;
         width: 60%;
     }
-    </style>
+
+    .toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 1%;
+        margin-top: 2%;
+    }
+
+    .toolbar-row {
+        display: flex;
+        justify-content: center;
+        gap: 2%;
+    }
+
+    .tool-btn {
+        display: flex;
+        align-items: center;
+        background-color: #ff662e;
+        color: white;
+        font-weight: bold;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s ease-in-out;
+        min-width: 120px;
+    }
+
+    .tool-btn:hover {
+        background-color: #e65528;
+    }
+
+    .tool-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+    .icon {
+        font-size: 1.2em;
+        margin-right: 8px;
+    }
+</style>
