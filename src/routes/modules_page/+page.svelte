@@ -27,7 +27,7 @@
     };
 
     import { modules } from "../data_store";
-
+    import { fetchData } from "../data_store";
     
     // Store banner height to adjust the top margin of the content under it
     let bannerHeight = 0;

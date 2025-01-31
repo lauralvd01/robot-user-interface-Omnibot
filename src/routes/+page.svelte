@@ -24,14 +24,21 @@
         intervals.push(setInterval(() => fetchData("batteries_data"), 1000));
         intervals.push(setInterval(() => fetchData("power_infos"), 1000));
 
-        if ($simulating) intervals.push(setInterval(() => fetchData("settings"), 5000)); // Change the simulated response settings every 5 seconds
-
         return () => {
             intervals.forEach(element => {
                 clearInterval(element);
             });
         };
     });
+
+    let interval;
+    $: {if ($simulating) {
+        interval = setInterval(() => fetchData("settings"), 5000); // Change the simulated response settings every 5 seconds
+        }
+        else if (interval) {
+            clearInterval(interval);
+        }
+    }
 </script>
 
 <div class="homepage">

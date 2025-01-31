@@ -120,26 +120,7 @@
         };
     });
 
-    import { batteries_data, batteries } from "./data_store";
-
-    function updateBatteryLevel(batteries_data) {
-        $batteries = {};
-        if (batteries_data.length > 0) {
-            for (const battery_data of batteries_data) {
-                $batteries[battery_data.slot_id] = {
-                    name: battery_data.name.toUpperCase(),
-                    state_of_charge: Math.round(
-                        battery_data.state_of_charge * 100,
-                    ),
-                };
-            }
-        }
-    }
-
-    $: batteries_data && updateBatteryLevel($batteries_data);
-
-    import { is_gamepad_connected } from "./data_store";
-    $: is_gamepad_connected && console.log("Gamepad connected ?", $is_gamepad_connected);
+    import { is_gamepad_connected, batteries } from "./data_store";
 </script>
 
 <svelte:window
@@ -199,8 +180,8 @@
         </div>
 
         <div class="command-row-element" style="width: 30%">
-            <OperatingMode />
             <!--Import du composant OperatingMode-->
+            <OperatingMode />
             <div style="width: 60%; margin: 10px 0px;">
                 <label for="linear-range" class="speed-label">Linear speed : {($speed_data.linear_speed*step).toFixed(1)}</label>
                 <Range

@@ -267,7 +267,7 @@
         });
     }
 
-    $: connected_modules && updateCanvasInfo(connected_modules);
+    $: connected_modules && updateCanvasInfo($connected_modules);
 </script>
 
 <div class="canvas-container">
@@ -284,7 +284,7 @@
                 />
             {/if}
         {/each}
-        {#if connected_modules.length === 0}
+        {#if $connected_modules.length === 0}
             <img
                 src={"./src/lib/images/logo_omnibot.svg"}
                 alt={"Default image"}

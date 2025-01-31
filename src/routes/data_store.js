@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 /////////////////////////////////////  Frontend data store ///////////////////////////////////
 
 export const is_gamepad_connected = writable(false);
+is_gamepad_connected.subscribe(value => {console.log("Gamepad connected ?", value);});
 
 export const moving = writable({x_linear_vel: 0, y_linear_vel: 0, angular_vel: 0});
 
@@ -12,6 +13,20 @@ export const d_speed = writable({ du: false, dd: false, dl: false, dr: false });
 
 export const batteries = writable({});
 
+function updateBatteryLevel(batteries_data) {
+    let batt = {};
+    if (batteries_data.length > 0) {
+        for (const battery_data of batteries_data) {
+            batt[battery_data.slot_id] = {
+                name: battery_data.name.toUpperCase(),
+                state_of_charge: Math.round(
+                    battery_data.state_of_charge * 100,
+                ),
+            };
+        }
+    }
+    batteries.set(batt);
+}
 
 /////////////////////////////////////  Backend data store ///////////////////////////////////
 
@@ -24,6 +39,8 @@ export const batteries_data = writable([]);
 export const power_infos = writable([]);
 export const settings = writable(1);
 export const simulating = writable(true);
+
+batteries_data.subscribe(value => updateBatteryLevel(value));
 
 // Associate a request string with its store and default value
 const request_store = {

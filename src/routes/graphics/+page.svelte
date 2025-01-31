@@ -320,6 +320,14 @@
 
 
 
+<svelte:window
+    on:gamepadconnected={(e) => {
+        is_gamepad_connected.set(true);
+    }}
+    on:gamepaddisconnected={(e) => {
+        is_gamepad_connected.set(false);
+    }}
+/>
 
 
 <div class="homepage">
