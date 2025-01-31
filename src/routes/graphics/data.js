@@ -478,3 +478,6 @@ export const connected_modules = [
         "characteristics": []
       }
     ]
+
+export const records = {};
+export const graphData = [];

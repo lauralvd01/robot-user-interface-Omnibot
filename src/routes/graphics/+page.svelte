@@ -5,8 +5,7 @@
     import Graphic from "./Graphic.svelte";
 
     
-    import {data, connected_modules} from "./data.js";
-    // import { connected_modules } from "../data_store";
+    import { connected_modules } from "../data_store";
 
     const availableModules = writable([]);
     const selectedModules = writable([]); // Liste des modules cochés
@@ -14,6 +13,7 @@
     const selectedUnit = writable(""); // Unité associée
     const yLabel = writable("Y label"); // Légende Y par défaut
     const graphTitle = writable("Titre du graphique"); // Titre du graphique
+    const period = writable(1000); // Période de rafraîchissement des données
 
     const allCharacteristics = {
         power_flow: ["Puissance","W"],
@@ -25,7 +25,7 @@
         cell_voltages: ["Tension des cellules","V"],
     }
 
-    if (connected_modules) availableModules.set(connected_modules.filter((mod) => mod.characteristics.length > 0)); // Exclure les modules vides
+    $: connected_modules && availableModules.set($connected_modules.filter((mod) => mod.characteristics.length > 0)); // Exclure les modules vides
 
     // Liste des caractéristiques disponibles en fonction des modules cochés
     const availableCharacteristics = derived(selectedModules, ($selectedModules) => {
@@ -41,9 +41,10 @@
     // Met à jour l'unité lorsqu'on change la caractéristique
     selectedCharacteristic.subscribe((char) => {
         if (char && allCharacteristics[char]) {
-            console.log(allCharacteristics[char]);
-            yLabel.set(allCharacteristics[char][0] || "");
-            selectedUnit.set(allCharacteristics[char][1] || "");
+            yLabel.set(allCharacteristics[char][0]);
+            selectedUnit.set(allCharacteristics[char][1]);
+            graphTitle.set(`${allCharacteristics[char][0]} (${allCharacteristics[char][1]}) en fonction du temps`);
+            period.set(1000);
         }
     });
 
@@ -139,25 +140,23 @@
 
 
 
-    // import { connected_modules, power_infos } from "../data_store";
+    import { power_infos } from "../data_store";
 
-    // const data = writable({});
-    // const data_array = writable([]);
+    const data = writable({});
+    const data_array = writable([]);
 
-    // function updateData(power_infos) {
-    //     console.log("Power_infos ", power_infos);
-    //     power_infos.forEach(module => {
-    //         if ($data[module.slot_id]) {
-    //             $data[module.slot_id].push({date: new Date(), power_flow: module.power_flow});
-    //         } else {
-    //             $data[module.slot_id] = [{date: new Date(), power_flow: module.power_flow}];
-    //         }
-    //         });
-    //     data_array.set(Object.entries($data).map(([key, value]) => ({id: key, data: value})));
-    //     console.log("Data_array ",$data_array);
-    // };
+    function updateData(power_infos) {
+        power_infos.forEach(module => {
+            if ($data[module.slot_id]) {
+                $data[module.slot_id].push({date: new Date(), power_flow: module.power_flow});
+            } else {
+                $data[module.slot_id] = [{date: new Date(), power_flow: module.power_flow}];
+            }
+            });
+        data_array.set(Object.entries($data).map(([key, value]) => ({id: key, data: value})));
+    };
 
-    // $: power_infos && data && data_array && updateData($power_infos);
+    $: power_infos && data && data_array && updateData($power_infos);
 
 
 
@@ -165,7 +164,6 @@
     let svgRef = null;
 
     function downloadSvg() {
-        console.log("svgRef", svgRef);
         if (svgRef) {
             const htmlStr = svgRef.outerHTML;
             const blob = new Blob([htmlStr], { type: "image/svg+xml" });
@@ -207,6 +205,8 @@
         playing = true;
         paused = false;
         stopped = false;
+        data.set({});
+        updateData($power_infos);
     }
 
     function saveData() {
@@ -340,7 +340,9 @@
                     <select bind:value={$selectedCharacteristic}>
                         <option value="" disabled>Choisir une caractéristique</option>
                         {#each $availableCharacteristics as char}
-                            <option value={char}>{char}</option>
+                            {#if allCharacteristics[char]}
+                                <option value={char}>{allCharacteristics[char][0]}</option>
+                            {/if}
                         {/each}
                     </select>
                 </div>
@@ -359,8 +361,14 @@
                     <label for="title">Titre du graphique :</label>
                     <input type="text" bind:value={$graphTitle} />
                 </div>
+
+                <div class="input-group">
+                    <label for="period">Période (en ms) :</label>
+                    <input type="number" min=50 bind:value={$period} />
+                </div>
             
                 <h2 style:margin-top=5px>Modules</h2>
+                {#key $connected_modules}
                 {#each $availableModules as module, index}
                     <div class="module-entry">
                         <span class="slot-id">Slot {index + 1}</span>
@@ -371,7 +379,8 @@
                             value={module} 
                         />
                     </div>
-                {/each}      
+                {/each}
+                {/key}
         </div>
 
 
@@ -382,7 +391,9 @@
             <div style:width=100%>
             {#key $props}
                 {#if $props.width !== 0 && $selectedCharacteristic !== ""}
-                    <Graphic props={$props} bind:svgRef={svgRef} data={data}/>
+                    {#key $data_array}
+                        <Graphic props={$props} bind:svgRef={svgRef} data={$data_array}/>
+                    {/key}
 
                     <!-- Barre d'outils -->
                     <div class="toolbar">
