@@ -311,7 +311,7 @@ async def fetch_connected_modules():
         else:
             raise Exception(response["Error"])
     except Exception as e:
-        return {"ok": False, "error": str(e), "default": []}
+        return {"ok": False, "error": str(e)}
 
 
 BatteryState = [
@@ -343,8 +343,8 @@ response_get_batteries2 = {'ok': True, 'batteries': [{'slot_id': 1, 'name': 'Bat
 
 response_get_batteries = response_get_batteries1
 
-@app.get("/fetch_batteries")
-async def fetch_batteries():
+@app.get("/fetch_batteries_data")
+async def fetch_batteries_data():
     try:
         response = None
         if simulating :
@@ -357,7 +357,7 @@ async def fetch_batteries():
         else:
             raise Exception(response["Error"])
     except Exception as e:
-        return {"ok": False, "error": str(e), "default": []}
+        return {"ok": False, "error": str(e)}
 
 
 @app.get("/fetch_settings")
@@ -466,7 +466,7 @@ async def fetch_power_infos():
         else:
             raise Exception(response["Error"])
     except Exception as e:
-        return {"ok": False, "error": str(e), "default": []}
+        return {"ok": False, "error": str(e)}
     
     
 if __name__ == "__main__":
