@@ -445,7 +445,7 @@ response_get_power_info = {"ok": True, "power_infos": [
 ]}
 
 
-
+from random import random, randint
 @app.get("/fetch_power_infos")
 async def fetch_power_infos():
     try:
@@ -455,8 +455,8 @@ async def fetch_power_infos():
             
             # Change power_infos values every fetch
             for i in range(len(response["power_infos"])):
-                response["power_infos"][i]["power_flow"] = (response["power_infos"][i]["power_flow"] * 1.5) % 10
-                response["power_infos"][i]["energy"] = (response["power_infos"][i]["energy"] * 1.5) % 50
+                response["power_infos"][i]["power_flow"] = (response["power_infos"][i]["power_flow"] * (1+random()) % 10) * (-1)**randint(0,1)
+                response["power_infos"][i]["energy"] = (response["power_infos"][i]["energy"] * (1+random()) % 50) * (-1)**randint(0,1)
             
         else :
             response = await robot.get_power_flow()
