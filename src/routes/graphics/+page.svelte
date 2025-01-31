@@ -6,47 +6,7 @@
 
     
     import {data, connected_modules} from "./data.js";
-
-    import { backend_host, backend_port } from "../../config.js";
-    
-    // // Send a request to the backend to get the data
-    // async function fetchData(endpoint, store) {
-    //     try {
-    //         console.log(`Fetching ${endpoint.split("fetch_")[1]} ...`);
-    //         const response = await fetch(endpoint); // Send a request to the backend
-    //         const data = await response.json(endpoint); // Parse response and get data as a JSON object
-    //         // console.log(data);
-    //         if (data.ok === true) {
-    //             store.set(data.data); // Set the store with the data received
-    //         } else {
-    //             console.error("Error:", data.error);
-    //             store.set(data.default); // Set the store with the default value
-    //         }
-    //     } catch (error) {
-    //         console.error("Error:", error);
-    //         store.set([]); // Set the store with an empty array
-    //     }
-    // }
-
-
-    // const power_infos = writable([]);
-    // const data = writable({});
-    // const data_array = writable([]);
-
-    // function updateData(power_infos) {
-    //     console.log("Power_infos ",power_infos);
-    //     power_infos.forEach(module => {
-    //         if ($data[module.slot_id]) {
-    //             $data[module.slot_id].push({date: new Date(), power_flow: module.power_flow});
-    //         } else {
-    //             $data[module.slot_id] = [{date: new Date(), power_flow: module.power_flow}];
-    //         }
-    //         });
-    //     data_array.set(Object.entries($data).map(([key, value]) => ({id: key, data: value})));
-    //     console.log("Data_array ",$data_array);
-    // };
-
-    // $: power_infos && data && data_array && updateData($power_infos);
+    // import { connected_modules } from "../data_store";
 
     const availableModules = writable([]);
     const selectedModules = writable([]); // Liste des modules cochés
@@ -97,42 +57,23 @@
 
 
 
+    // Store banner height to adjust the top margin of the content under it
     let bannerHeight = 0;
+    // Store content width to adjust the graphic dimensions
     let content_width = 0;
-    let content_height = 0;
-
-    // Function that runs when the component is mounted
-    onMount(async () => {
-        // Get banner height to adjust the top margin of the content under it
+    onMount( () => {
         const banner = document.querySelector(".banner");
-        if (banner) {
-            bannerHeight = banner.offsetHeight;
-        }
+        if (banner) bannerHeight = banner.offsetHeight;
 
         const content = document.querySelector(".content");
-        if (content) {
-            content_width = content.offsetWidth;
-            content_height = content.offsetHeight;
-        }
-
-        // Fetch power_infos data
-        // fetchData(`http://${backend_host}:${backend_port}/fetch_power_infos`, power_infos);
-        // const interval = setInterval(() => {fetchData(`http://${backend_host}:${backend_port}/fetch_power_infos`, power_infos);},5000);
-
-        // return () => {
-        //     clearInterval(interval);
-        // };
-    });
+        if (content) content_width = content.clientWidth;
+    })
 
 
 
     import { curveLinear, scaleLinear, scaleUtc } from "d3";
 
-    const width = writable(0); // the outer width of the chart, in pixels (600)
-    let height = 0; // the outer height of the chart, in pixels (350)
-    $: height = Math.round(0.4 * $width);
-
-    const props = writable({}); // the properties of the chart
+    const props = writable({}); // the properties of the chart (and default values)
     props.set({
         // width: $width,
         // height: height,
@@ -189,22 +130,34 @@
         $props.yLabel = "↑ " + yLabel + " (" + selectedUnit + ")";
         $props.yFormat = selectedUnit;}
 
+
+    const width = writable(0); // the outer width of the chart, in pixels (600 by default)
+
+    $: width.set(Math.round(content_width - (15 + 10 + 10 + 15)));
     $: updateProps($width, $graphTitle, $yLabel, $selectedUnit);
         
 
-    function calculateGraphicDimensions(content_width, content_height) {
-        if (content_width > 0) {
-            props.width = Math.round(content_width - (15 + 10 + 10 + 15));
-            props.height = Math.round(0.4 * props.width);
-            props.xScalefactor = props.width / 80;
-            props.yScalefactor = props.height / 40;
-            width.set(props.width);
-        }
-    }
-
-    $: calculateGraphicDimensions(content_width, content_height);
 
 
+    // import { connected_modules, power_infos } from "../data_store";
+
+    // const data = writable({});
+    // const data_array = writable([]);
+
+    // function updateData(power_infos) {
+    //     console.log("Power_infos ", power_infos);
+    //     power_infos.forEach(module => {
+    //         if ($data[module.slot_id]) {
+    //             $data[module.slot_id].push({date: new Date(), power_flow: module.power_flow});
+    //         } else {
+    //             $data[module.slot_id] = [{date: new Date(), power_flow: module.power_flow}];
+    //         }
+    //         });
+    //     data_array.set(Object.entries($data).map(([key, value]) => ({id: key, data: value})));
+    //     console.log("Data_array ",$data_array);
+    // };
+
+    // $: power_infos && data && data_array && updateData($power_infos);
 
 
 
@@ -259,6 +212,101 @@
     function saveData() {
         console.log("Données enregistrées !");
     }
+
+
+
+
+
+    import Controller from "../Controller.svelte";
+    import { is_gamepad_connected, batteries } from "../data_store";
+
+    import { sendMoveData } from "../data_store";
+
+    //Creation de booléens pour savoir si une touche du clavier est pressée
+    let isActiveKeyA = false, isActiveKeyZ = false, isActiveKeyE = false, isActiveKeyQ = false, isActiveKeyS = false, isActiveKeyD = false;
+
+    //Fonctions permettant de savoir si la touche est pressée ou non
+    function handleKeyDown(event) {
+        if (event.key.toLowerCase() === "z") {
+            isActiveKeyZ = true;
+        }
+        if (event.key.toLowerCase() === "a") {
+            isActiveKeyA = true;
+        }
+        if (event.key.toLowerCase() === "e") {
+            isActiveKeyE = true;
+        }
+        if (event.key.toLowerCase() === "s") {
+            isActiveKeyS = true;
+        }
+        if (event.key.toLowerCase() === "q") {
+            isActiveKeyQ = true;
+        }
+        if (event.key.toLowerCase() === "d") {
+            isActiveKeyD = true;
+        }
+        if (
+            isActiveKeyZ ||
+            isActiveKeyS ||
+            isActiveKeyQ ||
+            isActiveKeyD ||
+            isActiveKeyA ||
+            isActiveKeyE
+        ) {
+            sendMoveData({
+                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
+                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
+                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
+            });
+        }
+    }
+
+    function handleKeyUp(event) {
+        if (event.key.toLowerCase() === "z") {
+            isActiveKeyZ = false;
+        }
+        if (event.key.toLowerCase() === "a") {
+            isActiveKeyA = false;
+        }
+        if (event.key.toLowerCase() === "e") {
+            isActiveKeyE = false;
+        }
+        if (event.key.toLowerCase() === "q") {
+            isActiveKeyQ = false;
+        }
+        if (event.key.toLowerCase() === "s") {
+            isActiveKeyS = false;
+        }
+        if (event.key.toLowerCase() === "d") {
+            isActiveKeyD = false;
+        }
+        if (
+            !(
+                isActiveKeyZ ||
+                isActiveKeyS ||
+                isActiveKeyQ ||
+                isActiveKeyD ||
+                isActiveKeyA ||
+                isActiveKeyE
+            )
+        ) {
+            sendMoveData({
+                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
+                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
+                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
+            });
+        }
+    }
+
+    onMount(async () => {
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keyup", handleKeyUp);
+        };
+    });
 </script>
 
 
@@ -304,7 +352,7 @@
                     <input type="text" bind:value={$graphTitle} />
                 </div>
             
-                <h2>Modules</h2>
+                <h2 style:margin-top=5px>Modules</h2>
                 {#each $availableModules as module, index}
                     <div class="module-entry">
                         <span class="slot-id">Slot {index + 1}</span>
@@ -322,8 +370,8 @@
         <div
             class="content"
             bind:clientWidth={content_width}
-            bind:clientHeight={content_height}
         >
+            <div style:width=100%>
             {#key $props}
                 {#if $props.width !== 0 && $selectedCharacteristic !== ""}
                     <Graphic props={$props} bind:svgRef={svgRef} data={data}/>
@@ -376,6 +424,73 @@
                     <p>Choisir un ou plusieurs modules ainsi que la caractéristique commune à afficher</p>
                 {/if}
             {/key}
+            </div>
+            
+
+
+            <div class="command-row" style:width=100%>
+                <div class="command-row-element" style:width=50%>
+                    <div class="control-container">
+                        <p class="titles">COMMANDES</p>
+                        {#if !$is_gamepad_connected}
+                            <div class="keyboard">
+                                <div class="key {isActiveKeyA ? 'active' : ''}">
+                                    <!--vérification de si la touche est pressée -->
+                                    <span class="first-line">A</span><br />
+                                    <span class="second-line">Rotation G</span>
+                                </div>
+                                <div class="key {isActiveKeyZ ? 'active' : ''}">
+                                    <span class="first-line">Z</span><br />
+                                    <span class="second-line">Avancer</span>
+                                </div>
+                                <div class="key {isActiveKeyE ? 'active' : ''}">
+                                    <span class="first-line">E</span><br />
+                                    <span class="second-line">Rotation D</span>
+                                </div>
+                                <div class="key {isActiveKeyQ ? 'active' : ''}">
+                                    <span class="first-line">Q</span><br />
+                                    <span class="second-line">Gauche</span>
+                                </div>
+                                <div class="key {isActiveKeyS ? 'active' : ''}">
+                                    <span class="first-line">S</span><br />
+                                    <span class="second-line">Reculer</span>
+                                </div>
+                                <div class="key {isActiveKeyD ? 'active' : ''}">
+                                    <span class="first-line">D</span><br />
+                                    <span class="second-line">Droite</span>
+                                </div>
+                            </div>
+                        {/if}
+                        <div
+                            class="pad_controller"
+                            style="--displayGamepad:{$is_gamepad_connected ? 'flex' : 'none'};"
+                        >
+                            <Controller />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="command-row-element" style:width=50%>
+                    <div class="battery-lvl-container">
+                        {#each Object.entries($batteries) as [battery_slot, battery]}
+                            <h1 class="titles">{battery["name"]}</h1>
+                            <div class="battery">
+                                <div class="battery-bar">
+                                    <!--Actualisation de la barre de batterie selon le niveau de batterie restant dans l'Omnibot-->
+                                    <div
+                                        class="battery-level"
+                                        style="width: {battery['state_of_charge']}%"
+                                    ></div>
+                                    <div class="battery-text">
+                                        {battery["state_of_charge"]}%
+                                    </div>
+                                </div>
+                                <div class="battery-shape"></div>
+                            </div>
+                        {/each}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -503,5 +618,144 @@
     .icon {
         font-size: 1.2em;
         margin-right: 8px;
+    }
+
+    .command-row {
+        margin-top: 2%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    .command-row-element {
+        flex-shrink: 0;
+        overflow-y: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .control-container {
+        width: 100%;
+        padding: 2%;
+        background-color: #a8a8a8;
+        border-radius: 5%;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .keyboard {
+        width: 95%;
+        height: 95%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: auto auto auto;
+    }
+
+    .pad_controller {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        display: var(--displayGamepad);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .titles {
+        font-weight: bold;
+        font-size: 24px;
+        color: black;
+        font-family: "Roboto", sans-serif;
+    }
+
+    span {
+        color: black;
+    }
+
+    .key {
+        background-color: #ff662e;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 6px;
+        border-radius: 6px;
+        white-space: pre-line;
+        height: auto;
+        line-height: 1;
+        font-family: "Roboto", sans-serif;
+    }
+
+    .key .first-line {
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    .key .second-line {
+        font-size: 16px;
+    }
+
+    /*Permet de changer le style lorsque qu'une touche du clavier est pressée */
+    .key.active {
+        background-color: #239e99;
+        color: white;
+    }
+
+    .battery-lvl-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .battery {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .battery-bar {
+        position: relative;
+        width: 135px;
+        height: 50px;
+        background-color: #494949;
+        border: black solid 3px;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .battery-level {
+        height: 100%;
+        background-color: #ff662e;
+        width: 0;
+        transition: width 0.5s;
+    }
+
+    .battery-text {
+        position: absolute;
+        top: 50%;
+        left: 20px;
+        transform: translateY(-50%);
+        font-family: "Roboto", sans-serif;
+        color: white;
+        font-weight: bold;
+        padding-bottom: 3px;
+        display: flex;
+        justify-content: left;
+    }
+
+    .battery-shape {
+        width: 10px;
+        height: 30px;
+        background-color: black;
+        border-radius: 4px;
+        margin-left: 3px;
     }
 </style>

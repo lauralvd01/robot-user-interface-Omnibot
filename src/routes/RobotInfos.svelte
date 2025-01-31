@@ -1,22 +1,17 @@
 <script>
+    import { onMount } from "svelte";
+    import { writable } from "svelte/store";
     import Direction from "./Direction.svelte";
     import OperatingMode from "./OperatingMode.svelte";
     import Range from "./Range.svelte";
     import Controller from "./Controller.svelte";
-    import { onMount } from "svelte";
-    import { writable } from "svelte/store";
 
-    import { backend_host, backend_port } from "../config.js";
+    import { speed_data, step, d_speed } from "./data_store";
+    import { sendMoveData, sendSpeedData } from "./data_store";
 
-    const step = 0.1;
-    const speed_data = writable({
-        linear_speed: 1 / step,
-        angular_speed: 2 / step,
-    });
-    const count_d_speed = { du: 0, dd: 0, dl: 0, dr: 0 };
-    const d_speed = writable({ du: false, dd: false, dl: false, dr: false });
-
-    function check_d_speed(d_speed) {
+    let count_d_speed = { du: 0, dd: 0, dl: 0, dr: 0 };
+    
+    export function check_d_speed(d_speed) {
         for (const [key, value] of Object.entries(d_speed)) {
             if (value && count_d_speed[key] == 0) {
                 count_d_speed[key] += 1;
@@ -29,7 +24,7 @@
                 } else if (key === "dr") {
                     $speed_data.angular_speed += 1;
                 }
-                sendSpeedData();
+                sendSpeedData($speed_data);
                 count_d_speed[key] = 0;
                 d_speed[key] = false;
             }
@@ -38,43 +33,9 @@
 
     $: d_speed && check_d_speed($d_speed);
 
-    // Send a request to the backend to change robot speed settigs
-    function sendSpeedData() {
-        fetch(`http://${backend_host}:${backend_port}/set_speed`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                linear_speed:
-                    Math.round($speed_data.linear_speed * step * 10) / 10,
-                angular_speed:
-                    Math.round($speed_data.angular_speed * step * 10) / 10,
-            }),
-        });
-    }
-
-    const moving = writable({x_linear_vel: 0, y_linear_vel: 0, angular_vel: 0});
-
-    // Send a request to the backend to move the robot
-    function sendMoveData(moves) {
-        $moving = {...moves};
-        fetch(`http://${backend_host}:${backend_port}/post_move`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(moves),
-        });
-    }
 
     //Creation de booléens pour savoir si une touche du clavier est pressée
-    let isActiveKeyA = false;
-    let isActiveKeyZ = false;
-    let isActiveKeyE = false;
-    let isActiveKeyQ = false;
-    let isActiveKeyS = false;
-    let isActiveKeyD = false;
+    let isActiveKeyA = false, isActiveKeyZ = false, isActiveKeyE = false, isActiveKeyQ = false, isActiveKeyS = false, isActiveKeyD = false;
 
     //Fonctions permettant de savoir si la touche est pressée ou non
     function handleKeyDown(event) {
@@ -159,9 +120,7 @@
         };
     });
 
-    export let batteries_data;
-
-    const batteries = writable({});
+    import { batteries_data, batteries } from "./data_store";
 
     function updateBatteryLevel(batteries_data) {
         $batteries = {};
@@ -177,11 +136,10 @@
         }
     }
 
-    $: batteries_data && updateBatteryLevel(batteries_data);
+    $: batteries_data && updateBatteryLevel($batteries_data);
 
-    const is_gamepad_connected = writable(false);
-    $: is_gamepad_connected &&
-        console.log("Gamepad connected ?", $is_gamepad_connected);
+    import { is_gamepad_connected } from "./data_store";
+    $: is_gamepad_connected && console.log("Gamepad connected ?", $is_gamepad_connected);
 </script>
 
 <svelte:window
@@ -196,7 +154,7 @@
 <div class="content">
     <div class="command-row">
         <div class="command-row-element" style="width: 20%">
-            <Direction moving={$moving}/>
+            <Direction />
         </div>
 
         <div class="command-row-element" style="width: 25%">
@@ -233,11 +191,9 @@
                 {/if}
                 <div
                     class="pad_controller"
-                    style="--displayGamepad:{$is_gamepad_connected
-                        ? 'flex'
-                        : 'none'};"
+                    style="--displayGamepad:{$is_gamepad_connected ? 'flex' : 'none'};"
                 >
-                    <Controller move={sendMoveData} bind:d_speed={$d_speed} />
+                    <Controller />
                 </div>
             </div>
         </div>
@@ -246,31 +202,17 @@
             <OperatingMode />
             <!--Import du composant OperatingMode-->
             <div style="width: 60%; margin: 10px 0px;">
-                <label for="linear-range" class="speed-label"
-                    >Linear speed : {($speed_data.linear_speed*step).toFixed(1)}</label
-                >
+                <label for="linear-range" class="speed-label">Linear speed : {($speed_data.linear_speed*step).toFixed(1)}</label>
                 <Range
-                    on:change={(e) => {
-                        $speed_data.linear_speed = e.detail.value;
-                        sendSpeedData();
-                    }}
-                    min={0}
-                    max={5}
-                    {step}
+                    on:change={(e) => { $speed_data.linear_speed = e.detail.value; sendSpeedData($speed_data); }}
+                    min={0} max={5} {step}
                     bind:value={$speed_data.linear_speed}
                     id="speed-slider"
                 />
-                <label for="angular-range" class="speed-label"
-                    >Angular speed : {($speed_data.angular_speed*step).toFixed(1)}</label
-                >
+                <label for="angular-range" class="speed-label">Angular speed : {($speed_data.angular_speed*step).toFixed(1)}</label>
                 <Range
-                    on:change={(e) => {
-                        $speed_data.angular_speed = e.detail.value;
-                        sendSpeedData();
-                    }}
-                    min={0}
-                    max={5}
-                    {step}
+                    on:change={(e) => { $speed_data.angular_speed = e.detail.value; sendSpeedData($speed_data); }}
+                    min={0} max={5} {step}
                     bind:value={$speed_data.angular_speed}
                     id="angular-slider"
                 />

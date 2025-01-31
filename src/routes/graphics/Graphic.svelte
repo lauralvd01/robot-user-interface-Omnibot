@@ -9,9 +9,6 @@
   } from "d3";
 
   export let data;
-  // import {data} from "./data.js";
-  // console.log(data);
-
   export let props;
 
   const marginTop = props.marginTop || 40; // the top margin, in pixels (40)
@@ -318,7 +315,8 @@
     text-align: center;
     display:flex;
     flex-direction: column;
-    margin:15px
+    margin:15px;
+    margin-top: 0;
   }
 
   .chart-container h2 {

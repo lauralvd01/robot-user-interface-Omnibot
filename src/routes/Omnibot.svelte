@@ -185,7 +185,7 @@
     });
 
     // Get connected_modules from parent component and update triangles and trapezes info accordingly
-    export let connected_modules;
+    import { connected_modules } from "./data_store";
     import {
         triangleTitle,
         triangleData,

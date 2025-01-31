@@ -3,44 +3,11 @@
     import { writable } from "svelte/store";
     import Banner from "../Banner.svelte";
 
-    import { backend_host, backend_port } from "../../config.js";
-
-    const records = writable([]);
-
-    $: console.log($records);
-
-    // Send a request to the backend to get the data
-    async function fetchData(endpoint, store) {
-        try {
-            console.log(`Fetching ${endpoint.split("fetch_")[1]} ...`);
-            const response = await fetch(endpoint); // Send a request to the backend
-            const data = await response.json(endpoint); // Parse response and get data as a JSON object
-            // console.log(data);
-            if (data.ok === true) {
-                store.set(data.data); // Set the store with the data received
-            } else {
-                console.error("Error:", data.error);
-                store.set(data.default); // Set the store with the default value
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            store.set([]); // Set the store with an empty array
-        }
-    }
-
     let bannerHeight = 0;
-
-    // Function that runs when the component is mounted
-    onMount(async () => {
-        // Get banner height to adjust the top margin of the content under it
+    onMount( () => {
         const banner = document.querySelector(".banner");
-        if (banner) {
-            bannerHeight = banner.offsetHeight;
-        }
-
-        // Fetch existant modules
-        fetchData(`http://${backend_host}:${backend_port}/fetch_power_infos`, records);
-    });
+        if (banner) bannerHeight = banner.offsetHeight;
+    })
 </script>
 
 <div class="homepage">

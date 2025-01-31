@@ -1,6 +1,7 @@
 
 <script>
-    export let move;
+    import { sendMoveData as move} from "./data_store";	
+	import { d_speed } from "./data_store"; // = {"du": false, "dd": false, "dl": false, "dr": false};
 
 	let poll;
 	
@@ -73,16 +74,14 @@
 	};
 
 	const plugIn = () => {
-        console.log("Gamepad connected");
+        // console.log("Gamepad connected");
 		startController();
 	}
 	
 	const unPlug = () => {
-        console.log("Gamepad disconnected");
+        // console.log("Gamepad disconnected");
 		cancelAnimationFrame(poll);
 	}
-	
-	export let d_speed; // = {"du": false, "dd": false, "dl": false, "dr": false};
 
 	const startController = () => {
 		
@@ -102,13 +101,13 @@
             if (button.pressed && button.value > 0.01) {
                 console.log(buttons[i], button.value);
 				if (buttons[i] === "du") {
-					d_speed["du"] = true;
+					$d_speed["du"] = true;
 				} else if (buttons[i] === "dd") {
-					d_speed["dd"] = true;
+					$d_speed["dd"] = true;
 				} else if (buttons[i] === "dl") {
-					d_speed["dl"] = true;
+					$d_speed["dl"] = true;
 				} else if (buttons[i] === "dr") {
-					d_speed["dr"] = true;
+					$d_speed["dr"] = true;
 				}
             }
 		});
