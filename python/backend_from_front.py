@@ -467,7 +467,37 @@ async def fetch_power_infos():
             raise Exception(response["Error"])
     except Exception as e:
         return {"ok": False, "error": str(e)}
-    
+
+
+@app.get("/fetch_current_data")
+async def fetch_current_data():
+    try:
+        response_modules = await fetch_connected_modules()
+        if response_modules["ok"]:
+            response_batteries = await fetch_batteries_data()
+            if response_batteries["ok"]:
+                response_power_infos = await fetch_power_infos()
+                if response_power_infos["ok"]:
+                    return {"ok": True, "data": {"connected_modules": response_modules["data"], "batteries_data": response_batteries["data"], "power_infos": response_power_infos["data"]}}
+                else:
+                    raise Exception(response_power_infos["error"])
+            else:
+                raise Exception(response_batteries["error"])
+        else :
+            raise Exception(response_modules["error"])
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+@app.get("/test_connection")
+async def test_connection():
+    try:
+        response = await robot.get_modules()
+        if response["ok"]:
+            return {"ok": True}
+        else:
+            raise Exception(response["Error"])
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
     
 if __name__ == "__main__":
     read_modules_db()
