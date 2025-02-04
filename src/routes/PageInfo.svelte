@@ -9,9 +9,10 @@
     // Déclaration réactive pour mettre à jour le contenu lorsque selectedTriangle change
     $: {
         const id = $selectedTriangle.id;
-        if (id !== null) {
+        if (id !== null && $triangleData[id] !== null) {
             const module = $triangleData[id]; // module = {slot_id, module_id, functionality, characteristics[]}
-            if (module === "Aucun module connecté") {
+            console.log(module);
+            if (module === null || module === "Aucun module connecté") {
                 currentContent = module;
             }
             else {
@@ -27,7 +28,7 @@
             }
             currentImage = $triangleImages[id];
             currentTitle = $triangleTitle[id];
-        } else if (id === 32) {
+        } else if (id === 32 || $triangleData[id] === null) {
             currentContent = "";
             currentImage = null;
             currentTitle = "Emplacement vide";
@@ -39,7 +40,7 @@
     }
 
 
-    import { batteries_data, power_infos } from "./data_store";
+    import { batteries_data, connected_modules, power_infos } from "./data_store";
 
     const batteries = writable({});
 

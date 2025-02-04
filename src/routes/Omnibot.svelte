@@ -196,6 +196,7 @@
     function updateCanvasInfo(connected_modules) {
         if (connected_modules.length === 0) {
             // Reset the store
+            selectedTriangle.set({ id: null, color: "#494949" });
             triangleTitle.set({
         1: null,
         2: null,

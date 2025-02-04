@@ -19,16 +19,17 @@
         if (banner) bannerHeight = banner.offsetHeight;
 
         // Fetch data from the backend every second
-        let intervals = [];
-        intervals.push(setInterval(() => fetchData("connected_modules"), 1000));
-        intervals.push(setInterval(() => fetchData("batteries_data"), 1000));
-        intervals.push(setInterval(() => fetchData("power_infos"), 1000));
+        // let intervals = [];
+        // intervals.push(setInterval(() => fetchData("current_data"), 1000));
 
-        return () => {
-            intervals.forEach(element => {
-                clearInterval(element);
-            });
-        };
+        // return () => {
+        //     intervals.forEach(element => {
+        //         clearInterval(element);
+        //     });
+        // };
+
+        // Start fetching data every second
+        fetchData("current_data");
     });
 
     let interval;
