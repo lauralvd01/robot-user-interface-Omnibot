@@ -7,7 +7,7 @@
     
     import { connected_modules } from "../data_store";
 
-    const availableModules = writable([]);
+    const availableModules = writable(new Array(12).fill(null)); // Liste des modules connectés
     const selectedModules = writable([]); // Liste des modules cochés
     const selectedCharacteristic = writable(""); // Caractéristique choisie
     const selectedUnit = writable(""); // Unité associée
@@ -25,7 +25,23 @@
         cell_voltages: ["Tension des cellules","V"],
     }
 
-    $: connected_modules && availableModules.set($connected_modules.filter((mod) => mod.characteristics.length > 0)); // Exclure les modules vides
+    function updateAvailableModules(connected_modules) {
+        if (connected_modules.length !== 12) return;
+        let current_modules = [...$availableModules];
+        for (let index = 0; index < 12; index++) {
+            const element = current_modules[index];
+            if (element !== connected_modules[index] ) {
+                current_modules[index] = connected_modules[index];
+                availableModules.set(current_modules);
+                if (connected_modules[index].characteristics.length === 0) {
+                    selectedModules.set($selectedModules.filter((mod) => mod["slot_id"] !== index+1));
+                    $checkbox_inputs[index] = false;
+                }
+            }
+        }
+    }
+
+    $: connected_modules && updateAvailableModules($connected_modules);
 
     // Liste des caractéristiques disponibles en fonction des modules cochés
     const availableCharacteristics = derived(selectedModules, ($selectedModules) => {
@@ -46,15 +62,32 @@
             graphTitle.set(`${allCharacteristics[char][0]} (${allCharacteristics[char][1]}) en fonction du temps`);
             period.set(1000);
         }
+        else {
+            yLabel.set("Y label");
+            selectedUnit.set("");
+            graphTitle.set("Titre du graphique");
+            period.set(1000);
+        }
     });
 
 
-    // selectedModules.subscribe((modules) => {
-    //     if (modules.length === 0) {
-    //         selectedCharacteristic.set("");
-    //     }
-    // });
+    availableCharacteristics.subscribe((value) => {
+        if (!value.includes($selectedCharacteristic)) {
+            selectedCharacteristic.set("");
+        }
+    });
 
+
+    const checkbox_inputs = writable(new Array(12).fill(false));
+    selectedModules.subscribe(value => {
+        for (let index = 0; index < 12; index++) {
+            value.forEach(element => {
+                if (element == {"slot_id": index+1, ...$availableModules[index]}) {
+                    $checkbox_inputs[index] = true;
+                }
+            });
+        }
+    })
 
 
 
@@ -364,21 +397,24 @@
 
                 <div class="input-group">
                     <label for="period">Période (en ms) :</label>
-                    <input type="number" min=50 bind:value={$period} />
+                    <input type="rnumber" min=50 bind:value={$period} />
                 </div>
             
                 <h2 style:margin-top=5px>Modules</h2>
-                {#key $connected_modules}
+                {#key $availableModules}
                 {#each $availableModules as module, index}
-                    <div class="module-entry">
-                        <span class="slot-id">Slot {index + 1}</span>
-                        <span class="module-name">{module.name}</span>
-                        <input 
-                            type="checkbox" 
-                            bind:group={$selectedModules} 
-                            value={module} 
-                        />
-                    </div>
+                    {#if module !== null && module.characteristics.length > 0}
+                        <div class="module-entry">
+                            <span class="slot-id">Slot {index + 1}</span>
+                            <span class="module-name">{module.name}</span>
+                            <input 
+                                type="checkbox" 
+                                bind:group={$selectedModules}
+                                bind:checked={$checkbox_inputs[index]}
+                                value={{"slot_id": index+1, ...module}} 
+                            />
+                        </div>
+                    {/if}
                 {/each}
                 {/key}
         </div>
