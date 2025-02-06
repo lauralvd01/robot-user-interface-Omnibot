@@ -28,6 +28,8 @@ function updateBatteryLevel(batteries_data) {
     batteries.set(batt);
 }
 
+export const graphic_saved_data = writable({});
+
 /////////////////////////////////////  Backend data store ///////////////////////////////////
 
 import { backend_host, backend_port } from '../config.js';
@@ -69,7 +71,6 @@ const request_store = {
 
 // Don't send a new request when it is impossible to connect to the robot
 let no_connection = false;
-let interval = null;
 
 async function test_connection() {
     try {
@@ -163,3 +164,4 @@ export function sendSpeedData(speed_data) {
         }),
     });
 }
+

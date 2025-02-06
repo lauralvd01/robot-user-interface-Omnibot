@@ -5,6 +5,10 @@
     import Graphic from "./Graphic.svelte";
 
     
+    let playing = false;
+    let paused = false;
+    let stopped = false;
+
     import { connected_modules } from "../data_store";
 
     const availableModules = writable(new Array(12).fill(null)); // Liste des modules connectés
@@ -61,12 +65,14 @@
             selectedUnit.set(allCharacteristics[char][1]);
             graphTitle.set(`${allCharacteristics[char][0]} (${allCharacteristics[char][1]}) en fonction du temps`);
             period.set(1000);
+            playing = true;
         }
         else {
             yLabel.set("Y label");
             selectedUnit.set("");
             graphTitle.set("Titre du graphique");
             period.set(1000);
+            playing = false;
         }
     });
 
@@ -74,6 +80,7 @@
     availableCharacteristics.subscribe((value) => {
         if (!value.includes($selectedCharacteristic)) {
             selectedCharacteristic.set("");
+            playing = false;
         }
     });
 
@@ -88,7 +95,6 @@
             });
         }
     })
-
 
 
     // Store banner height to adjust the top margin of the content under it
@@ -179,7 +185,10 @@
     const data_array = writable([]);
 
     function updateData(power_infos) {
-        power_infos.forEach(module => {
+        if (!playing) return;
+
+        let selected_infos = power_infos.filter((mod) => $checkbox_inputs[mod.slot_id-1]);
+        selected_infos.forEach(module => {
             if ($data[module.slot_id]) {
                 $data[module.slot_id].push({date: new Date(), power_flow: module.power_flow});
             } else {
@@ -194,37 +203,20 @@
 
 
     
-    let svgRef = null;
-
-    function downloadSvg() {
-        if (svgRef) {
-            const htmlStr = svgRef.outerHTML;
-            const blob = new Blob([htmlStr], { type: "image/svg+xml" });
-
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.setAttribute("download", "chart.svg");
-            a.setAttribute("href", url);
-            a.style.display = "none";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-        }
-    }
-
-    let playing = false;
-    let paused = false;
-    let stopped = false;
 
     function togglePlayPause() {
         if (playing) {
             playing = false;
             paused = true;
         } else {
-            playing = true;
-            paused = false;
-            stopped = false;
+            if (stopped) {
+                restartGraph();
+            }
+            else {
+                playing = true;
+                paused = false;
+                stopped = false;
+            }
         }
     }
 
@@ -242,8 +234,31 @@
         updateData($power_infos);
     }
 
+    import { graphic_saved_data } from "../data_store";
     function saveData() {
-        console.log("Données enregistrées !");
+        const now = new Date().toString();
+        console.log(now);
+        $graphic_saved_data[now] = $data_array;
+        alert("Données enregistrées !");
+    }
+
+    let svgRef = null;
+
+    function downloadSvg() {
+        if (svgRef) {
+            const htmlStr = svgRef.outerHTML;
+            const blob = new Blob([htmlStr], { type: "image/svg+xml" });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.setAttribute("download", "chart.svg");
+            a.setAttribute("href", url);
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
     }
 
 
@@ -426,7 +441,7 @@
         >
             <div style:width=100%>
             {#key $props}
-                {#if $props.width !== 0 && $selectedCharacteristic !== ""}
+                {#if $props.width !== 0 && $selectedCharacteristic !== "" && $data_array.length > 0}
                     {#key $data_array}
                         <Graphic props={$props} bind:svgRef={svgRef} data={$data_array}/>
                     {/key}

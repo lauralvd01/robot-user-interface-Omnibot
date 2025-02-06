@@ -11,6 +11,12 @@
   export let data;
   export let props;
 
+  console.log(data);
+  if (!data || data.length === 0) {
+    console.error("No data provided");
+    data = [{"id": 1, "data": [{"title_X": 0, "title_Y": 0}]}];
+  }
+
   const marginTop = props.marginTop || 40; // the top margin, in pixels (40)
   const marginRight = props.marginRight || 5; // the right margin, in pixels (0)
   const marginBottom = props.marginBottom || 35; // the bottom margin, in pixels (30)
@@ -298,7 +304,9 @@
         style:background-color={tooltipBackground}
         style:color={tooltipTextColor}
       >
-        {subsets ? subsets[points[dotInfo[1]].color] : ""}:
+        <strong>
+          {subsets ? subsets[points[dotInfo[1]].color] : ""}:
+        </strong>
         {points[dotInfo[1]].x.getSeconds()}s; {points[dotInfo[1]].y.toFixed(2)}{yFormat}
       </div>
     {/if}
@@ -376,5 +384,9 @@
       rgba(0, 0, 0, 0.4) 0px 2px 4px,
       rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
       rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  }
+
+  .tooltip strong {
+    color: #ff662e;
   }
 </style>
