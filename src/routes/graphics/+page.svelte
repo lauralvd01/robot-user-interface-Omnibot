@@ -5,6 +5,11 @@
     import Graphic from "./Graphic.svelte";
 
     
+    const data = writable({1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: []});
+    const data_array = writable([]);
+    const checkbox_inputs = writable(new Array(12).fill(false));
+
+    
     let playing = false;
     let paused = false;
     let stopped = false;
@@ -72,7 +77,7 @@
             selectedUnit.set("");
             graphTitle.set("Titre du graphique");
             period.set(1000);
-            playing = false;
+            if (data) restartGraph();
         }
     });
 
@@ -80,19 +85,15 @@
     availableCharacteristics.subscribe((value) => {
         if (!value.includes($selectedCharacteristic)) {
             selectedCharacteristic.set("");
-            playing = false;
+            if (data) restartGraph();
         }
     });
 
 
-    const checkbox_inputs = writable(new Array(12).fill(false));
     selectedModules.subscribe(value => {
         for (let index = 0; index < 12; index++) {
-            value.forEach(element => {
-                if (element == {"slot_id": index+1, ...$availableModules[index]}) {
-                    $checkbox_inputs[index] = true;
-                }
-            });
+            const selected = value.find(module => module.slot_id === index + 1);
+            $checkbox_inputs[index] = selected ? true : false;
         }
     })
 
@@ -181,20 +182,14 @@
 
     import { power_infos } from "../data_store";
 
-    const data = writable({});
-    const data_array = writable([]);
 
     function updateData(power_infos) {
         if (!playing) return;
 
         let selected_infos = power_infos.filter((mod) => $checkbox_inputs[mod.slot_id-1]);
         selected_infos.forEach(module => {
-            if ($data[module.slot_id]) {
-                $data[module.slot_id].push({date: new Date(), power_flow: module.power_flow});
-            } else {
-                $data[module.slot_id] = [{date: new Date(), power_flow: module.power_flow}];
-            }
-            });
+            $data[module.slot_id].push({date: new Date(), power_flow: module.power_flow});
+        });
         data_array.set(Object.entries($data).map(([key, value]) => ({id: key, data: value})));
     };
 
@@ -230,13 +225,13 @@
         playing = true;
         paused = false;
         stopped = false;
-        data.set({});
+        data.set({1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: []});
         updateData($power_infos);
     }
 
     import { graphic_saved_data } from "../data_store";
     function saveData() {
-        const now = new Date().toString();
+        const now = new Date();
         console.log(now);
         $graphic_saved_data[now] = $data_array;
         alert("Données enregistrées !");

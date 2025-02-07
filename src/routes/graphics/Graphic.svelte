@@ -14,7 +14,7 @@
   console.log(data);
   if (!data || data.length === 0) {
     console.error("No data provided");
-    data = [{"id": 1, "data": [{"title_X": 0, "title_Y": 0}]}];
+    data = [{"id": 1, "data": []}];
   }
 
   const marginTop = props.marginTop || 40; // the top margin, in pixels (40)
@@ -106,10 +106,12 @@
 
 
   // Create functions to scale x and y values to the chart width and height
-  const Ymin = Math.min(...yVals)
+  const Xmin = Math.min(...xVals);
+  const Xmax = Math.max(...xVals);
+  const xDomain = [Xmin, Xmax]; 
+  const Ymin = Math.min(...yVals);
   const Ymax = Math.max(...yVals);
-  const xDomain = [xVals[0], xVals[xVals.length - 1]]; // Assuming xVals is sorted : [ first x value, last x value ] = [ min x value, max x value ]
-  const yDomain = [Ymin, Ymax]; // Assuming all yVals are positive : [ 0, max y value ]
+  const yDomain = [Ymin, Ymax];
   // xRange = [ left, right ] x_positions of the x axis ( in pixels inside the (0 0 width height) viewbox)
   // yRange = [ bottom, top ] y_positions of the y axis ( in pixels inside the (0 0 width height) viewbox)
   const xScale = xType(xDomain, xRange); // xScale(x_value) = x_position in the svg, xScale.invert(x_position) = x_value
@@ -250,7 +252,11 @@
           <g class="tick" transform="translate(0, {yScale(tick)})">
             <line class="tick-start" stroke="black" x1={-8}/>
             {#if horizontalGrid}
-              <line class="tick-grid" stroke=black stroke-opacity="0.2" x2={width - marginRight}/>
+              {#if tick === 0}
+                <line class="tick-grid" stroke=black x2={width - marginRight}/>
+              {:else}
+                <line class="tick-grid" stroke=black stroke-opacity="0.2" x2={width - marginRight}/>
+              {/if}
             {/if}
             <text font-size="11px" x="-{marginLeft}" y="5">{tick + yFormat}</text>
           </g>
