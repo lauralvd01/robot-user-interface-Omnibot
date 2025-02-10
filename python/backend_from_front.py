@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import asyncio
-import keyboard
+import json
 from pydantic import BaseModel
 
 import backend_to_robot as robot
@@ -253,7 +252,7 @@ def read_modules_db():
     global all_modules
     global implemented_modules
 
-    import json
+    
 
     with open("user_interface/python/database/modules.json") as file:
         all_modules = json.load(file)
@@ -498,8 +497,37 @@ async def test_connection():
             raise Exception(response["Error"])
     except Exception as e:
         return {"ok": False, "error": str(e)}
+
+
+class Record(BaseModel):
+    date: str
+    title: str
+    yLabel: str
+    yUnit: str
+    data: list
+
+all_records = []
+
+def read_records_db():
+    global all_records    
+    with open("user_interface/python/database/records.json") as file:
+        all_records = json.load(file)
+
+@app.get("/fetch_records")
+def fetch_records():
+    global all_records
+    return {"ok": True, "data": all_records}
+
+@app.post("/post_record")
+def post_record(record: Record):
+    global all_records
+    all_records.append(record)
+    
+    with open("user_interface/python/database/records.json",'w') as file:
+        json.dump(all_records, file)
     
 if __name__ == "__main__":
     read_modules_db()
+    read_records_db()
 
     uvicorn.run(app, host="localhost", port=8001)
