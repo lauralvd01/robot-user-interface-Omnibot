@@ -28,7 +28,9 @@ BACKEND_IP = "localhost"
 BACKEND_PORT = 8001
 
 # List of possible front origins
-origins = [ f"http://{ip}:{port}" for ip in front_ip for port in front_ports ]	
+# origins = [ f"http://{ip}:{port}" for ip in front_ip for port in front_ports ]	
+origins = [ "http://"+ip+":"+str(port) for ip in front_ip for port in front_ports ]
+print(origins)
 
 app.add_middleware(
     CORSMiddleware,
