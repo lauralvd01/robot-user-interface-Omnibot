@@ -11,7 +11,6 @@
         const id = $selectedTriangle.id;
         if (id !== null && $triangleData[id] !== null) {
             const module = $triangleData[id]; // module = {slot_id, module_id, functionality, characteristics[]}
-            console.log(module);
             if (module === null || module === "Aucun module connecté") {
                 currentContent = module;
             }

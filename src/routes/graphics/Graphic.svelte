@@ -11,10 +11,12 @@
   export let data;
   export let props;
 
-  console.log(data);
-  if (!data || data.length === 0) {
+  // console.log("Graphic data", data);
+  if (!data || data.length === 0 || ( // if data is not defined or empty
+    data.reduce((acc, dataset) => acc + dataset.data.length, 0) === 0 // or if there is no data in the datasets
+  )) {
     console.error("No data provided");
-    data = [{"id": 1, "data": []}];
+    data = [{"id": 1, "data": [{"title_X": 0, "title_Y": 0}]}];
   }
 
   const marginTop = props.marginTop || 40; // the top margin, in pixels (40)
@@ -252,11 +254,7 @@
           <g class="tick" transform="translate(0, {yScale(tick)})">
             <line class="tick-start" stroke="black" x1={-8}/>
             {#if horizontalGrid}
-              {#if tick === 0}
-                <line class="tick-grid" stroke=black x2={width - marginRight}/>
-              {:else}
-                <line class="tick-grid" stroke=black stroke-opacity="0.2" x2={width - marginRight}/>
-              {/if}
+              <line class="tick-grid" stroke=black stroke-opacity={tick === 0 ? "0.6" : "0.2"} x2={width - marginRight}/>
             {/if}
             <text font-size="11px" x="-{marginLeft}" y="5">{tick + yFormat}</text>
           </g>

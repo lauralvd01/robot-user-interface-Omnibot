@@ -7,7 +7,7 @@
     import PageInfo from "./PageInfo.svelte";
     import Button from "./Button.svelte";
 
-    import { fetchData } from "./data_store";
+    import { connected_modules, fetchData } from "./data_store";
     import { simulating } from "./data_store";
 
     // Store banner height to adjust the top margin of the content under it
@@ -18,18 +18,8 @@
         const banner = document.querySelector(".banner");
         if (banner) bannerHeight = banner.offsetHeight;
 
-        // Fetch data from the backend every second
-        // let intervals = [];
-        // intervals.push(setInterval(() => fetchData("current_data"), 1000));
-
-        // return () => {
-        //     intervals.forEach(element => {
-        //         clearInterval(element);
-        //     });
-        // };
-
-        // Start fetching data every second
-        fetchData("current_data");
+        // Start fetching data from backend every second (Start automatically when simulating is initialized to true)
+        // fetchData("current_data");
     });
 
     // let interval;

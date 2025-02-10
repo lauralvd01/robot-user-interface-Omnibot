@@ -28,7 +28,6 @@ function updateBatteryLevel(batteries_data) {
     batteries.set(batt);
 }
 
-export const graphic_saved_data = writable({});
 
 /////////////////////////////////////  Backend data store ///////////////////////////////////
 
@@ -40,6 +39,7 @@ const current_data = writable({});
 export const connected_modules = writable([]);
 export const batteries_data = writable([]);
 export const power_infos = writable([]);
+export const records = writable([]);
 export const settings = writable(1);
 export const simulating = writable(true);
 
@@ -65,14 +65,40 @@ const request_store = {
     connected_modules: { need_connection: true, store: connected_modules, default_value: [] },
     batteries_data: { need_connection: true, store: batteries_data, default_value: [] },
     power_infos: { need_connection: true, store: power_infos, default_value: [] },
+    records: { need_connection: false, store: records, default_value: [] },
     settings: { need_connection: false, store: settings, default_value: 1 },
     simulating: { need_connection: false, store: simulating, default_value: true },
 }
 
 // Don't send a new request when it is impossible to connect to the robot
 let no_connection = false;
+let testing = false;
+let task_queue = [];
+let test_queue = [];
+
+simulating.subscribe(new_value =>  {
+    current_data.set({});
+    if (new_value) {
+        testing = false;
+        test_queue.forEach(test_task => {
+            clearTimeout(test_task);
+        });
+        test_queue = [];
+        fetchData("current_data");
+    }
+    else {
+        no_connection = true;
+        testing = true;
+        task_queue.forEach(task => {
+            clearTimeout(task);
+        });
+        task_queue = [];
+        test_connection();
+    }
+})
 
 async function test_connection() {
+    if (!testing) return;
     try {
         console.log("Testing connection ...");
         const response = await fetch(endpoint + "test_connection");
@@ -80,21 +106,32 @@ async function test_connection() {
         if (data.ok === true) {
             console.log("Connection successful");
             no_connection = false;
+            testing = false;
+            test_queue.forEach(test_task => {
+                clearTimeout(test_task);
+            });
+            test_queue = [];
+            fetchData("current_data");
+        }
+        else if (testing) {
+            console.log("Connection test failed");
+            no_connection = true;
+            test_queue.push(setTimeout(test_connection, 500));
         }
     }
     catch (error) {
+        if (testing) {
         console.error("Error:", error);
         no_connection = true;
-        let sleep = new Promise(resolve => setTimeout(resolve, 500));
-        sleep.then(() => test_connection());
+        test_queue.push(setTimeout(test_connection, 500));
+        }
     }
 }
-
 
 // Send a request to the backend to get the data
 export async function fetchData(request) {
     // request = name of the data to fetch = name of the writable where to store the data
-    if (!(request_store[request])) {
+    if (!(request_store[request]) || !request_store[request]["store"]) {
             console.error("Error: request not found");
         return;
     }
@@ -107,7 +144,7 @@ export async function fetchData(request) {
         try {
             console.log(`Fetching ${request} ...`);
             const response = await fetch(endpoint + "fetch_" + request); // Send the request to the backend
-            const data = await response.json(endpoint + "fetch_" + request); // Parse response and get data as a JSON object
+            const data = await response.json(); // Parse response and get data as a JSON object
             if (data.ok === true) {
                 store.set(data.data); // Set the store with the data received
                 no_connection = false;
@@ -117,7 +154,13 @@ export async function fetchData(request) {
                 if (data.error === "[Errno 111] Connect call failed ('192.168.50.153', 6550)") {
                     console.error("Error: Connection to the robot failed");
                     no_connection = true;
+                    testing = true;
+                    task_queue.forEach(task => {
+                        clearTimeout(task);                        
+                    });
+                    task_queue = [];
                     test_connection();
+                    return;
                 }
             }
         } catch (error) {
@@ -125,10 +168,9 @@ export async function fetchData(request) {
             store.set(default_value); // Set the store with an empty array
         }
     }
-    // If the request is to get the current data, wait 1 second before sending a new request
+    // If the request is to get the current data, wait 1s before sending a new request
     if (request === "current_data") {
-        let sleep = new Promise(resolve => setTimeout(resolve, 1000));
-        sleep.then(() => fetchData(request));
+        task_queue.push(setTimeout(() => fetchData("current_data"),1000));
     }
 }
 
@@ -165,3 +207,14 @@ export function sendSpeedData(speed_data) {
     });
 }
 
+// Send a request to the backend to store graphic data
+export function sendGraphicData(graphic_data) {
+    console.log("Sending graphic data: ", graphic_data);
+    fetch(endpoint + "post_record", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(graphic_data),
+    });
+}

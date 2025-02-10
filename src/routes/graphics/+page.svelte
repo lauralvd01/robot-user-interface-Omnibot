@@ -1,102 +1,229 @@
 <script>
     import { onMount } from "svelte";
     import { writable, derived } from "svelte/store";
+    import { curveLinear, scaleLinear, scaleUtc } from "d3";
+
     import Banner from "../Banner.svelte";
     import Graphic from "./Graphic.svelte";
 
+
+
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Definitions and actions about graphic data
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    import { connected_modules } from "../data_store"; // Import connected modules from data store to select the ones for the graphic
+    import { batteries_data, power_infos } from "../data_store"; // Import data from data store. This data is updated every 1000ms
+
+    // Data to display in the graphic, one subset per slot id
+    // List updated by updateData function, starting when a characteristic is selected and then every period seconds until playing is true
+    const data_array = writable([{"id": 1, "data": []}, {"id": 2, "data": []}, {"id": 3, "data": []}, {"id": 4, "data": []}, {"id": 5, "data": []}, {"id": 6, "data": []}, {"id": 7, "data": []}, {"id": 8, "data": []}, {"id": 9, "data": []}, {"id": 10, "data": []}, {"id": 11, "data": []}, {"id": 12, "data": []}]);
+
+    const nb_data_points = writable(0); ; // Number of data points in the graphic
+
+    let task_queue = []; // List of data fetching tasks
+
+    let playing = false; // When true, data fetching loop is running, graphic is updating
+    let paused = false; // When true, data fetching loop is paused, graphic is not updating, when playing is true again, data fetching restarts, keeping old values
+    let stopped = false; // Data fetching loop is stoped, graphic is not updating, and data is cleaned before restarting
     
-    const data = writable({1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: []});
-    const data_array = writable([]);
+    // List of connected modules sorted by slot id and represented by a null if no module is connected
+    // List updated by updateAvailableModules function every time connected_modules is updated (every 1000ms)
+    const availableModules = writable(new Array(12).fill(null));
+    // List of modules beyond available modules selected to be displayed in the graphic
+    const selectedModules = writable([]);
+    // List storing for each slot id (array index +1) if its module is selected or not
     const checkbox_inputs = writable(new Array(12).fill(false));
 
-    
-    let playing = false;
-    let paused = false;
-    let stopped = false;
-
-    import { connected_modules } from "../data_store";
-
-    const availableModules = writable(new Array(12).fill(null)); // Liste des modules connectés
-    const selectedModules = writable([]); // Liste des modules cochés
-    const selectedCharacteristic = writable(""); // Caractéristique choisie
-    const selectedUnit = writable(""); // Unité associée
-    const yLabel = writable("Y label"); // Légende Y par défaut
-    const graphTitle = writable("Titre du graphique"); // Titre du graphique
-    const period = writable(1000); // Période de rafraîchissement des données
-
+    // List of each possible characteristic for the modules, their names and units
     const allCharacteristics = {
         power_flow: ["Puissance","W"],
         energy: ["Energie","J"],
         state_of_charge: ["Etat de charge","%"],
-        speed: ["Vitesse","m/s"],
         current: ["Courant","A"],
         temperature: ["Température","°C"],
         cell_voltages: ["Tension des cellules","V"],
     }
+    // List of characteristics that are common to all selected modules.
+    // List updated by updateAvailableCharacteristics function every time selected_modules is updated
+    const availableCharacteristics = writable([]);
+    // Common characteristic between selected modules, selected by the user to be displayed in the graphic
+    const selectedCharacteristic = writable("");
+    // Unit associated with the selected characteristic, can be modified by the user
+    const selectedUnit = writable("");
+    // Label of the Y axis, can be modified by the user
+    const yLabel = writable("Y label");
+    // Title of the graphic, can be modified by the user
+    const graphTitle = writable("Titre du graphique");
+    // Period of data fetching (in s), can be modified by the user if superior to 1s
+    const period = writable(1);
 
+    // Clean graphic data store
+    function cleanData() {
+        data_array.set([{"id": 1, "data": []}, {"id": 2, "data": []}, {"id": 3, "data": []}, {"id": 4, "data": []}, {"id": 5, "data": []}, {"id": 6, "data": []}, {"id": 7, "data": []}, {"id": 8, "data": []}, {"id": 9, "data": []}, {"id": 10, "data": []}, {"id": 11, "data": []}, {"id": 12, "data": []}]);
+    }
+
+    // Update data displayed in the graphic if playing is true and a characteristic is selected, then restart the function after period seconds. Break the loop if stopped is true
+    function updateData() {
+        const char = $selectedCharacteristic; // Get the selected characteristic
+        if (stopped || !char || char === "") return; // If stopped is true or no characteristic is selected, do nothing and break the loop
+
+        if (playing) { // Update data only if playing is true (and paused and stopped are false)
+            let data_to_fetch = (char === "power_flow" || char === "energy") ? $power_infos : $batteries_data; // Select the store to get the data from, accordingly to the selected characteristic
+            let selected_infos = data_to_fetch.filter((mod) => $checkbox_inputs[mod.slot_id-1]); // Get the data of the selected modules
+            selected_infos.forEach(module => {
+                $data_array[module.slot_id-1].data.push({date: new Date(), measured_value: module[char]}); // Add the data of the selected modules to the data array
+            });
+            nb_data_points.set($data_array.reduce((acc, dataset) => acc + dataset.data.length, 0)); // Update the number of data points in the graphic
+        }
+
+        if (!stopped) task_queue.push(setTimeout(() => updateData(), $period * 1000)); // If stopped is still false, restart the function after period seconds (add the task to the queue)
+    }
+
+    // Handle Play/Pause button click
+    function togglePlayPause() {
+        if (playing) { playing = false; paused = true; } 
+        else {
+            if (stopped) { restartGraph(); }
+            playing = true; paused = false;
+        }
+    }
+    // Handle Stop button click
+    function stopGraph() { playing = false; paused = false; stopped = true; }
+
+    // Handle Restart button click
+    function restartGraph() { 
+        playing = false; stopped = true; // Stop the data fetching loop
+        task_queue.forEach(task => {
+            clearTimeout(task); // Clear all the tasks in the queue to prevent them from restarting the data fetching loop            
+        });
+        task_queue = []; // Empty the queue
+        cleanData(); // Clear data displayed in the graphic
+        playing = true; paused = false; stopped = false;
+        updateData(); // Allow to restart the data fetching loop
+    }
+
+
+    // Update available modules list when connected modules are updated
+    // connected_modules is an array of 12 objects representing the connected modules
+    // Each object has a slot_id (its position in the array, slot_id = index + 1) and a characteristics array (among other properties)
+    // If no module is connected at a slot_id, the correseponding object (array[slot_id -1]) is has a slot of 32 and an empty characteristics array
     function updateAvailableModules(connected_modules) {
-        if (connected_modules.length !== 12) return;
-        let current_modules = [...$availableModules];
+        if (connected_modules.length !== 12) return; // If connected_modules is not fully fetched from backend yet, do nothing
+
+        let current_modules = [...$availableModules]; // Store list of modules currently displayed as available to compare with updated connected_modules
         for (let index = 0; index < 12; index++) {
-            const element = current_modules[index];
-            if (element !== connected_modules[index] ) {
-                current_modules[index] = connected_modules[index];
-                availableModules.set(current_modules);
-                if (connected_modules[index].characteristics.length === 0) {
-                    selectedModules.set($selectedModules.filter((mod) => mod["slot_id"] !== index+1));
-                    $checkbox_inputs[index] = false;
-                }
+            const element = current_modules[index]; // Current module displayed as available at slot id = index + 1
+            if (element === null || element.module_id !== connected_modules[index].module_id ) { // If the module displayed have a module id different from the one of the module connected at this slot id we have to update
+                selectedModules.set($selectedModules.filter((mod) => mod["slot_id"] !== index+1)); // Remove the former module from the selected modules list
+                $checkbox_inputs[index] = false; // Uncheck the checkbox associated with the former module
+                current_modules[index] = connected_modules[index]; // Update the store of the module displayed as available at this slot id
+                availableModules.set(current_modules); // Update the list of available modules with the new one
             }
         }
     }
 
+    // Update available modules list each time connected modules are updated
     $: connected_modules && updateAvailableModules($connected_modules);
 
-    // Liste des caractéristiques disponibles en fonction des modules cochés
-    const availableCharacteristics = derived(selectedModules, ($selectedModules) => {
-        if ($selectedModules.length === 0) return [];
+    // Update checkbox inputs when selected modules are updated
+    selectedModules.subscribe(value => {
+        for (let index = 0; index < 12; index++) {
+            const selected = value.find(module => module.slot_id === index + 1); // Check if the module at slot id = index + 1 is in the selected modules list
+            $checkbox_inputs[index] = selected ? true : false; // If the module is in the selected modules list then selected is that module object and we can check the checkbox, otherwise selected is undefined and we uncheck the checkbox
+        }
+    })
 
-        const commonCharacteristics = $selectedModules
-            .map((mod) => mod.characteristics.filter((c) => c !== "name" && c !== "state"))
-            .reduce((a, b) => a.filter((c) => b.includes(c)));
+    // Update available characteristics list when selected modules are updated
+    // selectedModules is an array of objects representing the selected modules
+    // Each object is a module with a slot_id and a characteristics array
+    function updateAvailableCharacteristics(selectedModules) {
+        if (selectedModules.length === 0) { // If no module is selected, no characteristic is available
+            selectedCharacteristic.set(""); // Unselect the characteristic
+            restartGraph(); // Clean data and restart the graphic
+            return []
+        };
 
-        return commonCharacteristics;
-    });
+        const commonCharacteristics = selectedModules
+            .map((mod) => mod.characteristics.filter((c) => Object.keys(allCharacteristics).includes(c))) // Get charachteristics of each selected modules, removing characteristics that are not in allCharacteristics
+            .reduce((a, b) => a.filter((c) => b.includes(c))); // Get the common characteristics between result characteristics arrays of the previous map
+        availableCharacteristics.set(commonCharacteristics); // Update the list of available characteristics with the new one
 
-    // Met à jour l'unité lorsqu'on change la caractéristique
+        if (!commonCharacteristics.includes($selectedCharacteristic)) { // If the selected characteristic is not in the new list of available characteristics
+            selectedCharacteristic.set(""); // Unselect the characteristic
+            restartGraph(); // Clean data and restart the graphic
+        }
+    };
+
+    // Update available characteristics list each time selected modules are updated
+    $: selectedModules && updateAvailableCharacteristics($selectedModules);
+
+    // When a characteristic is selected, update the data displayed in the graphic
     selectedCharacteristic.subscribe((char) => {
-        if (char && allCharacteristics[char]) {
-            yLabel.set(allCharacteristics[char][0]);
-            selectedUnit.set(allCharacteristics[char][1]);
-            graphTitle.set(`${allCharacteristics[char][0]} (${allCharacteristics[char][1]}) en fonction du temps`);
-            period.set(1000);
-            playing = true;
+        if (char && char !== "") { // If a characteristic is selected
+            const [char_name, char_unit] = allCharacteristics[char]; // Get the name and unit of the selected characteristic
+            yLabel.set(char_name); // Update the Y axis label with the name of the characteristic
+            selectedUnit.set(char_unit); // Update the unit of the characteristic
+            graphTitle.set(`${char_name} (${char_unit}) en fonction du temps`); // Update the title of the graphic
+            period.set(1); // Reset the period of data fetching to 1s
         }
         else {
             yLabel.set("Y label");
             selectedUnit.set("");
             graphTitle.set("Titre du graphique");
-            period.set(1000);
-            if (data) restartGraph();
+            period.set(1);
         }
+        restartGraph(); // Stop data fetching loop, clear data and restart data fetching loop
     });
+    
 
 
-    availableCharacteristics.subscribe((value) => {
-        if (!value.includes($selectedCharacteristic)) {
-            selectedCharacteristic.set("");
-            if (data) restartGraph();
+    import { sendGraphicData } from "../data_store";
+    // Handle Enregistrer button click
+    function saveData() {
+        const now = new Date(); // Get the current date
+        console.log(now);
+        sendGraphicData({ // Send the data to the backend to save the record
+            date: now,
+            title: $graphTitle,
+            yLabel: $yLabel,
+            yUnit: $selectedUnit,
+            data: $data_array,
+        });
+        alert("Données enregistrées !"); // Alert the user that the data is saved
+    }
+
+    // Handle Exporter button click
+    let svgRef = null; // Reference to the SVG element of the graphic, updated by Graphic component when mounted
+    function downloadSvg() {
+        if (svgRef) {
+            const htmlStr = svgRef.outerHTML; // Get the SVG element as an HTML string
+            const blob = new Blob([htmlStr], { type: "image/svg+xml" }); // Create a blob from the HTML string
+
+            const url = URL.createObjectURL(blob); // Create a URL linked the blob
+            const a = document.createElement("a"); // Create an anchor element (like a button link that can be clicked to access the URL)
+            a.setAttribute("download", "chart.svg"); // Set the download attribute to the anchor element to download the file as chart.svg
+            a.setAttribute("href", url); // Set the href attribute to the anchor element to link the URL
+            a.style.display = "none"; // Hide the anchor element to prevent it from being displayed on the page
+            document.body.appendChild(a); // Add the anchor element to the body of the page
+            a.click(); // Simulate a click on the anchor element to download the file
+            a.remove(); // Remove the anchor element from the body of the page
+            URL.revokeObjectURL(url); // Revoke the URL to free memory
         }
-    });
+    }
 
 
-    selectedModules.subscribe(value => {
-        for (let index = 0; index < 12; index++) {
-            const selected = value.find(module => module.slot_id === index + 1);
-            $checkbox_inputs[index] = selected ? true : false;
-        }
-    })
 
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Set graphic properties
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Store banner height to adjust the top margin of the content under it
     let bannerHeight = 0;
@@ -111,10 +238,7 @@
     })
 
 
-
-    import { curveLinear, scaleLinear, scaleUtc } from "d3";
-
-    const props = writable({}); // the properties of the chart (and default values)
+    const props = writable({}); // the fixed properties of the chart (and default values from d3 package)
     props.set({
         // width: $width,
         // height: height,
@@ -132,20 +256,20 @@
         // yScalefactor: height / 40, // y-axis number of values
         curve: curveLinear, // method of interpolation between points
 
-        // Number of colors array elements must match number of data sets (or be superior)
-        colors: [
-            "#FF662E", // Orange vif
-            "#E42618", // Rouge profond
-            "#239E99", // Bleu-vert
-            "#A04040", // Marron rougeâtre
-            "#4B1338", // Bordeaux foncé
-            "#656780", // Gris bleuté
-            "#FFB400", // Jaune doré
-            "#0A9D58", // Vert foncé
-            "#0085C7", // Bleu vif
-            "#C724B1", // Violet magenta
-            "#795548", // Brun terreux
-            "#1E1E1E", // Gris anthracite
+        // Number of colors array elements must match number of data sets (12 here)
+        colors: [ 
+            "#FF662E", // Bright orange
+            "#E42618", // Deep red
+            "#239E99", // Blue-green
+            "#A04040", // Reddish brown
+            "#4B1338", // Dark burgundy
+            "#656780", // Bluish grey
+            "#FFB400", // Golden yellow
+            "#0A9D58", // Dark green
+            "#0085C7", // Bright blue
+            "#C724B1", // Magenta violet
+            "#795548", // Earthy brown
+            "#1E1E1E", // Anthracite grey
         ], // fill color for dots && number of colors in fill array MUST match number of subsets in data ("#F50057","#42A5F5","#26A69A","#9575CD"])
 
         // Inner style
@@ -153,8 +277,8 @@
         verticalGrid: true, // show vertical grid lines
         showDots: true, // whether dots should be displayed or not
         dotsFilled: true, // whether dots should be filled or outlined
-        r: 4, // (fixed) radius of dots, in pixels (5)
-        strokeWidth: 3, // stroke width of line, in pixels (5)
+        r: 3, // (fixed) radius of dots, in pixels (5)
+        strokeWidth: 2.5, // stroke width of line, in pixels (5)
         strokeOpacity: 0.4, // stroke opacity of line (0.8)
         tooltipBackground: "white", // background color of tooltip
         tooltipTextColor: "black", // text color of tooltip
@@ -162,6 +286,7 @@
         strokeLinejoin: "round", // stroke line join of the line
     });
 
+    // Update width-dependant properties of the chart when the width of the window is updated, update properties modified by the user
     function updateProps(width, graphTitle, yLabel, selectedUnit) {
         $props.width = width;
         $props.height = Math.round(0.4 * width);
@@ -171,131 +296,59 @@
         $props.yLabel = "↑ " + yLabel + " (" + selectedUnit + ")";
         $props.yFormat = selectedUnit;}
 
+    const width = writable(600); // the outer width of the chart, in pixels (600 by default)
 
-    const width = writable(0); // the outer width of the chart, in pixels (600 by default)
-
-    $: width.set(Math.round(content_width - (15 + 10 + 10 + 15)));
-    $: updateProps($width, $graphTitle, $yLabel, $selectedUnit);
+    $: width.set(Math.round(content_width - (15 + 10 + 10 + 15))); // Update the width of the chart when the content width is updated, counting out margins of inner contents
+    $: updateProps($width, $graphTitle, $yLabel, $selectedUnit); // Update props when needed
         
-
-
-
-    import { power_infos } from "../data_store";
-
-
-    function updateData(power_infos) {
-        if (!playing) return;
-
-        let selected_infos = power_infos.filter((mod) => $checkbox_inputs[mod.slot_id-1]);
-        selected_infos.forEach(module => {
-            $data[module.slot_id].push({date: new Date(), power_flow: module.power_flow});
-        });
-        data_array.set(Object.entries($data).map(([key, value]) => ({id: key, data: value})));
-    };
-
-    $: power_infos && data && data_array && updateData($power_infos);
-
+ 
+  
 
 
     
-
-    function togglePlayPause() {
-        if (playing) {
-            playing = false;
-            paused = true;
-        } else {
-            if (stopped) {
-                restartGraph();
-            }
-            else {
-                playing = true;
-                paused = false;
-                stopped = false;
-            }
-        }
-    }
-
-    function stopGraph() {
-        playing = false;
-        paused = false;
-        stopped = true;
-    }
-
-    function restartGraph() {
-        playing = true;
-        paused = false;
-        stopped = false;
-        data.set({1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: []});
-        updateData($power_infos);
-    }
-
-    import { graphic_saved_data } from "../data_store";
-    function saveData() {
-        const now = new Date();
-        console.log(now);
-        $graphic_saved_data[now] = $data_array;
-        alert("Données enregistrées !");
-    }
-
-    let svgRef = null;
-
-    function downloadSvg() {
-        if (svgRef) {
-            const htmlStr = svgRef.outerHTML;
-            const blob = new Blob([htmlStr], { type: "image/svg+xml" });
-
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.setAttribute("download", "chart.svg");
-            a.setAttribute("href", url);
-            a.style.display = "none";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-        }
-    }
-
-
-
-
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Handle keyboard and gamepad commands, battery level display, as in RobotInfos.svelte
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     import Controller from "../Controller.svelte";
     import { is_gamepad_connected, batteries } from "../data_store";
 
     import { sendMoveData } from "../data_store";
 
-    //Creation de booléens pour savoir si une touche du clavier est pressée
+    //Booleans representing the state of the a, z, e, q, s and d keys of the keyboard
     let isActiveKeyA = false, isActiveKeyZ = false, isActiveKeyE = false, isActiveKeyQ = false, isActiveKeyS = false, isActiveKeyD = false;
 
-    //Fonctions permettant de savoir si la touche est pressée ou non
+    //Handle keydown event to send move data to the backend if a, z, e, q, s or d keys are pressed
     function handleKeyDown(event) {
-        if (event.key.toLowerCase() === "z") {
-            isActiveKeyZ = true;
+        switch (event.key.toLowerCase()) {
+            case "z":
+                isActiveKeyZ = true;
+                break;
+
+            case "a":
+                isActiveKeyA = true;
+                break;
+
+            case "e":
+                isActiveKeyE = true;
+                break;
+            
+            case "q":
+                isActiveKeyQ = true;
+                break;
+
+            case "s":
+                isActiveKeyS = true;
+                break;
+
+            case "d":
+                isActiveKeyD = true;
+                break;
+        
+            default:
+                break;
         }
-        if (event.key.toLowerCase() === "a") {
-            isActiveKeyA = true;
-        }
-        if (event.key.toLowerCase() === "e") {
-            isActiveKeyE = true;
-        }
-        if (event.key.toLowerCase() === "s") {
-            isActiveKeyS = true;
-        }
-        if (event.key.toLowerCase() === "q") {
-            isActiveKeyQ = true;
-        }
-        if (event.key.toLowerCase() === "d") {
-            isActiveKeyD = true;
-        }
-        if (
-            isActiveKeyZ ||
-            isActiveKeyS ||
-            isActiveKeyQ ||
-            isActiveKeyD ||
-            isActiveKeyA ||
-            isActiveKeyE
-        ) {
+        if ( ["z","a","e","q","s","d"].includes(event.key.toLowerCase()) ) {
             sendMoveData({
                 x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
                 y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
@@ -303,36 +356,37 @@
             });
         }
     }
-
+    // Handle keyup event to send move data to the backend if a, z, e, q, s or d keys are released
     function handleKeyUp(event) {
-        if (event.key.toLowerCase() === "z") {
-            isActiveKeyZ = false;
+        switch (event.key.toLowerCase()) {
+            case "z":
+                isActiveKeyZ = false;
+                break;
+
+            case "a":
+                isActiveKeyA = false;
+                break;
+
+            case "e":
+                isActiveKeyE = false;
+                break;
+
+            case "q":
+                isActiveKeyQ = false;
+                break;
+
+            case "s":
+                isActiveKeyS = false;
+                break;
+
+            case "d":
+                isActiveKeyD = false;
+                break;
+
+            default:
+                break;
         }
-        if (event.key.toLowerCase() === "a") {
-            isActiveKeyA = false;
-        }
-        if (event.key.toLowerCase() === "e") {
-            isActiveKeyE = false;
-        }
-        if (event.key.toLowerCase() === "q") {
-            isActiveKeyQ = false;
-        }
-        if (event.key.toLowerCase() === "s") {
-            isActiveKeyS = false;
-        }
-        if (event.key.toLowerCase() === "d") {
-            isActiveKeyD = false;
-        }
-        if (
-            !(
-                isActiveKeyZ ||
-                isActiveKeyS ||
-                isActiveKeyQ ||
-                isActiveKeyD ||
-                isActiveKeyA ||
-                isActiveKeyE
-            )
-        ) {
+        if ( ["z","a","e","q","s","d"].includes(event.key.toLowerCase()) ) {
             sendMoveData({
                 x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
                 y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
@@ -341,6 +395,7 @@
         }
     }
 
+    // Add event listeners to handle keyboard commands, remove it when the page component is destroyed
     onMount(async () => {
         window.addEventListener("keydown", handleKeyDown);
         window.addEventListener("keyup", handleKeyUp);
@@ -406,8 +461,8 @@
                 </div>
 
                 <div class="input-group">
-                    <label for="period">Période (en ms) :</label>
-                    <input type="rnumber" min=50 bind:value={$period} />
+                    <label for="period">Période (en s) :</label>
+                    <input type="number" min=1 bind:value={$period} />
                 </div>
             
                 <h2 style:margin-top=5px>Modules</h2>
@@ -436,8 +491,8 @@
         >
             <div style:width=100%>
             {#key $props}
-                {#if $props.width !== 0 && $selectedCharacteristic !== "" && $data_array.length > 0}
-                    {#key $data_array}
+                {#if $props.width !== 0 && $selectedCharacteristic !== "" && $data_array && $nb_data_points > 0}
+                    {#key $nb_data_points}
                         <Graphic props={$props} bind:svgRef={svgRef} data={$data_array}/>
                     {/key}
 
