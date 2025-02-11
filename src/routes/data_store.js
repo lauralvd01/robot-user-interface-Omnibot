@@ -73,10 +73,25 @@ const request_store = {
 // Don't send a new request when it is impossible to connect to the robot
 let no_connection = false;
 let testing = false;
+let stop_app = false;
 let task_queue = [];
 let test_queue = [];
 
+export function stopApp() {
+    stop_app = true;
+    testing = false;
+    no_connection = true;
+    task_queue.forEach(task => {
+        clearTimeout(task);
+    });
+    test_queue.forEach(test_task => {
+        clearTimeout(test_task);
+    });
+}
+
 simulating.subscribe(new_value =>  {
+    if (stop_app) {simulating.set(!new_value); return}; // Prevent the app from starting again and the user from changing the simulation state
+
     current_data.set({});
     if (new_value) {
         testing = false;
@@ -98,7 +113,7 @@ simulating.subscribe(new_value =>  {
 })
 
 async function test_connection() {
-    if (!testing) return;
+    if (stop_app || !testing) return;
     try {
         console.log("Testing connection ...");
         const response = await fetch(endpoint + "test_connection");
@@ -113,14 +128,14 @@ async function test_connection() {
             test_queue = [];
             fetchData("current_data");
         }
-        else if (testing) {
+        else if (testing && !stop_app) {
             console.log("Connection test failed");
             no_connection = true;
             test_queue.push(setTimeout(test_connection, 500));
         }
     }
     catch (error) {
-        if (testing) {
+        if (testing && !stop_app) {
         console.error("Error:", error);
         no_connection = true;
         test_queue.push(setTimeout(test_connection, 500));
@@ -130,6 +145,8 @@ async function test_connection() {
 
 // Send a request to the backend to get the data
 export async function fetchData(request) {
+    if (stop_app) return;
+
     // request = name of the data to fetch = name of the writable where to store the data
     if (!(request_store[request]) || !request_store[request]["store"]) {
             console.error("Error: request not found");
@@ -140,10 +157,11 @@ export async function fetchData(request) {
     const default_value = request_store[request]["default_value"];
 
     // Fetch data only if the request does not need a connection or if the connection is established
-    if (!need_connection || (need_connection && !no_connection)) {
+    if (!stop_app && (!need_connection || (need_connection && !no_connection))) {
         try {
             console.log(`Fetching ${request} ...`);
-            const response = await fetch(endpoint + "fetch_" + request); // Send the request to the backend
+            const full_endpoint = endpoint + "fetch_" + request;
+            const response = await fetch(full_endpoint); // Send the request to the backend
             const data = await response.json(); // Parse response and get data as a JSON object
             if (data.ok === true) {
                 store.set(data.data); // Set the store with the data received
@@ -159,25 +177,31 @@ export async function fetchData(request) {
                         clearTimeout(task);                        
                     });
                     task_queue = [];
-                    test_connection();
+                    if (!stop_app) test_connection();
                     return;
+                }
+                else if (error === "TypeError: Failed to fetch") {
+                    console.log("Error: Connection to the backend failed");
                 }
             }
         } catch (error) {
+            if (error === "TypeError: Failed to fetch") {console.log("Error: Connection to the backend failed");}
+            else {
             console.error("Error:", error);
             store.set(default_value); // Set the store with an empty array
+            }
         }
     }
     // If the request is to get the current data, wait 1s before sending a new request
-    if (request === "current_data") {
-        task_queue.push(setTimeout(() => fetchData("current_data"),1000));
+    if (request === "current_data" && !stop_app) {
+        task_queue.push(setTimeout(() => {if (!stop_app) fetchData("current_data")},1000));
     }
 }
 
 
 // Send a request to the backend to move the robot
 export function sendMoveData(moves) {
-    if (no_connection) return;
+    if (stop_app && no_connection) return;
 
     moving.set({...moves});
     console.log("Sending move data: ", moves);
@@ -192,7 +216,7 @@ export function sendMoveData(moves) {
 
 // Send a request to the backend to change robot speed settigs
 export function sendSpeedData(speed_data) {
-    if (no_connection) return;
+    if (stop_app && no_connection) return;
     
     console.log("Sending speed data: ", speed_data);
     fetch(endpoint + "set_speed", {
@@ -209,6 +233,8 @@ export function sendSpeedData(speed_data) {
 
 // Send a request to the backend to store graphic data
 export function sendGraphicData(graphic_data) {
+    if (stop_app) return;
+
     console.log("Sending graphic data: ", graphic_data);
     fetch(endpoint + "post_record", {
         method: "POST",

@@ -34,91 +34,102 @@
     $: d_speed && check_d_speed($d_speed);
 
 
-    //Creation de booléens pour savoir si une touche du clavier est pressée
-    let isActiveKeyA = false, isActiveKeyZ = false, isActiveKeyE = false, isActiveKeyQ = false, isActiveKeyS = false, isActiveKeyD = false;
+        //Booleans representing the state of the a, z, e, q, s and d keys of the keyboard
+        let isActiveKeyA = false, isActiveKeyZ = false, isActiveKeyE = false, isActiveKeyQ = false, isActiveKeyS = false, isActiveKeyD = false;
 
-    //Fonctions permettant de savoir si la touche est pressée ou non
-    function handleKeyDown(event) {
-        if (event.key.toLowerCase() === "z") {
-            isActiveKeyZ = true;
-        }
-        if (event.key.toLowerCase() === "a") {
-            isActiveKeyA = true;
-        }
-        if (event.key.toLowerCase() === "e") {
-            isActiveKeyE = true;
-        }
-        if (event.key.toLowerCase() === "s") {
-            isActiveKeyS = true;
-        }
-        if (event.key.toLowerCase() === "q") {
-            isActiveKeyQ = true;
-        }
-        if (event.key.toLowerCase() === "d") {
-            isActiveKeyD = true;
-        }
-        if (
-            isActiveKeyZ ||
-            isActiveKeyS ||
-            isActiveKeyQ ||
-            isActiveKeyD ||
-            isActiveKeyA ||
-            isActiveKeyE
-        ) {
-            sendMoveData({
-                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
-                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
-                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
-            });
-        }
-    }
+        //Handle keydown event to send move data to the backend if a, z, e, q, s or d keys are pressed. Press r to stop any movement
+        function handleKeyDown(event) {
+            switch (event.key.toLowerCase()) {
+                case "z":
+                    isActiveKeyZ = true;
+                    break;
 
-    function handleKeyUp(event) {
-        if (event.key.toLowerCase() === "z") {
-            isActiveKeyZ = false;
-        }
-        if (event.key.toLowerCase() === "a") {
-            isActiveKeyA = false;
-        }
-        if (event.key.toLowerCase() === "e") {
-            isActiveKeyE = false;
-        }
-        if (event.key.toLowerCase() === "q") {
-            isActiveKeyQ = false;
-        }
-        if (event.key.toLowerCase() === "s") {
-            isActiveKeyS = false;
-        }
-        if (event.key.toLowerCase() === "d") {
-            isActiveKeyD = false;
-        }
-        if (
-            !(
-                isActiveKeyZ ||
-                isActiveKeyS ||
-                isActiveKeyQ ||
-                isActiveKeyD ||
-                isActiveKeyA ||
-                isActiveKeyE
-            )
-        ) {
-            sendMoveData({
-                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
-                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
-                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
-            });
-        }
-    }
+                case "a":
+                    isActiveKeyA = true;
+                    break;
 
-    onMount(async () => {
-        window.addEventListener("keydown", handleKeyDown);
-        window.addEventListener("keyup", handleKeyUp);
+                case "e":
+                    isActiveKeyE = true;
+                    break;
+                
+                case "q":
+                    isActiveKeyQ = true;
+                    break;
 
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-            window.removeEventListener("keyup", handleKeyUp);
-        };
-    });
+                case "s":
+                    isActiveKeyS = true;
+                    break;
+
+                case "d":
+                    isActiveKeyD = true;
+                    break;
+                    
+                case "r":
+                    isActiveKeyA = false; isActiveKeyD = false; isActiveKeyE = false; isActiveKeyQ = false; isActiveKeyS = false; isActiveKeyZ = false;
+                    break;
+            
+                default:
+                    isActiveKeyA = false; isActiveKeyD = false; isActiveKeyE = false; isActiveKeyQ = false; isActiveKeyS = false; isActiveKeyZ = false;
+                    break;
+            }
+            if ( ["z","a","e","q","s","d","r"].includes(event.key.toLowerCase()) ) {
+                sendMoveData({
+                    x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
+                    y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
+                    angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
+                });
+            }
+        }
+        // Handle keyup event to send move data to the backend if a, z, e, q, s or d keys are released
+        function handleKeyUp(event) {
+            switch (event.key.toLowerCase()) {
+                case "z":
+                    isActiveKeyZ = false;
+                    break;
+
+                case "a":
+                    isActiveKeyA = false;
+                    break;
+
+                case "e":
+                    isActiveKeyE = false;
+                    break;
+
+                case "q":
+                    isActiveKeyQ = false;
+                    break;
+
+                case "s":
+                    isActiveKeyS = false;
+                    break;
+
+                case "d":
+                    isActiveKeyD = false;
+                    break;
+
+                default:
+                    isActiveKeyA = false; isActiveKeyD = false; isActiveKeyE = false; isActiveKeyQ = false; isActiveKeyS = false; isActiveKeyZ = false;
+                    break;
+            }
+            if ( ["z","a","e","q","s","d"].includes(event.key.toLowerCase()) ) {
+                sendMoveData({
+                    x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
+                    y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
+                    angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
+                });
+            }
+        }
+
+        // Add event listeners to handle keyboard commands, remove it when the page component is destroyed
+        onMount(async () => {
+            window.addEventListener("keydown", handleKeyDown);
+            window.addEventListener("keyup", handleKeyUp);
+
+            return () => {
+                window.removeEventListener("keydown", handleKeyDown);
+                window.removeEventListener("keyup", handleKeyUp);
+            };
+        });
 
     import { is_gamepad_connected, batteries } from "./data_store";
 </script>

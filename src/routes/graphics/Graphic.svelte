@@ -11,12 +11,15 @@
   export let data;
   export let props;
 
-  // console.log("Graphic data", data);
-  if (!data || data.length === 0 || ( // if data is not defined or empty
-    data.reduce((acc, dataset) => acc + dataset.data.length, 0) === 0 // or if there is no data in the datasets
-  )) {
+  console.log("Graphic data", data);
+  let first_not_empty = data.findIndex((dataset) => dataset.data.length > 0);
+  console.log("First not empty dataset", first_not_empty);
+
+  if (!data || data.length === 0 || first_not_empty === -1) {
     console.error("No data provided");
-    data = [{"id": 1, "data": [{"title_X": 0, "title_Y": 0}]}];
+    console.log(data.reduce((acc, dataset) => acc + dataset.data.length, 0))
+    data = [{"id": 1, "data": [{"title_X": new Date(), "title_Y": 0}]}];
+    first_not_empty = 0;
   }
 
   const marginTop = props.marginTop || 40; // the top margin, in pixels (40)
@@ -54,26 +57,11 @@
 
   let x,y,dotInfo,lines,xVals = [],yVals = [],points = [],subsets = [],colorVals = [];
 
-  // For a single set of data
-  if (!("data" in data[0])) {
-    x = Object.keys(data[0])[0];
-    y = Object.keys(data[0])[1];
-    xVals = data.map((el) => el[x]);
-    yVals = data.map((el) => el[y]);
-    colorVals = data.map((el) => 0);
-    points = data.map((el) => ({
-      x: el[x],
-      y: el[y],
-      color: 0,
-    }));
-  }
-  // For data with subsets (NOTE: expects 'id' and 'data' keys)
 
   // One dataset = "title_X,title_Y\nvalue_X_1,value_Y_1\nvalue_X_2,value_Y_2\n..."
-  // Converted datasets array = [ { id: 1, data: [ { title_X: value_X_1, title_Y: value_Y_1 }, ... ] }, ... ]  
-  else {
-    x = Object.keys(data[0]?.data[0])[0]; // title_X
-    y = Object.keys(data[0]?.data[0])[1]; // title_Y
+  // Converted datasets array = [ { id: 1, data: [ { title_X: value_X_1, title_Y: value_Y_1 }, ... ] }, ... ]
+    x = Object.keys(data[first_not_empty].data[0])[0]; // title_X
+    y = Object.keys(data[first_not_empty].data[0])[1]; // title_Y
     data.forEach((subset, i) => {
       // subset = { id: 1, data: [ { title_X: value_X_1, title_Y: value_Y_1 }, ... ] }
       // i = subset index in data array
@@ -93,7 +81,6 @@
       });
       subsets.push(subset.id); // subsets = [ 1, 2, ... ] all subset ids
     });
-  }
 
   const date = points[0].x;
   const year = date.getFullYear();

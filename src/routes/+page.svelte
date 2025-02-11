@@ -7,8 +7,9 @@
     import PageInfo from "./PageInfo.svelte";
     import Button from "./Button.svelte";
 
-    import { connected_modules, fetchData } from "./data_store";
+    import { stopApp, fetchData } from "./data_store";
     import { simulating } from "./data_store";
+    // Start fetching data from backend every period milliseconds (Start automatically when simulating is initialized to true)
 
     // Store banner height to adjust the top margin of the content under it
     let bannerHeight = 0;
@@ -18,18 +19,20 @@
         const banner = document.querySelector(".banner");
         if (banner) bannerHeight = banner.offsetHeight;
 
-        // Start fetching data from backend every second (Start automatically when simulating is initialized to true)
-        // fetchData("current_data");
+        return () => {
+            // Stop fetching data when the component is unmounted
+            stopApp();
+        };
     });
 
-    // let interval;
-    // $: {if ($simulating) {
-    //     interval = setInterval(() => fetchData("settings"), 5000); // Change the simulated response settings every 5 seconds
-    //     }
-    //     else if (interval) {
-    //         clearInterval(interval);
-    //     }
-    // }
+    let interval;
+    $: {if ($simulating) {
+        interval = setInterval(() => fetchData("settings"), 10000); // Change the simulated response settings every 5 seconds
+        }
+        else if (interval) {
+            clearInterval(interval);
+        }
+    }
 </script>
 
 <div class="homepage">
@@ -42,6 +45,7 @@
                 </div>
                 <div class="omnibot">
                     <Button class="primary-inverse" on:click={() => fetchData("simulating")}>{ $simulating ? "Se connecter au robot" : "Simuler le robot" }</Button>
+                    <!-- <Button class="primary-inverse" on:click={stopApp}><span class="icon">⏹️</span><span class="label">Stop the app</span></Button> -->
                     <Omnibot />
                 </div>
                 <div class="infos">

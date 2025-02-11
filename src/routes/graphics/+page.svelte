@@ -76,7 +76,7 @@
             let data_to_fetch = (char === "power_flow" || char === "energy") ? $power_infos : $batteries_data; // Select the store to get the data from, accordingly to the selected characteristic
             let selected_infos = data_to_fetch.filter((mod) => $checkbox_inputs[mod.slot_id-1]); // Get the data of the selected modules
             selected_infos.forEach(module => {
-                $data_array[module.slot_id-1].data.push({date: new Date(), measured_value: module[char]}); // Add the data of the selected modules to the data array
+                $data_array[module.slot_id-1].data.push({date: new Date(), measured_value: (allCharacteristics[char][1] === "%") ? module[char]*100 :module[char]}); // Add the data of the selected modules to the data array
             });
             nb_data_points.set($data_array.reduce((acc, dataset) => acc + dataset.data.length, 0)); // Update the number of data points in the graphic
         }
@@ -179,16 +179,15 @@
         }
         restartGraph(); // Stop data fetching loop, clear data and restart data fetching loop
     });
-    
+
 
 
     import { sendGraphicData } from "../data_store";
     // Handle Enregistrer button click
     function saveData() {
         const now = new Date(); // Get the current date
-        console.log(now);
         sendGraphicData({ // Send the data to the backend to save the record
-            date: now,
+            date: now.toJSON(),
             title: $graphTitle,
             yLabel: $yLabel,
             yUnit: $selectedUnit,
@@ -318,7 +317,7 @@
     //Booleans representing the state of the a, z, e, q, s and d keys of the keyboard
     let isActiveKeyA = false, isActiveKeyZ = false, isActiveKeyE = false, isActiveKeyQ = false, isActiveKeyS = false, isActiveKeyD = false;
 
-    //Handle keydown event to send move data to the backend if a, z, e, q, s or d keys are pressed
+    //Handle keydown event to send move data to the backend if a, z, e, q, s or d keys are pressed. Press r to stop any movement
     function handleKeyDown(event) {
         switch (event.key.toLowerCase()) {
             case "z":
@@ -345,10 +344,15 @@
                 isActiveKeyD = true;
                 break;
         
+            case "r":
+                isActiveKeyA = false; isActiveKeyD = false; isActiveKeyE = false; isActiveKeyQ = false; isActiveKeyS = false; isActiveKeyZ = false;
+                break;
+            
             default:
+                isActiveKeyA = false; isActiveKeyD = false; isActiveKeyE = false; isActiveKeyQ = false; isActiveKeyS = false; isActiveKeyZ = false;
                 break;
         }
-        if ( ["z","a","e","q","s","d"].includes(event.key.toLowerCase()) ) {
+        if ( ["z","a","e","q","s","d","r"].includes(event.key.toLowerCase()) ) {
             sendMoveData({
                 x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
                 y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
@@ -382,8 +386,9 @@
             case "d":
                 isActiveKeyD = false;
                 break;
-
+            
             default:
+                isActiveKeyA = false; isActiveKeyD = false; isActiveKeyE = false; isActiveKeyQ = false; isActiveKeyS = false; isActiveKeyZ = false;
                 break;
         }
         if ( ["z","a","e","q","s","d"].includes(event.key.toLowerCase()) ) {
