@@ -1,6 +1,5 @@
 <script>
     import { onMount } from "svelte";
-    import { writable } from "svelte/store";
     import Banner from "./Banner.svelte";
     import RobotInfos from "./RobotInfos.svelte";
     import Blocs from "./Blocs.svelte";
@@ -8,63 +7,32 @@
     import PageInfo from "./PageInfo.svelte";
     import Button from "./Button.svelte";
 
-    import { backend_host, backend_port } from "../config.js";
+    import { stopApp, fetchData } from "./data_store";
+    import { simulating } from "./data_store";
+    // Start fetching data from backend every period milliseconds (Start automatically when simulating is initialized to true)
 
-    const connected_modules = writable([]);
-    const batteries_data = writable([]);
-    const settings = writable(1);
-    const simulating = writable(true);
-
-    // Send a request to the backend to get the data
-    async function fetchData(endpoint, store) {
-        try {
-            console.log(`Fetching ${endpoint.split("fetch_")[1]} ...`);
-            const response = await fetch(endpoint); // Send a request to the backend
-            const data = await response.json(endpoint); // Parse response and get data as a JSON object
-            // console.log(data);
-            if (data.ok === true) {
-                store.set(data.data); // Set the store with the data received
-            } else {
-                console.error("Error:", data.error);
-                store.set(data.default); // Set the store with the default value
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            store.set([]); // Set the store with an empty array
-        }
-    }
-
-    function simulateRobot() {
-        fetchData(`http://${backend_host}:${backend_port}/fetch_simulating`, simulating);
-    }
-
+    // Store banner height to adjust the top margin of the content under it
     let bannerHeight = 0;
 
     // Function that runs when the component is mounted
     onMount(async () => {
-        // Get banner height to adjust the top margin of the content under it
         const banner = document.querySelector(".banner");
-        if (banner) {
-            bannerHeight = banner.offsetHeight;
-        }
-
-        // Fetch connected modules every second
-        // fetchData(`http://${backend_host}:${backend_port}/fetch_connected_modules`, connected_modules);
-        const interval = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_connected_modules`, connected_modules), 1000);
-
-        // Fetch batteries data every second
-        // fetchData(`http://${backend_host}:${backend_port}/fetch_batteries`, batteries_data);
-        const interval2 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_batteries`, batteries_data), 1000);
-
-        // Temporary
-        const interval3 = setInterval(() => fetchData(`http://${backend_host}:${backend_port}/fetch_settings`, settings), 5000);
+        if (banner) bannerHeight = banner.offsetHeight;
 
         return () => {
-            clearInterval(interval);
-            clearInterval(interval2);
-            clearInterval(interval3);
+            // Stop fetching data when the component is unmounted
+            stopApp();
         };
     });
+
+    let interval;
+    $: {if ($simulating) {
+        interval = setInterval(() => fetchData("settings"), 10000); // Change the simulated response settings every 5 seconds
+        }
+        else if (interval) {
+            clearInterval(interval);
+        }
+    }
 </script>
 
 <div class="homepage">
@@ -73,19 +41,20 @@
         <div class="content">
             <div class="top" style="margin-top: {bannerHeight}px;">
                 <div class="modules">
-                    <Blocs connected_modules={$connected_modules}/>
+                    <Blocs/>
                 </div>
                 <div class="omnibot">
-                    <Button class="primary-inverse" on:click={simulateRobot}>{ $simulating ? "Se connecter au robot" : "Simuler le robot" }</Button>
-                    <Omnibot connected_modules={$connected_modules}/>
+                    <Button class="primary-inverse" on:click={() => fetchData("simulating")}>{ $simulating ? "Se connecter au robot" : "Simuler le robot" }</Button>
+                    <!-- <Button class="primary-inverse" on:click={stopApp}><span class="icon">⏹️</span><span class="label">Stop the app</span></Button> -->
+                    <Omnibot />
                 </div>
                 <div class="infos">
-                    <PageInfo fetchData={fetchData} batteries_data={$batteries_data}/>
+                    <PageInfo />
                 </div>
             </div>
         </div>
         <div class="bottom">
-            <RobotInfos batteries_data={$batteries_data}/>
+            <RobotInfos />
         </div>
     </div>
 </div>

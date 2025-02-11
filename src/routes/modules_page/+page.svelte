@@ -26,9 +26,20 @@
         "Mobilité": "#656780",
     };
 
-    import { backend_host, backend_port } from "../../config.js";
+    import { modules } from "../data_store";
+    import { fetchData } from "../data_store";
+    
+    // Store banner height to adjust the top margin of the content under it
+    let bannerHeight = 0;
 
-    const modules = writable([]);
+    // Function that runs when the component is mounted
+    onMount(async () => {
+        const banner = document.querySelector(".banner");
+        if (banner) bannerHeight = banner.offsetHeight;
+
+        // Fetch existant modules
+        fetchData("modules");
+    });
 
     let occupied_ids = [];
 
@@ -49,41 +60,7 @@
         }
     });
 
-    // Send a request to the backend to get the data
-    async function fetchData(endpoint, store) {
-        try {
-            console.log(`Fetching ${endpoint.split("fetch_")[1]} ...`);
-            const response = await fetch(endpoint); // Send a request to the backend
-            const data = await response.json(endpoint); // Parse response and get data as a JSON object
-            // console.log(data);
-            if (data.ok === true) {
-                store.set(data.data); // Set the store with the data received
-            } else {
-                console.error("Error:", data.error);
-                store.set(data.default); // Set the store with the default value
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            store.set([]); // Set the store with an empty array
-        }
-    }
 
-    let bannerHeight = 0;
-
-    // Function that runs when the component is mounted
-    onMount(async () => {
-        // Get banner height to adjust the top margin of the content under it
-        const banner = document.querySelector(".banner");
-        if (banner) {
-            bannerHeight = banner.offsetHeight;
-        }
-
-        // Fetch existant modules
-        fetchData(
-            `http://${backend_host}:${backend_port}/fetch_modules`,
-            modules,
-        );
-    });
 
 
     let newModule = {
@@ -133,6 +110,8 @@
         ) {
             console.log("Module valide :", newModule);
             // Traitement à ajouter ici
+            // Actualiser la liste des modules
+            alert("Fonction indsponible pour le moment");
         } else {
             alert("Vérifier que les champs requis sont remplis, ou que l'id choisi n'est pas déjà utilisé");
         }
@@ -319,7 +298,6 @@
 
 <style>
     * {
-        /* margin: 0px 5px 0px 5px; */
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -332,18 +310,13 @@
     }
 
     .body {
-        /* margin: 0px 20px 0px 20px;
-        padding: 0; */
-        margin: 20px;
+        margin: 2%;
         display: flex;
-        width: 100%;
+        width: 96%;
         height: 100%;
-        /* flex-direction: column;
-        align-items: center; */
     }
 
     .sidebar {
-        /* width: 25%; */
         width: 30%;
         padding: 20px;
         background-color: #ffd7c9;
@@ -351,7 +324,7 @@
         /* border-right: 1px solid #ddd;
         box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); */
         /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
-        margin-right: 20px;
+        margin-right: 2%;
     }
 
     .sidebar h2 {
@@ -440,79 +413,12 @@
     }
 
 
-    /* .sidebar h3 {
-        margin-bottom: 20px;
-        color: #333;
-    }
-
-    .sidebar form {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    .form-group input, .form-group select, .form-group button {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-
-    .form-group ul {
-        list-style: none;
-        padding: 0;
-    }
-
-    .form-group ul li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px 0;
-    } */
-/* 
-    .sidebar label {
-        margin-bottom: 10px;
-        font-size: 14px;
-        color: #555;
-    }
-
-    .sidebar input, .sidebar select, .sidebar button { */
-    /* .sidebar button {
-        margin-top: 5px;
-        margin-bottom: 15px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 14px;
-
-        background-color: #FF662E;
-        color: #fff;
-        border: none;
-        cursor: pointer;
-    }
-
-    .sidebar button:hover {
-        background-color: #e55a27;
-        font-weight: bold;
-    } */
-
     .content {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
         overflow: auto;
         height: 100%;
-        /* width: 70%; */
         width: 60%;
     }
 
@@ -550,14 +456,6 @@
         margin-left: 5%;
         padding-left: 3%; */
     }
-
-    /* .inline-enum li::before {
-            content: "•";
-            color: white;
-            display: inline-block;
-            width: 1em;
-            margin-left: -1em;
-    } */
 
     .picto {
         /* height: 80%;

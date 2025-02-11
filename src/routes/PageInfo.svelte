@@ -1,24 +1,17 @@
 <script>
     import { writable } from "svelte/store"; // Importer la fonction writable
-    import {
-        selectedTriangle,
-        triangleData,
-        triangleImages,
-        triangleTitle,
-    } from "./store"; // Importer le store
-    import { onMount } from "svelte";
+    import { selectedTriangle, triangleData, triangleImages, triangleTitle } from "./store"; // Importer le store
 
-    let currentContent =
-        "Cliquez sur un bloc afin d'avoir les informations lié a celui-ci";
+    let currentContent = "Cliquer sur un bloc afin d'avoir les informations liées à celui-ci";
     let currentImage = null;
     let currentTitle = null;
 
     // Déclaration réactive pour mettre à jour le contenu lorsque selectedTriangle change
     $: {
         const id = $selectedTriangle.id;
-        if (id !== null) {
+        if (id !== null && $triangleData[id] !== null) {
             const module = $triangleData[id]; // module = {slot_id, module_id, functionality, characteristics[]}
-            if (module === "Aucun module connecté") {
+            if (module === null || module === "Aucun module connecté") {
                 currentContent = module;
             }
             else {
@@ -34,19 +27,19 @@
             }
             currentImage = $triangleImages[id];
             currentTitle = $triangleTitle[id];
-        } else if (id === 32) {
+        } else if (id === 32 || $triangleData[id] === null) {
             currentContent = "";
             currentImage = null;
             currentTitle = "Emplacement vide";
         } else {
-            currentContent =
-                "Cliquez sur un bloc afin d'avoir les informations lié a celui-ci";
+            currentContent = "Cliquer sur un bloc afin d'avoir les informations liées à celui-ci";
             currentImage = null;
             currentTitle = "Aucun bloc sélectionné";
         }
     }
 
-    export let batteries_data;
+
+    import { batteries_data, connected_modules, power_infos } from "./data_store";
 
     const batteries = writable({});
 
@@ -79,24 +72,7 @@
         }
     }
 
-    $: batteries_data && updateBatteryData(batteries_data);
-
-    import { backend_host, backend_port } from "../config.js";
-
-    export let fetchData;
-    const power_infos = writable([]);
-
-    function fetch_power_infos() {
-        fetchData(
-            `http://${backend_host}:${backend_port}/fetch_power_infos`,
-            power_infos,
-        );
-    }
-
-    onMount(() => {
-        const interval = setInterval(fetch_power_infos, 500);
-        return () => clearInterval(interval);
-    });
+    $: batteries_data && updateBatteryData($batteries_data);
 
     function updateCurrentContent(power_infos, batteries) {
         if (currentContent.slot_id !== undefined) {

@@ -9,8 +9,8 @@
     import { writable } from 'svelte/store';
     import { wheels_count } from './store';
 
-    // Get connected_modules from parent component
-    export let connected_modules;
+    // Get connected_modules from data store
+    import { connected_modules } from './data_store';
 
     // Create a store to store modules grouped by categories
     const modules_by_categories = writable({"Stockage d'énergie": {}, "Mobilité": {}, "Processeur": {}, "Réseau": {}, "Production d'énergie": {}, "Capteur": {}});
@@ -33,7 +33,7 @@
     }
 
     // Wait for connected_modules to be fetched from parent component and then run group_connected_modules_by_categories
-    $: connected_modules && group_connected_modules_by_categories(connected_modules);
+    $: connected_modules && group_connected_modules_by_categories($connected_modules);
 </script>
 
 <div class="blocs">

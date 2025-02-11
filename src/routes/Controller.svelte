@@ -1,6 +1,7 @@
 
 <script>
-    export let move;
+    import { sendMoveData as move} from "./data_store";	
+	import { d_speed } from "./data_store"; // = {"du": false, "dd": false, "dl": false, "dr": false};
 
 	let poll;
 	
@@ -10,10 +11,10 @@
 		let rx = axisMap.lx * 10;
 		let ry = axisMap.ly * 10;
 		let z = 1 - buttonMap.lstick * 0.05;
-        if (x > 5 || y > 5 || rx > 5 || ry > 5 || x < -5 || y < -5 || rx < -5 || ry < -5 ) {
+        if (x > 25 || y > 25 || x < -25 || y < -25) {
             move({
-                x_linear_vel: -Math.round(y)/25,
-                y_linear_vel: -Math.round(x)/25,
+                x_linear_vel: Math.round(y/25),
+                y_linear_vel: Math.round(x/25),
                 angular_vel: 0
             });
         };
@@ -26,11 +27,11 @@
 		let rx = axisMap.rx * 10;
 		let ry = axisMap.ry * 10;
 		let z = 1 - buttonMap.rstick * 0.05;
-        if (x > 5 || y > 5 || rx > 5 || ry > 5 || x < -5 || y < -5 || rx < -5 || ry < -5 ) {
+        if (rx > 10 || ry > 10 || rx < -10 || ry < -10 ) {
             move({
                 x_linear_vel: 0,
                 y_linear_vel: 0,
-                angular_vel: -Math.round(x)/10
+                angular_vel: Math.round(x)/10
             });
         };
 		return `translateX(${x}%) translateY(${y}%) rotateY(${rx}deg) rotateX(${ry}deg) scale(${z})`;
@@ -73,16 +74,14 @@
 	};
 
 	const plugIn = () => {
-        console.log("Gamepad connected");
+        // console.log("Gamepad connected");
 		startController();
 	}
 	
 	const unPlug = () => {
-        console.log("Gamepad disconnected");
+        // console.log("Gamepad disconnected");
 		cancelAnimationFrame(poll);
 	}
-	
-	export let d_speed; // = {"du": false, "dd": false, "dl": false, "dr": false};
 
 	const startController = () => {
 		
@@ -102,13 +101,13 @@
             if (button.pressed && button.value > 0.01) {
                 console.log(buttons[i], button.value);
 				if (buttons[i] === "du") {
-					d_speed["du"] = true;
+					$d_speed["du"] = true;
 				} else if (buttons[i] === "dd") {
-					d_speed["dd"] = true;
+					$d_speed["dd"] = true;
 				} else if (buttons[i] === "dl") {
-					d_speed["dl"] = true;
+					$d_speed["dl"] = true;
 				} else if (buttons[i] === "dr") {
-					d_speed["dr"] = true;
+					$d_speed["dr"] = true;
 				}
             }
 		});

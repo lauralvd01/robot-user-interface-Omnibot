@@ -18,8 +18,6 @@
         "functionality": "Mobilité",
         "characteristics": [
             "name",
-            "state",
-            "speed",
             "power_flow",
             "energy"
         ]
@@ -51,8 +49,6 @@
         "functionality": "Processeur",
         "characteristics": [
             "name",
-            "control_state",
-            "control_mode",
             "power_flow",
             "energy"
         ]

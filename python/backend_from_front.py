@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import asyncio
-import keyboard
+import json
 from pydantic import BaseModel
 
 import backend_to_robot as robot
@@ -29,7 +28,9 @@ BACKEND_IP = "localhost"
 BACKEND_PORT = 8001
 
 # List of possible front origins
-origins = [ f"http://{ip}:{port}" for ip in front_ip for port in front_ports ]	
+# origins = [ f"http://{ip}:{port}" for ip in front_ip for port in front_ports ]	
+origins = [ "http://"+ip+":"+str(port) for ip in front_ip for port in front_ports ]
+print(origins)
 
 app.add_middleware(
     CORSMiddleware,
@@ -253,8 +254,6 @@ def read_modules_db():
     global all_modules
     global implemented_modules
 
-    import json
-
     with open("user_interface/python/database/modules.json") as file:
         all_modules = json.load(file)
 
@@ -311,7 +310,7 @@ async def fetch_connected_modules():
         else:
             raise Exception(response["Error"])
     except Exception as e:
-        return {"ok": False, "error": str(e), "default": []}
+        return {"ok": False, "error": str(e)}
 
 
 BatteryState = [
@@ -343,8 +342,8 @@ response_get_batteries2 = {'ok': True, 'batteries': [{'slot_id': 1, 'name': 'Bat
 
 response_get_batteries = response_get_batteries1
 
-@app.get("/fetch_batteries")
-async def fetch_batteries():
+@app.get("/fetch_batteries_data")
+async def fetch_batteries_data():
     try:
         response = None
         if simulating :
@@ -357,7 +356,7 @@ async def fetch_batteries():
         else:
             raise Exception(response["Error"])
     except Exception as e:
-        return {"ok": False, "error": str(e), "default": []}
+        return {"ok": False, "error": str(e)}
 
 
 @app.get("/fetch_settings")
@@ -444,12 +443,20 @@ response_get_power_info = {"ok": True, "power_infos": [
     {"slot_id": 4, "name": 'Omniwheel on slot 4', "power_flow": 0.0, "energy": 0.0}
 ]}
 
+
+from random import random, randint
 @app.get("/fetch_power_infos")
 async def fetch_power_infos():
     try:
         response = None
         if simulating :
             response = response_get_power_info
+            
+            # Change power_infos values every fetch
+            for i in range(len(response["power_infos"])):
+                response["power_infos"][i]["power_flow"] = (response["power_infos"][i]["power_flow"] * (1+random()) % 10) * (-1)**randint(0,1)
+                response["power_infos"][i]["energy"] = (response["power_infos"][i]["energy"] * (1+random()) % 50) * (-1)**randint(0,1)
+            
         else :
             response = await robot.get_power_flow()
         
@@ -458,10 +465,79 @@ async def fetch_power_infos():
         else:
             raise Exception(response["Error"])
     except Exception as e:
-        return {"ok": False, "error": str(e), "default": []}
+        return {"ok": False, "error": str(e)}
+
+
+@app.get("/fetch_current_data")
+async def fetch_current_data():
+    try:
+        response_modules = await fetch_connected_modules()
+        if response_modules["ok"]:
+            response_batteries = await fetch_batteries_data()
+            if response_batteries["ok"]:
+                response_power_infos = await fetch_power_infos()
+                if response_power_infos["ok"]:
+                    return {"ok": True, "data": {"connected_modules": response_modules["data"], "batteries_data": response_batteries["data"], "power_infos": response_power_infos["data"]}}
+                else:
+                    raise Exception(response_power_infos["error"])
+            else:
+                raise Exception(response_batteries["error"])
+        else :
+            raise Exception(response_modules["error"])
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+@app.get("/test_connection")
+async def test_connection():
+    try:
+        response = await robot.get_modules()
+        if response["ok"]:
+            return {"ok": True}
+        else:
+            raise Exception(response["Error"])
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+class GraphicPoint(BaseModel):
+    date: str
+    measured_value: float
+
+class GraphicData(BaseModel):
+    id: int
+    data: list[GraphicPoint]
+
+class Record(BaseModel):
+    date: str
+    title: str
+    yLabel: str
+    yUnit: str
+    data: list[GraphicData]
+
+all_records = []
+
+def read_records_db():
+    global all_records    
+    with open("user_interface/python/database/records.json") as file:
+        all_records = json.load(file)
+
+@app.get("/fetch_records")
+def fetch_records():
+    global all_records
+    return {"ok": True, "data": all_records}
+
+@app.post("/post_record")
+def post_record(record: Record):
+    global all_records
+    print(record)
+    all_records.append(record.model_dump())
+    all_records.sort(key=lambda x: x["date"])
     
+    with open("user_interface/python/database/records.json",'w') as file:
+        json.dump(all_records, file)
     
 if __name__ == "__main__":
     read_modules_db()
+    read_records_db()
 
     uvicorn.run(app, host="localhost", port=8001)

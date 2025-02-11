@@ -185,7 +185,7 @@
     });
 
     // Get connected_modules from parent component and update triangles and trapezes info accordingly
-    export let connected_modules;
+    import { connected_modules } from "./data_store";
     import {
         triangleTitle,
         triangleData,
@@ -196,6 +196,7 @@
     function updateCanvasInfo(connected_modules) {
         if (connected_modules.length === 0) {
             // Reset the store
+            selectedTriangle.set({ id: null, color: "#494949" });
             triangleTitle.set({
         1: null,
         2: null,
@@ -267,7 +268,7 @@
         });
     }
 
-    $: connected_modules && updateCanvasInfo(connected_modules);
+    $: connected_modules && updateCanvasInfo($connected_modules);
 </script>
 
 <div class="canvas-container">
@@ -284,7 +285,7 @@
                 />
             {/if}
         {/each}
-        {#if connected_modules.length === 0}
+        {#if $connected_modules.length === 0}
             <img
                 src={"./src/lib/images/logo_omnibot.svg"}
                 alt={"Default image"}

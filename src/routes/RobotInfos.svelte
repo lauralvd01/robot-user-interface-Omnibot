@@ -1,22 +1,17 @@
 <script>
+    import { onMount } from "svelte";
+    import { writable } from "svelte/store";
     import Direction from "./Direction.svelte";
     import OperatingMode from "./OperatingMode.svelte";
     import Range from "./Range.svelte";
     import Controller from "./Controller.svelte";
-    import { onMount } from "svelte";
-    import { writable } from "svelte/store";
 
-    import { backend_host, backend_port } from "../config.js";
+    import { speed_data, step, d_speed } from "./data_store";
+    import { sendMoveData, sendSpeedData } from "./data_store";
 
-    const step = 0.1;
-    const speed_data = writable({
-        linear_speed: 1 / step,
-        angular_speed: 2 / step,
-    });
-    const count_d_speed = { du: 0, dd: 0, dl: 0, dr: 0 };
-    const d_speed = writable({ du: false, dd: false, dl: false, dr: false });
-
-    function check_d_speed(d_speed) {
+    let count_d_speed = { du: 0, dd: 0, dl: 0, dr: 0 };
+    
+    export function check_d_speed(d_speed) {
         for (const [key, value] of Object.entries(d_speed)) {
             if (value && count_d_speed[key] == 0) {
                 count_d_speed[key] += 1;
@@ -29,7 +24,7 @@
                 } else if (key === "dr") {
                     $speed_data.angular_speed += 1;
                 }
-                sendSpeedData();
+                sendSpeedData($speed_data);
                 count_d_speed[key] = 0;
                 d_speed[key] = false;
             }
@@ -38,150 +33,105 @@
 
     $: d_speed && check_d_speed($d_speed);
 
-    // Send a request to the backend to change robot speed settigs
-    function sendSpeedData() {
-        fetch(`http://${backend_host}:${backend_port}/set_speed`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                linear_speed:
-                    Math.round($speed_data.linear_speed * step * 10) / 10,
-                angular_speed:
-                    Math.round($speed_data.angular_speed * step * 10) / 10,
-            }),
-        });
-    }
 
-    const moving = writable({x_linear_vel: 0, y_linear_vel: 0, angular_vel: 0});
+        //Booleans representing the state of the a, z, e, q, s and d keys of the keyboard
+        let isActiveKeyA = false, isActiveKeyZ = false, isActiveKeyE = false, isActiveKeyQ = false, isActiveKeyS = false, isActiveKeyD = false;
 
-    // Send a request to the backend to move the robot
-    function sendMoveData(moves) {
-        $moving = {...moves};
-        fetch(`http://${backend_host}:${backend_port}/post_move`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(moves),
-        });
-    }
+        //Handle keydown event to send move data to the backend if a, z, e, q, s or d keys are pressed. Press r to stop any movement
+        function handleKeyDown(event) {
+            switch (event.key.toLowerCase()) {
+                case "z":
+                    isActiveKeyZ = true;
+                    break;
 
-    //Creation de booléens pour savoir si une touche du clavier est pressée
-    let isActiveKeyA = false;
-    let isActiveKeyZ = false;
-    let isActiveKeyE = false;
-    let isActiveKeyQ = false;
-    let isActiveKeyS = false;
-    let isActiveKeyD = false;
+                case "a":
+                    isActiveKeyA = true;
+                    break;
 
-    //Fonctions permettant de savoir si la touche est pressée ou non
-    function handleKeyDown(event) {
-        if (event.key.toLowerCase() === "z") {
-            isActiveKeyZ = true;
-        }
-        if (event.key.toLowerCase() === "a") {
-            isActiveKeyA = true;
-        }
-        if (event.key.toLowerCase() === "e") {
-            isActiveKeyE = true;
-        }
-        if (event.key.toLowerCase() === "s") {
-            isActiveKeyS = true;
-        }
-        if (event.key.toLowerCase() === "q") {
-            isActiveKeyQ = true;
-        }
-        if (event.key.toLowerCase() === "d") {
-            isActiveKeyD = true;
-        }
-        if (
-            isActiveKeyZ ||
-            isActiveKeyS ||
-            isActiveKeyQ ||
-            isActiveKeyD ||
-            isActiveKeyA ||
-            isActiveKeyE
-        ) {
-            sendMoveData({
-                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
-                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
-                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
-            });
-        }
-    }
+                case "e":
+                    isActiveKeyE = true;
+                    break;
+                
+                case "q":
+                    isActiveKeyQ = true;
+                    break;
 
-    function handleKeyUp(event) {
-        if (event.key.toLowerCase() === "z") {
-            isActiveKeyZ = false;
-        }
-        if (event.key.toLowerCase() === "a") {
-            isActiveKeyA = false;
-        }
-        if (event.key.toLowerCase() === "e") {
-            isActiveKeyE = false;
-        }
-        if (event.key.toLowerCase() === "q") {
-            isActiveKeyQ = false;
-        }
-        if (event.key.toLowerCase() === "s") {
-            isActiveKeyS = false;
-        }
-        if (event.key.toLowerCase() === "d") {
-            isActiveKeyD = false;
-        }
-        if (
-            !(
-                isActiveKeyZ ||
-                isActiveKeyS ||
-                isActiveKeyQ ||
-                isActiveKeyD ||
-                isActiveKeyA ||
-                isActiveKeyE
-            )
-        ) {
-            sendMoveData({
-                x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
-                y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
-                angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
-            });
-        }
-    }
+                case "s":
+                    isActiveKeyS = true;
+                    break;
 
-    onMount(async () => {
-        window.addEventListener("keydown", handleKeyDown);
-        window.addEventListener("keyup", handleKeyUp);
-
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-            window.removeEventListener("keyup", handleKeyUp);
-        };
-    });
-
-    export let batteries_data;
-
-    const batteries = writable({});
-
-    function updateBatteryLevel(batteries_data) {
-        $batteries = {};
-        if (batteries_data.length > 0) {
-            for (const battery_data of batteries_data) {
-                $batteries[battery_data.slot_id] = {
-                    name: battery_data.name.toUpperCase(),
-                    state_of_charge: Math.round(
-                        battery_data.state_of_charge * 100,
-                    ),
-                };
+                case "d":
+                    isActiveKeyD = true;
+                    break;
+                    
+                case "r":
+                    isActiveKeyA = false; isActiveKeyD = false; isActiveKeyE = false; isActiveKeyQ = false; isActiveKeyS = false; isActiveKeyZ = false;
+                    break;
+            
+                default:
+                    isActiveKeyA = false; isActiveKeyD = false; isActiveKeyE = false; isActiveKeyQ = false; isActiveKeyS = false; isActiveKeyZ = false;
+                    break;
+            }
+            if ( ["z","a","e","q","s","d","r"].includes(event.key.toLowerCase()) ) {
+                sendMoveData({
+                    x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
+                    y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
+                    angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
+                });
             }
         }
-    }
+        // Handle keyup event to send move data to the backend if a, z, e, q, s or d keys are released
+        function handleKeyUp(event) {
+            switch (event.key.toLowerCase()) {
+                case "z":
+                    isActiveKeyZ = false;
+                    break;
 
-    $: batteries_data && updateBatteryLevel(batteries_data);
+                case "a":
+                    isActiveKeyA = false;
+                    break;
 
-    const is_gamepad_connected = writable(false);
-    $: is_gamepad_connected &&
-        console.log("Gamepad connected ?", $is_gamepad_connected);
+                case "e":
+                    isActiveKeyE = false;
+                    break;
+
+                case "q":
+                    isActiveKeyQ = false;
+                    break;
+
+                case "s":
+                    isActiveKeyS = false;
+                    break;
+
+                case "d":
+                    isActiveKeyD = false;
+                    break;
+
+                default:
+                    isActiveKeyA = false; isActiveKeyD = false; isActiveKeyE = false; isActiveKeyQ = false; isActiveKeyS = false; isActiveKeyZ = false;
+                    break;
+            }
+            if ( ["z","a","e","q","s","d"].includes(event.key.toLowerCase()) ) {
+                sendMoveData({
+                    x_linear_vel: isActiveKeyZ ? 1 : isActiveKeyS ? -1 : 0,
+                    y_linear_vel: isActiveKeyQ ? 1 : isActiveKeyD ? -1 : 0,
+                    angular_vel: isActiveKeyA ? 1 : isActiveKeyE ? -1 : 0,
+                });
+            }
+        }
+
+        // Add event listeners to handle keyboard commands, remove it when the page component is destroyed
+        onMount(async () => {
+            window.addEventListener("keydown", handleKeyDown);
+            window.addEventListener("keyup", handleKeyUp);
+
+            return () => {
+                window.removeEventListener("keydown", handleKeyDown);
+                window.removeEventListener("keyup", handleKeyUp);
+            };
+        });
+
+    import { is_gamepad_connected, batteries } from "./data_store";
 </script>
 
 <svelte:window
@@ -196,7 +146,7 @@
 <div class="content">
     <div class="command-row">
         <div class="command-row-element" style="width: 20%">
-            <Direction moving={$moving}/>
+            <Direction />
         </div>
 
         <div class="command-row-element" style="width: 25%">
@@ -233,44 +183,28 @@
                 {/if}
                 <div
                     class="pad_controller"
-                    style="--displayGamepad:{$is_gamepad_connected
-                        ? 'flex'
-                        : 'none'};"
+                    style="--displayGamepad:{$is_gamepad_connected ? 'flex' : 'none'};"
                 >
-                    <Controller move={sendMoveData} bind:d_speed={$d_speed} />
+                    <Controller />
                 </div>
             </div>
         </div>
 
         <div class="command-row-element" style="width: 30%">
-            <OperatingMode />
             <!--Import du composant OperatingMode-->
+            <OperatingMode />
             <div style="width: 60%; margin: 10px 0px;">
-                <label for="linear-range" class="speed-label"
-                    >Linear speed : {($speed_data.linear_speed*step).toFixed(1)}</label
-                >
+                <label for="linear-range" class="speed-label">Linear speed : {($speed_data.linear_speed*step).toFixed(1)}</label>
                 <Range
-                    on:change={(e) => {
-                        $speed_data.linear_speed = e.detail.value;
-                        sendSpeedData();
-                    }}
-                    min={0}
-                    max={5}
-                    {step}
+                    on:change={(e) => { $speed_data.linear_speed = e.detail.value; sendSpeedData($speed_data); }}
+                    min={0} max={5} {step}
                     bind:value={$speed_data.linear_speed}
                     id="speed-slider"
                 />
-                <label for="angular-range" class="speed-label"
-                    >Angular speed : {($speed_data.angular_speed*step).toFixed(1)}</label
-                >
+                <label for="angular-range" class="speed-label">Angular speed : {($speed_data.angular_speed*step).toFixed(1)}</label>
                 <Range
-                    on:change={(e) => {
-                        $speed_data.angular_speed = e.detail.value;
-                        sendSpeedData();
-                    }}
-                    min={0}
-                    max={5}
-                    {step}
+                    on:change={(e) => { $speed_data.angular_speed = e.detail.value; sendSpeedData($speed_data); }}
+                    min={0} max={5} {step}
                     bind:value={$speed_data.angular_speed}
                     id="angular-slider"
                 />
