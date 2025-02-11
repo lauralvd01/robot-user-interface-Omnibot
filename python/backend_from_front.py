@@ -254,8 +254,6 @@ def read_modules_db():
     global all_modules
     global implemented_modules
 
-    
-
     with open("user_interface/python/database/modules.json") as file:
         all_modules = json.load(file)
 
@@ -501,12 +499,20 @@ async def test_connection():
         return {"ok": False, "error": str(e)}
 
 
+class GraphicPoint(BaseModel):
+    date: str
+    measured_value: float
+
+class GraphicData(BaseModel):
+    id: int
+    data: list[GraphicPoint]
+
 class Record(BaseModel):
     date: str
     title: str
     yLabel: str
     yUnit: str
-    data: list
+    data: list[GraphicData]
 
 all_records = []
 
@@ -523,7 +529,9 @@ def fetch_records():
 @app.post("/post_record")
 def post_record(record: Record):
     global all_records
-    all_records.append(record)
+    print(record)
+    all_records.append(record.model_dump())
+    all_records.sort(key=lambda x: x["date"])
     
     with open("user_interface/python/database/records.json",'w') as file:
         json.dump(all_records, file)
