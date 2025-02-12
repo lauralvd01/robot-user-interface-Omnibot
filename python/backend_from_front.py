@@ -540,4 +540,4 @@ if __name__ == "__main__":
     read_modules_db()
     read_records_db()
 
-    uvicorn.run(app, host="localhost", port=8001)
+    uvicorn.run(app, host=BACKEND_IP, port=BACKEND_PORT)
