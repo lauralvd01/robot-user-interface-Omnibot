@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import uvicorn
 import json
 from pydantic import BaseModel
@@ -28,9 +29,7 @@ BACKEND_IP = "localhost"
 BACKEND_PORT = 8001
 
 # List of possible front origins
-# origins = [ f"http://{ip}:{port}" for ip in front_ip for port in front_ports ]	
 origins = [ "http://"+ip+":"+str(port) for ip in front_ip for port in front_ports ]
-print(origins)
 
 app.add_middleware(
     CORSMiddleware,
@@ -244,11 +243,31 @@ async def reset_camera():
         return {"Error": str(e)}
 
 
+
+
+
+
+
+
+
 ##################################################################### Actual front requests  #####################################################################
 
+@app.get("/")
+def home():
+    return {"ok": True}
+
+@app.get('/favicon.ico', include_in_schema=False)
+async def favicon():
+    return FileResponse("user_interface/static/favicon.png")
+
+
 all_modules = []
+all_records_paths = []
+all_records = []
 implemented_modules = {}
 simulating = True
+
+####################################### Get modules list from database
 
 def read_modules_db():
     global all_modules
@@ -265,6 +284,63 @@ def read_modules_db():
 def fetch_modules():
     global all_modules
     return {"ok": True, "data": all_modules}
+
+
+####################################### Get records list from database
+
+class GraphicPoint(BaseModel):
+    date: str
+    measured_value: float
+
+class GraphicData(BaseModel):
+    id: int
+    data: list[GraphicPoint]
+
+class Record(BaseModel):
+    date: str
+    title: str
+    yLabel: str
+    yUnit: str
+    data: list[GraphicData]
+    
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+def read_records_db():
+    global all_records_paths
+    global all_records
+    
+    with open("user_interface/python/database/records.json") as file:
+        all_records_paths = json.load(file)
+    
+    for path in all_records_paths:
+        with open(path) as file:
+            record = json.load(file)
+            all_records.append(record)
+
+@app.get("/fetch_records")
+def fetch_records():
+    global all_records
+    return {"ok": True, "data": all_records}
+
+@app.post("/post_record")
+def post_record(record: Record):
+    global all_records_paths
+    global all_records
+    
+    file_name = "user_interface/python/database/records/"+record['date']+".json"
+    with open(file_name,'w') as file:
+        json.dump(record.model_dump(), file)
+    
+    all_records_paths.append(file_name)
+    with open(file_name) as file:
+        record = json.load(file)
+        all_records.append(record)
+        
+        
+        
+        
+        
 
 
 # Allow to send real requests to the robot or assume that the robot is not connected and then simulate the responses
@@ -499,43 +575,6 @@ async def test_connection():
         return {"ok": False, "error": str(e)}
 
 
-class GraphicPoint(BaseModel):
-    date: str
-    measured_value: float
-
-class GraphicData(BaseModel):
-    id: int
-    data: list[GraphicPoint]
-
-class Record(BaseModel):
-    date: str
-    title: str
-    yLabel: str
-    yUnit: str
-    data: list[GraphicData]
-
-all_records = []
-
-def read_records_db():
-    global all_records    
-    with open("user_interface/python/database/records.json") as file:
-        all_records = json.load(file)
-
-@app.get("/fetch_records")
-def fetch_records():
-    global all_records
-    return {"ok": True, "data": all_records}
-
-@app.post("/post_record")
-def post_record(record: Record):
-    global all_records
-    print(record)
-    all_records.append(record.model_dump())
-    all_records.sort(key=lambda x: x["date"])
-    
-    with open("user_interface/python/database/records.json",'w') as file:
-        json.dump(all_records, file)
-    
 if __name__ == "__main__":
     read_modules_db()
     read_records_db()
