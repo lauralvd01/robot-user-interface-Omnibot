@@ -302,6 +302,7 @@ class Record(BaseModel):
     yLabel: str
     yUnit: str
     data: list[GraphicData]
+    modules: list[dict]
     
     def __getitem__(self, item):
         return getattr(self, item)
@@ -328,11 +329,15 @@ def post_record(record: Record):
     global all_records_paths
     global all_records
     
-    file_name = "user_interface/python/database/records/"+record['date']+".json"
+    file_name = "user_interface/python/database/records/"+record['date'].replace(':','.')+".json"
+    print(file_name)
     with open(file_name,'w') as file:
         json.dump(record.model_dump(), file)
     
     all_records_paths.append(file_name)
+    with open("user_interface/python/database/records.json","w") as file:
+        json.dump(all_records_paths,file)
+        
     with open(file_name) as file:
         record = json.load(file)
         all_records.append(record)
