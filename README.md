@@ -332,10 +332,9 @@ git checkout <autre branche>
 Dans un terminal (Command Prompt ou PowerShell) ouvert depuis le dossier où le repository a été téléchargé :
 
 ```bash
-git add <fichiers à ajouté>
-git add * #tous les fichiers
-git commit -a -m "Description des changements apportés" 
-# -a permet d'ajouter tous les fichiers et évite de faire le git add * avant
+git add <fichiers à sauvegarder>
+git add * #sauvegarde tous les fichiers
+git commit -m "Description des changements apportés"  
 # -m permet d'indiquer que ce qui suit est le message de description accompagnant un commit. Il est obligatoire
 ```
 
