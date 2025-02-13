@@ -305,9 +305,9 @@ git pull
 Dans un terminal (Command Prompt ou PowerShell) ouvert depuis le dossier où le repository a été téléchargé :
 
 ```bash
-git branch
-git branch <nouvelle branche>
-git checkout <nouvelle branche>
+git branch #Consulter les branches
+git branch <nouvelle branche> #Créer une branche
+git checkout <nouvelle branche> #Se deplacer sur une branche
 ```
 
 ***IMPORTANT : Penser à toujours se déplacer sur la branche créée avant de commencer à apporter des modifications au code !***
@@ -332,6 +332,8 @@ git checkout <autre branche>
 Dans un terminal (Command Prompt ou PowerShell) ouvert depuis le dossier où le repository a été téléchargé :
 
 ```bash
+git add <fichiers à ajouté>
+git add * #tous les fichiers
 git commit -a -m "Description des changements apportés" 
 # -a permet d'ajouter tous les fichiers et évite de faire le git add * avant
 # -m permet d'indiquer que ce qui suit est le message de description accompagnant un commit. Il est obligatoire
