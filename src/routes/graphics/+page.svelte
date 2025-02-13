@@ -76,7 +76,7 @@
             let data_to_fetch = (char === "power_flow" || char === "energy") ? $power_infos : $batteries_data; // Select the store to get the data from, accordingly to the selected characteristic
             let selected_infos = data_to_fetch.filter((mod) => $checkbox_inputs[mod.slot_id-1]); // Get the data of the selected modules
             selected_infos.forEach(module => {
-                $data_array[module.slot_id-1].data.push({date: new Date(), measured_value: (allCharacteristics[char][1] === "%") ? module[char]*100 :module[char]}); // Add the data of the selected modules to the data array
+                $data_array[module.slot_id-1].data.push({date: new Date(), measured_value: (char === "cell_voltages") ? module[char][0] : (allCharacteristics[char][1] === "%") ? module[char]*100 : module[char]}); // Add the data of the selected modules to the data array
             });
             nb_data_points.set($data_array.reduce((acc, dataset) => acc + dataset.data.length, 0)); // Update the number of data points in the graphic
         }
@@ -192,8 +192,9 @@
             yLabel: $yLabel,
             yUnit: $selectedUnit,
             data: $data_array,
+            modules: $availableModules
         });
-        alert("Données enregistrées !"); // Alert the user that the data is saved
+        alert("Données enregistrées !\nÀ retrouver dans la base de données, date: "+now.toJSON()); // Alert the user that the data is saved
     }
 
     // Handle Exporter button click
