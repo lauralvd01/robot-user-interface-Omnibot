@@ -231,11 +231,11 @@ import { writable } from "svelte/store";
     }
 
     //import des images
-    import pictoIntelligence from "../src/lib/images/picto_intelligence.svg";
-    import picto_energie from "../src/lib/images/picto_energie.svg";
-    import picto_mobilite from "../src/lib/images/picto_mobilite.svg";
-    import picto_stockage from "../src/lib/images/picto_stockage_energie.svg";
-    import picto_capteur from "../src/lib/images/picto_capteur.svg";
+    import pictoIntelligence from "../lib/images/picto_intelligence.svg";
+    import picto_energie from "../lib/images/picto_energie.svg";
+    import picto_mobilite from "../lib/images/picto_mobilite.svg";
+    import picto_stockage from "../lib/images/picto_stockage_energie.svg";
+    import picto_capteur from "../lib/images/picto_capteur.svg";
 
     export const functionalityImages = {
         "Stockage d'energie": picto_stockage,

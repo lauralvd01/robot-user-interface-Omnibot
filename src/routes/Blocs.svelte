@@ -13,11 +13,11 @@
     import { connected_modules } from './data_store';
 
     // Create a store to store modules grouped by categories
-    const modules_by_categories = writable({"Stockage d'énergie": {}, "Mobilité": {}, "Processeur": {}, "Réseau": {}, "Production d'énergie": {}, "Capteur": {}});
+    const modules_by_categories = writable({"Stockage d'energie": {}, "Mobilite": {}, "Processeur": {}, "Reseau": {}, "Production d'energie": {}, "Capteur": {}});
 
     // Group modules by categories and set modules_by_categories accordingly
     function group_connected_modules_by_categories(connected_modules) {
-        $modules_by_categories = {"Stockage d'énergie": {}, "Mobilité": {}, "Processeur": {}, "Réseau": {}, "Production d'énergie": {}, "Capteur": {}};
+        $modules_by_categories = {"Stockage d'energie": {}, "Mobilite": {}, "Processeur": {}, "Reseau": {}, "Production d'energie": {}, "Capteur": {}};
 
         // Group modules by functionality
         let modules_group_by_categories = Object.groupBy(connected_modules, ({functionality}) => functionality);
@@ -26,7 +26,7 @@
             let [functionality, modules] = element;
             // For each functionality, count and store occurences of each module name : { name_module1: count_module1, name_module2: count_module2, ... }
             $modules_by_categories[functionality] = modules.map(({name}) => name).reduce(((acc, val) => { acc[val] = ( acc[val] || 0) + 1; return acc}), {});
-            if (functionality == "Mobilité") {
+            if (functionality == "Mobilite") {
                 wheels_count.set($modules_by_categories[functionality]["Roue Omnidirectionnelle"] || 0);
             }
         });
@@ -41,15 +41,15 @@
     <div class="scrolable">
         {#each Object.entries($modules_by_categories) as [functionality, modules] (functionality)}
             {#if Object.entries(modules).length > 0}
-                {#if functionality == "Stockage d'énergie"}
+                {#if functionality == "Stockage d'energie"}
                     <Storage modules={modules}/>
-                {:else if functionality == "Mobilité"}
+                {:else if functionality == "Mobilite"}
                     <Mobility modules={modules}/>
                 {:else if functionality == "Processeur"}
                     <Processor modules={modules}/>
-                {:else if functionality == "Réseau"}
+                {:else if functionality == "Reseau"}
                     <Network modules={modules}/>
-                {:else if functionality == "Production d'énergie"}
+                {:else if functionality == "Production d'energie"}
                     <Production modules={modules}/>
                 {:else if functionality == "Capteur"}
                     <Sensor modules={modules}/>
