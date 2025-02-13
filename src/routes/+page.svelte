@@ -25,14 +25,14 @@
         };
     });
 
-    let interval;
-    $: {if ($simulating) {
-        interval = setInterval(() => fetchData("settings"), 10000); // Change the simulated response settings every 5 seconds
-        }
-        else if (interval) {
-            clearInterval(interval);
-        }
-    }
+    // let interval;
+    // $: {if ($simulating) {
+    //     interval = setInterval(() => fetchData("settings"), 10000); // Change the simulated response settings every 5 seconds
+    //     }
+    //     else if (interval) {
+    //         clearInterval(interval);
+    //     }
+    // }
 </script>
 
 <div class="homepage">
