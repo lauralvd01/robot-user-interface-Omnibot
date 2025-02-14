@@ -159,7 +159,7 @@ export async function fetchData(request) {
     // Fetch data only if the request does not need a connection or if the connection is established
     if (!stop_app && (!need_connection || (need_connection && !no_connection))) {
         try {
-            console.log(`Fetching ${request} ...`);
+            //console.log(`Fetching ${request} ...`);
             const full_endpoint = endpoint + "fetch_" + request;
             const response = await fetch(full_endpoint); // Send the request to the backend
             const data = await response.json(); // Parse response and get data as a JSON object
