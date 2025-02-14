@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 import uvicorn
 import json
 from pydantic import BaseModel
+import os
 
 import backend_to_robot as robot
 
@@ -578,6 +579,31 @@ async def test_connection():
             raise Exception(response["Error"])
     except Exception as e:
         return {"ok": False, "error": str(e)}
+    
+class RecordNames(BaseModel) :
+    names : list[str]
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+
+
+@app.post("/erase_records")
+def erase_records (record_names : RecordNames) :
+    print(record_names)
+    for record in record_names['names'] :
+        record = record.replace(":",".")
+        record = "user_interface/python/database/records/" + record + ".json"
+        os.remove(record)
+    global all_records_paths
+    global all_records
+
+    all_records_paths = []
+    all_records = []
+
+    with open("user_interface/python/database/records.json","w") as file:
+        json.dump(all_records_paths,file)
+  
+    
 
 
 if __name__ == "__main__":

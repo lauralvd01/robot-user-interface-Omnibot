@@ -214,6 +214,21 @@ export function sendMoveData(moves) {
     });
 }
 
+export function sendEraseRequest(records){
+    if (stop_app) return;
+
+    console.log("Sending Records Erasing Request", records)
+    fetch(endpoint + "erase_records", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({names : records})
+    }
+
+    );
+}
+
 // Send a request to the backend to change robot speed settigs
 export function sendSpeedData(speed_data) {
     if (stop_app && no_connection) return;

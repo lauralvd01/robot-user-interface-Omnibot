@@ -7,7 +7,7 @@
     import Button from "../Button.svelte";
     import Graphic from "../graphics/Graphic.svelte";
 
-    import { fetchData, records } from "../data_store";
+    import { fetchData, records, sendEraseRequest } from "../data_store";
 
     let content_width = 0;
     let bannerHeight = 0;
@@ -22,6 +22,7 @@
 
 const currentRecords = writable([])
 
+
 function updateCurrentRecords(records){
     currentRecords.set(records);
     console.log(records);
@@ -29,6 +30,17 @@ function updateCurrentRecords(records){
 
 $: records && updateCurrentRecords($records);
 
+let record_names = []
+function getRecordsNames(records){
+    record_names = []
+    for (let index = 0; index < records.length; index++) {
+        record_names.push(records[index].date)
+        
+    }
+
+}
+
+$: records && getRecordsNames($records);
 
 const props = writable({}); // the fixed properties of the chart (and default values from d3 package)
     props.set({
@@ -115,6 +127,9 @@ let currentGraph = [];
 let graphTitle = "";
 let yLabel = "";
 let selectedUnit = "";
+
+
+
 </script>
 
 <div class="homepage">
@@ -131,7 +146,7 @@ let selectedUnit = "";
                 {/each}
 
                 <div class='delete'>
-                    <Button class = "primary" on:click={() => {}}>Supprimer les enregistrements</Button>
+                    <Button class = "primary" on:click={() => sendEraseRequest(record_names)}>Supprimer les enregistrements</Button>
                 </div>
         </div>
         <div class = "content">
@@ -152,7 +167,7 @@ let selectedUnit = "";
         padding: 0;
         box-sizing: border-box;
     }
-    .refresh{
+    .refresh, .delete{
         margin-top: 5%;
         margin-bottom: 5%;
         display: flex;
