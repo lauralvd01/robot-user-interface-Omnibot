@@ -15,7 +15,7 @@
         <nav class="buttons-container">
             <Button class="default" on:click={() => goto('/modules_page')}>MODULES</Button>
             <Button class="default" on:click={() => goto('/graphics')}>GRAPHICS</Button>
-            <Button class="default" on:click={() => goto('/graphics')}>RECORDS</Button>
+            <Button class="default" on:click={() => goto('/records')}>RECORDS</Button>
         </nav>
         <img class="logo" alt="logo mines" src={logo_mines}>
     </div>
