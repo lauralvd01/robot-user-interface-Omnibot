@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { writable } from "svelte/store";
+    import { curveLinear, scaleLinear, scaleUtc } from "d3";
 
     import Banner from "../Banner.svelte";
     import Button from "../Button.svelte";
@@ -8,10 +9,14 @@
 
     import { fetchData, records } from "../data_store";
 
+    let content_width = 0;
     let bannerHeight = 0;
     onMount( () => {
         const banner = document.querySelector(".banner");
         if (banner) bannerHeight = banner.offsetHeight;
+
+        const content = document.querySelector(".content");
+        if (content) content_width = content.clientWidth;
         fetchData("records");
     })
 
@@ -23,14 +28,120 @@ function updateCurrentRecords(records){
 }
 
 $: records && updateCurrentRecords($records);
+
+
+const props = writable({}); // the fixed properties of the chart (and default values from d3 package)
+    props.set({
+        // width: $width,
+        // height: height,
+
+        // Labels and formats
+        // title: $graphTitle, // a title for the chart ('')
+        xLabel: "-> temps", // a label for the x-axis
+        // yLabel: "↑ " + $yLabel + "(" + $selectedUnit + ")", // a label for the y-axis
+        // yFormat: $selectedUnit, // a format specifier string for the y-axis
+
+        xType: scaleUtc, // type of x-scale
+        yType: scaleLinear, // type of y-scale
+
+        // xScalefactor: $width / 80, // x-axis number of values
+        // yScalefactor: height / 40, // y-axis number of values
+        curve: curveLinear, // method of interpolation between points
+
+        // Number of colors array elements must match number of data sets (12 here)
+        colors: [ 
+            "#FF662E", // Bright orange
+            "#E42618", // Deep red
+            "#239E99", // Blue-green
+            "#A04040", // Reddish brown
+            "#4B1338", // Dark burgundy
+            "#656780", // Bluish grey
+            "#FFB400", // Golden yellow
+            "#0A9D58", // Dark green
+            "#0085C7", // Bright blue
+            "#C724B1", // Magenta violet
+            "#795548", // Earthy brown
+            "#1E1E1E", // Anthracite grey
+        ], // fill color for dots && number of colors in fill array MUST match number of subsets in data ("#F50057","#42A5F5","#26A69A","#9575CD"])
+
+        // Inner style
+        horizontalGrid: true, // show horizontal grid lines
+        verticalGrid: true, // show vertical grid lines
+        showDots: true, // whether dots should be displayed or not
+        dotsFilled: true, // whether dots should be filled or outlined
+        r: 3, // (fixed) radius of dots, in pixels (5)
+        strokeWidth: 2.5, // stroke width of line, in pixels (5)
+        strokeOpacity: 0.4, // stroke opacity of line (0.8)
+        tooltipBackground: "white", // background color of tooltip
+        tooltipTextColor: "black", // text color of tooltip
+        strokeLinecap: "round", // stroke line cap of the line
+        strokeLinejoin: "round", // stroke line join of the line
+    });
+
+    // Update width-dependant properties of the chart when the width of the window is updated, update properties modified by the user
+    function updateProps(width, graphTitle, yLabel, selectedUnit) {
+        $props.width = width;
+        $props.height = Math.round(0.4 * width);
+        $props.xScalefactor = width / 80;
+        $props.yScalefactor = Math.round(0.4 * width) / 40;
+        $props.title = graphTitle;
+        $props.yLabel = "↑ " + yLabel + " (" + selectedUnit + ")";
+        $props.yFormat = selectedUnit;}
+
+    const width = writable(600); // the outer width of the chart, in pixels (600 by default)
+
+    $: width.set(Math.round(content_width - (15 + 10 + 10 + 15))); // Update the width of the chart when the content width is updated, counting out margins of inner contents
+    $: updateProps($width, graphTitle, yLabel, selectedUnit); // Update props when needed
+
+
+    let svgRef = null; // Reference to the SVG element of the graphic, updated by Graphic component when mounted
+    function downloadSvg() {
+        if (svgRef) {
+            const htmlStr = svgRef.outerHTML; // Get the SVG element as an HTML string
+            const blob = new Blob([htmlStr], { type: "image/svg+xml" }); // Create a blob from the HTML string
+
+            const url = URL.createObjectURL(blob); // Create a URL linked the blob
+            const a = document.createElement("a"); // Create an anchor element (like a button link that can be clicked to access the URL)
+            a.setAttribute("download", "chart.svg"); // Set the download attribute to the anchor element to download the file as chart.svg
+            a.setAttribute("href", url); // Set the href attribute to the anchor element to link the URL
+            a.style.display = "none"; // Hide the anchor element to prevent it from being displayed on the page
+            document.body.appendChild(a); // Add the anchor element to the body of the page
+            a.click(); // Simulate a click on the anchor element to download the file
+            a.remove(); // Remove the anchor element from the body of the page
+            URL.revokeObjectURL(url); // Revoke the URL to free memory
+        }
+    }
+let currentGraph = [];
+let graphTitle = "";
+let yLabel = "";
+let selectedUnit = "";
 </script>
 
 <div class="homepage">
     <Banner />
     <div class="body" style="margin-top: {bannerHeight}px;">
         <div class="sidebar">
-                <Button class="primary" on:click={() => fetchData("records")}>Actualiser</Button>
+                <div class="refresh">
+                    <Button class="primary" on:click={() => fetchData("records")}>Actualiser</Button>
+                </div>
+                
                 <h2>Données enregistrées</h2>
+                {#each $currentRecords as record, index}
+                    <Button class="default" on:click={() => {currentGraph = record.data; graphTitle = record.title; yLabel = record.yLabel; selectedUnit = record.yUnit;}}>{record.title}</Button>
+                {/each}
+
+                <div class='delete'>
+                    <Button class = "primary" on:click={() => {}}>Supprimer les enregistrements</Button>
+                </div>
+        </div>
+        <div class = "content">
+                <div style:width=100%>
+                    {#key $props && currentGraph}
+                        {#if $props.width !== 0 && currentGraph.length > 0}
+                            <Graphic props={$props} bind:svgRef={svgRef} data={currentGraph}/>
+                        {/if}
+                    {/key}
+                </div>
         </div>
     </div>
 </div>
@@ -41,7 +152,13 @@ $: records && updateCurrentRecords($records);
         padding: 0;
         box-sizing: border-box;
     }
-
+    .refresh{
+        margin-top: 5%;
+        margin-bottom: 5%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
     .homepage {
         display: flex;
         flex-direction: column;
